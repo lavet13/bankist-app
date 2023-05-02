@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const MovementItemContainer = styled.div`
   display: flex;
@@ -18,8 +18,17 @@ export const MovementType = styled.div`
   margin-right: 20px;
 `;
 
+export const MovementTypeDeposit = styled(MovementType)`
+  background-image: linear-gradient(to top left, #39b385, #9be15d);
+`;
+
+export const MovementTypeWithdrawal = styled(MovementType)`
+  background-image: linear-gradient(to top left, #e52a5a, #ff585f);
+`;
+
 export const MovementDate = styled.div`
   font-size: 11px;
+  font-family: inherit;
   text-transform: uppercase;
   font-weight: 500;
   color: #666;
