@@ -8,7 +8,7 @@ export const Title = styled.h1`
   text-transform: capitalize;
 `;
 
-export const NavigationContainer = styled.div`
+export const NavigationContainer = styled.nav`
   display: flex;
   flex-direction: column;
   row-gap: 25px;

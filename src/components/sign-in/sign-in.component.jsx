@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 import FormInput from '../form-input/form-input.component';
@@ -14,6 +15,10 @@ const SignIn = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const [isLoading, setIsLoading] = useState(false);
   const { user, password } = formFields;
+
+  const navigate = useNavigate();
+
+  const goToHome = () => navigate('home');
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -31,6 +36,7 @@ const SignIn = () => {
 
     resetFormFields();
     setIsLoading(false);
+    goToHome();
   };
   return (
     <SignInFormContainer onSubmit={handleSubmit}>
