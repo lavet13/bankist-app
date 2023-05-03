@@ -39,6 +39,7 @@ const Transfer = () => {
     <TransferContainer>
       <Title>Перечисление депозита</Title>
       <Form onSubmit={handleSubmit}>
+        <OperationLabel htmlFor='transfer'>Перевод</OperationLabel>
         <OperationInput
           id='transfer'
           type='text'
@@ -47,8 +48,9 @@ const Transfer = () => {
           onChange={handleChange}
           required
         />
+        <OperationLabel htmlFor='transfer-amount'>Количество</OperationLabel>
         <OperationInput
-          id='amount'
+          id='transfer-amount'
           type='number'
           name='amount'
           value={amount}
@@ -58,8 +60,6 @@ const Transfer = () => {
         <Button type='submit' buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
           →
         </Button>
-        <OperationLabel htmlFor='transfer'>Перевод</OperationLabel>
-        <OperationLabel htmlFor='amount'>Количество</OperationLabel>
       </Form>
     </TransferContainer>
   );

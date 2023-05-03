@@ -82,3 +82,27 @@ export const ArrowSubmit = styled(ArrowBase)`
     background-color: rgba(255, 255, 255, 0.8);
   }
 `;
+
+export const GoogleButton = styled(ArrowSubmit)`
+  display: inline-block;
+  background: #1a73e8;
+  font-weight: 500;
+  color: #fff;
+  width: 190px;
+  border-radius: 4px;
+  border: thin solid #888;
+  white-space: nowrap;
+  transition: background-color 0.2s, border 0.2s, box-shadow 0.2s;
+  border: 1px solid transparent;
+
+  &:hover {
+    color: #fff;
+    background: #1765cc;
+    border: 1px solid #0277bd;
+    box-shadow: var(
+      none,
+      0 1px 2px 0 rgba(60, 64, 67, 0.3),
+      0 1px 3px 1px rgba(60, 64, 67, 0.15)
+    );
+  }
+`;

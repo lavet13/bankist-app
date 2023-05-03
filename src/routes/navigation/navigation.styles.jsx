@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 export const Title = styled.h1`
@@ -33,4 +34,14 @@ export const LogoIcon = styled.img`
   width: 60px;
   height: 60px;
   object-fit: cover;
+`;
+
+export const Anchor = styled(Link)`
+  display: flex;
+  align-items: center;
+  column-gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+  white-space: nowrap;
 `;

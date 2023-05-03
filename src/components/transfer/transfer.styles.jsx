@@ -8,7 +8,7 @@ export const OperationBase = styled.div`
 
 export const Form = styled.form`
   display: grid;
-  grid-template-columns: 2.5fr 2.5fr 1fr;
+  grid-template-columns: 1fr 1.5fr;
   grid-template-rows: auto auto;
   gap: 4px 10px;
 `;
@@ -34,6 +34,7 @@ export const OperationInput = styled.input`
 export const OperationLabel = styled.label`
   font-size: 13px;
   text-align: center;
+  align-self: center;
 `;
 
 export const Title = styled.h2`

@@ -12,6 +12,7 @@ const Home = () => {
       <Balance />
       <Movements />
       <Summary />
+
       <Transfer />
       <Loan />
       <CloseAccount />
