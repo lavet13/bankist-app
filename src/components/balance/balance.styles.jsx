@@ -6,15 +6,20 @@ export const BalanceContainer = styled.div`
   grid-column: 1 / span 2;
 
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+`;
+
+export const BalanceWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
 `;
 
 export const BalanceLabel = styled.p`
   font-size: 22px;
   font-weight: 500;
-  margin-bottom: -0.2rem;
 `;
 
 export const BalanceDate = styled.p`

@@ -53,6 +53,7 @@ const SignIn = () => {
         name='password'
         value={password}
         placeholder='PIN'
+        minLength='4'
         maxLength='4'
         required
         onChange={handleChange}

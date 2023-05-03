@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const HomeContainer = styled.main`
   position: relative;
 
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 40px auto;
 
   display: grid;

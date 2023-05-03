@@ -1,15 +1,26 @@
-import { ArrowButton } from './button.styles';
+import {
+  ArrowBase,
+  ArrowButton,
+  ArrowSort,
+  ArrowSubmit,
+} from './button.styles';
 
 export const BUTTON_TYPE_CLASSES = {
+  base: 'button/base',
   arrow: 'button/arrow',
+  arrowSort: 'button/arrowSort',
+  arrowSubmit: 'button/arrowSubmit',
 };
 
-const getButton = buttonType =>
-  ({ [BUTTON_TYPE_CLASSES.arrow]: ArrowButton }[buttonType]);
+const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
+  ({
+    [BUTTON_TYPE_CLASSES.base]: ArrowBase,
+    [BUTTON_TYPE_CLASSES.arrow]: ArrowButton,
+    [BUTTON_TYPE_CLASSES.arrowSort]: ArrowSort,
+    [BUTTON_TYPE_CLASSES.arrowSubmit]: ArrowSubmit,
+  }[buttonType]);
 
 const Button = ({ buttonType, type, children, ...otherProps }) => {
-  if (!buttonType) return;
-
   const CustomButton = getButton(buttonType);
   return (
     <CustomButton type={type || 'button'} {...otherProps}>

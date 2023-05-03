@@ -1,5 +1,6 @@
 import {
   BalanceContainer,
+  BalanceWrapper,
   BalanceDate,
   BalanceLabel,
   BalanceValue,
@@ -8,7 +9,7 @@ import {
 const Balance = () => {
   return (
     <BalanceContainer>
-      <div>
+      <BalanceWrapper>
         <BalanceLabel>Текущий баланс</BalanceLabel>
         <BalanceDate>
           По состоянию на{' '}
@@ -20,7 +21,7 @@ const Balance = () => {
             minute: '2-digit',
           }).format()}`}
         </BalanceDate>
-      </div>
+      </BalanceWrapper>
       <BalanceValue>
         {`${Intl.NumberFormat('ru-RU', {
           style: 'currency',
