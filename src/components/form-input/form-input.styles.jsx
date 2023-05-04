@@ -1,4 +1,8 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+const wideStyles = css`
+  width: 100%;
+`;
 
 export const Input = styled.input`
   padding: 5px 20px;
@@ -15,4 +19,6 @@ export const Input = styled.input`
     outline: none;
     border: 1px solid #ccc;
   }
+
+  ${({ wide }) => wide && wideStyles}
 `;

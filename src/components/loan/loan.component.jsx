@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '../../store/user/user.selector';
 import InputMask from 'react-input-mask';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
@@ -11,6 +13,7 @@ import {
   Form,
   OperationLabel,
 } from '../transfer/transfer.styles';
+import { uploadInfoForLoan } from '../../utils/firebase/firebase.utils';
 
 const defaultFormFields = {
   name: '',
@@ -26,8 +29,11 @@ const defaultFormFileFields = {
 };
 
 const Loan = () => {
+  const currentUser = useSelector(selectCurrentUser);
+
   const [formFields, setFormFields] = useState(defaultFormFields);
   const [formFileFields, setFormFileFields] = useState(defaultFormFileFields);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { name, email, tel } = formFields;
 
@@ -45,13 +51,29 @@ const Loan = () => {
     setFormFields({ ...formFields, [name]: value });
   };
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
+    console.log('submitted');
+    if (isLoading) return;
 
-    resetFormField();
+    setIsLoading(true);
 
     console.log(formFields);
     console.log(formFileFields);
+
+    try {
+      await uploadInfoForLoan(currentUser, formFileFields);
+      resetFormField();
+      event.target.reset();
+    } catch (error) {
+      switch (error.code) {
+        default:
+          alert(error);
+          break;
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -84,7 +106,6 @@ const Loan = () => {
           type='tel'
           mask='+7 (999) 999-99-99'
           maskChar='_'
-          placeholder='+7 (___) ___-__-__'
           name='tel'
           value={tel}
           onChange={handleChange}
@@ -99,7 +120,7 @@ const Loan = () => {
         <OperationInput
           id='loan-passport'
           type='file'
-          name='passport'
+          name='passportPhoto'
           onChange={handleFilesChange}
           accept='image/*,.pdf'
           required
@@ -117,8 +138,37 @@ const Loan = () => {
           required
         />
 
-        <Button type='submit' buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
-          →
+        <OperationLabel htmlFor='loan-financials'>
+          Выписка из банковского счета или другие документы, подтверждающие
+          финансовую состоятельность
+        </OperationLabel>
+        <OperationInput
+          id='loan-financials'
+          type='file'
+          name='financials'
+          onChange={handleFilesChange}
+          accept='image/*,.pdf'
+          required
+        />
+
+        <OperationLabel htmlFor='loan-collateral'>
+          Документы, связанные с залогом или обеспечением кредита
+        </OperationLabel>
+        <OperationInput
+          id='loan-collateral'
+          type='file'
+          name='collateral'
+          onChange={handleFilesChange}
+          accept='image/*,.pdf'
+          required
+        />
+
+        <Button
+          spinner={isLoading}
+          type='submit'
+          buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
+        >
+          <span>→</span>
         </Button>
       </Form>
     </LoanContainer>

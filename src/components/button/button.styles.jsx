@@ -35,6 +35,7 @@ const spinnerStyles = css`
 `;
 
 export const ArrowBase = styled.button`
+  position: relative;
   border: none;
   background: none;
   color: inherit;
@@ -50,7 +51,6 @@ export const ArrowBase = styled.button`
 `;
 
 export const ArrowButton = styled(ArrowBase)`
-  position: relative;
   font-size: 22px;
   background: #e2e6e4;
   border-radius: 30px;
@@ -73,9 +73,12 @@ export const ArrowSort = styled(ArrowBase)`
 `;
 
 export const ArrowSubmit = styled(ArrowBase)`
+  padding: 10px 30px;
   border-radius: 7px;
   font-size: 18px;
   background-color: #fff;
+
+  ${({ spinner }) => spinner && spinnerStyles}
 
   &:focus {
     outline: none;

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Title = styled.h1`
   font-size: 36px;
@@ -13,11 +13,17 @@ export const NavigationContainer = styled.nav`
   display: flex;
   flex-direction: column;
   row-gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media only screen and (max-width: 76.25em) {
+    padding: 0 15px;
+  }
 `;
 
 export const NavigationWrapper = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   column-gap: 20px;
 
@@ -27,6 +33,11 @@ export const NavigationWrapper = styled.div`
     flex-direction: column-reverse;
     row-gap: 15px;
   }
+`;
+
+export const NavigationWrapperFlex = styled.div`
+  display: flex;
+  column-gap: 15px;
 `;
 
 export const LogoIcon = styled.img`

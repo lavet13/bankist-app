@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 
-import Authentication from './routes/authentication/authentication.component';
-import Navigation from './routes/navigation/navigation.component';
 import Home from './routes/home/home.component';
+import Navigation from './routes/navigation/navigation.component';
+import Work from './routes/work/work.component';
+import SignIn from './routes/sign-in/sign-in.component';
+import SignUp from './routes/sign-up/sign-up.component';
 
 import {
   createUserDocumentFromAuth,
@@ -33,8 +35,10 @@ const App = () => {
   return (
     <Routes>
       <Route path='/' element={<Navigation />}>
-        <Route index element={<Authentication />} />
-        {currentUser && <Route path='home' element={<Home />} />}
+        <Route index element={<Home />} />
+        {!currentUser && <Route path='sign-in' element={<SignIn />} />}
+        {!currentUser && <Route path='sign-up' element={<SignUp />} />}
+        {currentUser && <Route path='work' element={<Work />} />}
       </Route>
     </Routes>
   );

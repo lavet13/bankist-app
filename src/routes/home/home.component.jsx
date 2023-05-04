@@ -1,21 +1,18 @@
+import { useNavigate } from 'react-router-dom';
 import { HomeContainer } from './home.styles';
-import Balance from '../../components/balance/balance.component';
-import Movements from '../../components/movements/movements.component';
-import Summary from '../../components/summary/summary.component';
-import Transfer from '../../components/transfer/transfer.component';
-import Loan from '../../components/loan/loan.component';
-import CloseAccount from '../../components/close-account/close-account.component';
+import Button, {
+  BUTTON_TYPE_CLASSES,
+} from '../../components/button/button.component';
 
 const Home = () => {
+  const navigate = useNavigate();
+  const goToWork = () => navigate('work');
+
   return (
     <HomeContainer>
-      <Balance />
-      <Movements />
-      <Summary />
-
-      <Transfer />
-      <Loan />
-      <CloseAccount />
+      <Button onClick={goToWork} buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
+        WORK :)
+      </Button>
     </HomeContainer>
   );
 };
