@@ -36,9 +36,9 @@ const App = () => {
     <Routes>
       <Route path='/' element={<Navigation />}>
         <Route index element={<Home />} />
-        {!currentUser && <Route path='sign-in' element={<SignIn />} />}
-        {!currentUser && <Route path='sign-up' element={<SignUp />} />}
-        {currentUser && <Route path='work' element={<Work />} />}
+        <Route path='sign-in' element={<SignIn />} />
+        <Route path='sign-up' element={<SignUp />} />
+        <Route path='work' element={<Work />} />
       </Route>
     </Routes>
   );

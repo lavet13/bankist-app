@@ -1,5 +1,5 @@
 import { Fragment, useEffect } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { selectCurrentUser } from '../../store/user/user.selector';
@@ -26,15 +26,9 @@ import {
 
 const Navigation = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const currentUser = useSelector(selectCurrentUser);
   const loanArray = useSelector(selectLoanArray);
   console.log(loanArray);
-
-  const signOutAndGoToHome = () => {
-    signOutUser();
-    navigate('/');
-  };
 
   useEffect(() => {
     dispatch(fetchLoanAsync(currentUser));
@@ -58,10 +52,7 @@ const Navigation = () => {
               <Anchor to='/sign-up'>Sign Up</Anchor>
             </Fragment>
           ) : (
-            <Button
-              onClick={signOutAndGoToHome}
-              buttonType={BUTTON_TYPE_CLASSES.base}
-            >
+            <Button onClick={signOutUser} buttonType={BUTTON_TYPE_CLASSES.base}>
               Sign Out
             </Button>
           )}

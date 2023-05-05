@@ -13,6 +13,8 @@ export const fetchLoanFailed = error =>
   createAction(LOAN_ACTION_TYPES.FETCH_LOAN_FAILED, error);
 
 export const fetchLoanAsync = userAuth => async dispatch => {
+  if (!userAuth) return;
+
   dispatch(fetchLoanStart());
 
   try {
