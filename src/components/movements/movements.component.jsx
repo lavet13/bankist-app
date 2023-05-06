@@ -26,11 +26,13 @@ const Movements = () => {
         );
 
         dispatch(setMovements(movementItems));
-        setIsLoading(false);
       });
+      setIsLoading(false);
 
       return unsub;
     }
+
+    setIsLoading(false);
   }, [currentUser]);
 
   return (
