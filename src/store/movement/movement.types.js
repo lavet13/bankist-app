@@ -1,0 +1,3 @@
+export const MOVEMENT_ACTION_TYPES = {
+  SET_MOVEMENTS: 'movement/SET_MOVEMENTS',
+};

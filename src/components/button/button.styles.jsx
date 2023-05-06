@@ -97,6 +97,8 @@ export const GoogleButton = styled(ArrowSubmit)`
   white-space: nowrap;
   transition: background-color 0.2s, border 0.2s, box-shadow 0.2s;
   border: 1px solid transparent;
+  width: 60%;
+  align-self: center;
 
   &:hover {
     color: #fff;

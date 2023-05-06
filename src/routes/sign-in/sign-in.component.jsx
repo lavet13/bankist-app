@@ -1,11 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { BUTTON_TYPE_CLASSES } from '../../components/button/button.component';
+import Button, {
+  BUTTON_TYPE_CLASSES,
+} from '../../components/button/button.component';
 import FormInput from '../../components/form-input/form-input.component';
 
 import { SignInFormContainer, SignInButton } from './sign-in.styles';
-import { signInAuthUserWithEmailAndPassword } from '../../utils/firebase/firebase.utils';
+import {
+  signInAuthUserWithEmailAndPassword,
+  signInWithGoogleRedirect,
+  getGoogleRedirectResult,
+  createUserDocumentFromAuth,
+} from '../../utils/firebase/firebase.utils';
 
 const defaultFormFields = {
   email: '',
@@ -19,6 +26,17 @@ const SignIn = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const [isLoading, setIsLoading] = useState(false);
   const { email, password } = formFields;
+
+  useEffect(() => {
+    (async () => {
+      const response = await getGoogleRedirectResult();
+
+      if (response) {
+        await createUserDocumentFromAuth(response.user);
+        goToWork();
+      }
+    })();
+  }, []);
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -90,6 +108,12 @@ const SignIn = () => {
       >
         <span>→</span>
       </SignInButton>
+      <Button
+        onClick={signInWithGoogleRedirect}
+        buttonType={BUTTON_TYPE_CLASSES.google}
+      >
+        Sign In With Google
+      </Button>
     </SignInFormContainer>
   );
 };

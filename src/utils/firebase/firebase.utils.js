@@ -11,7 +11,20 @@ import {
   getRedirectResult,
 } from 'firebase/auth';
 
-import { getFirestore, getDoc, setDoc, doc } from 'firebase/firestore';
+import {
+  getFirestore,
+  getDoc,
+  getDocs,
+  setDoc,
+  addDoc,
+  doc,
+  Timestamp,
+  collection,
+  onSnapshot,
+  query,
+  runTransaction,
+  where,
+} from 'firebase/firestore';
 
 import {
   getStorage,
@@ -44,14 +57,19 @@ export const auth = getAuth();
 export const signInWithGoogleRedirect = async () =>
   await signInWithRedirect(auth, googleProvider);
 
-export const getRedirectResultFromAuth = async () =>
+export const getGoogleRedirectResult = async () =>
   await getRedirectResult(auth);
 
 export const db = getFirestore();
 
 export const storage = getStorage();
 
-export const uploadInfoForLoan = async (userAuth, formFileFields) => {
+export const uploadInfoForLoan = async (
+  userAuth,
+  formFileFields,
+  formFields
+) => {
+  if (!userAuth) return;
   const regExp = /(?:\.([^.]+))?$/;
   const names = Object.keys(formFileFields);
   const fileNames = Object.values(formFileFields).map(
@@ -61,17 +79,11 @@ export const uploadInfoForLoan = async (userAuth, formFileFields) => {
 
   const userRef = ref(storage, `users/${userAuth.uid}`);
 
-  const dateFolderRef = ref(
-    userRef,
-    Intl.DateTimeFormat('ru-RU', {
-      year: 'numeric',
-      month: 'long',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).format()
-  );
+  const folderName = new Date();
+
+  const timestamp = Timestamp.fromDate(folderName);
+
+  const dateFolderRef = ref(userRef, folderName);
 
   const loadFiles = files.map(async (file, idx) => {
     const snapshot = await uploadBytesResumable(
@@ -87,10 +99,78 @@ export const uploadInfoForLoan = async (userAuth, formFileFields) => {
     async snapshot => await getDownloadURL(snapshot.ref)
   );
 
-  return await Promise.all(downloadURLs);
+  const result = {
+    folderName,
+    images: await Promise.all(downloadURLs),
+    timestamp,
+    ...formFields,
+  };
+
+  await createUserLoanDocument(userAuth, result);
+};
+
+export const createUserLoanDocument = async (userAuth, data) => {
+  if (!userAuth) return;
+
+  const { folderName, images, timestamp, ...formFields } = data;
+
+  const folderDocRef = doc(db, 'users', userAuth.uid, 'loans', folderName);
+  const folderSnapshot = await getDoc(folderDocRef);
+
+  if (!folderSnapshot.exists()) {
+    try {
+      await setDoc(folderDocRef, {
+        images,
+        timestamp,
+        isAllowed: false,
+        ...formFields,
+      });
+    } catch (error) {
+      console.log('error creating the loan', error.message);
+    }
+  }
+
+  return folderDocRef;
+};
+
+const addMovementsToUser = async (objectsToAdd, userAuth) => {
+  const usersRef = collection(db, 'users');
+
+  const sendDataPromise = objectsToAdd.map(object =>
+    addDoc(collection(usersRef, userAuth.uid, 'movements'), object)
+  );
+
+  await Promise.all(sendDataPromise);
+
+  console.log('done');
+};
+
+export const onMovementChangeListener = (userAuth, callback) => {
+  const q = query(collection(db, 'users', userAuth.uid, 'movements'));
+  return onSnapshot(q, callback);
+};
+
+export const transferAmountToUser = async (userAuth, email, amount) => {
+  await runTransaction(db, async transaction => {
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    // const userDocRef = doc(db, 'users', userAuth.uid);
+    // console.log(userDocRef, querySnapshot);
+
+    if (querySnapshot.docs[0].data().email === userAuth.email)
+      return alert('Вы не можете передать себе деньги :)');
+
+    const userDocRef = await transaction.get(querySnapshot.docs[0]);
+    console.log(userDocRef);
+
+    if (!userDocRef.exists()) {
+      alert("doesn't exist");
+    }
+  });
 };
 
 export const getListOfFilesFromLoan = async userAuth => {
+  // @FOR ADMIN
   // @RECURSIVE FUNCTION: INCOMPLETE
   const listRef = ref(storage, `users/${userAuth.uid}`);
 

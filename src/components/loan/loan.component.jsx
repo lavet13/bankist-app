@@ -16,9 +16,10 @@ import {
 import { uploadInfoForLoan } from '../../utils/firebase/firebase.utils';
 
 const defaultFormFields = {
-  name: '',
+  displayName: '',
   email: '',
   tel: '',
+  creditCard: '',
 };
 
 const defaultFormFileFields = {
@@ -35,7 +36,7 @@ const Loan = () => {
   const [formFileFields, setFormFileFields] = useState(defaultFormFileFields);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { name, email, tel } = formFields;
+  const { displayName, email, tel, creditCard } = formFields;
 
   const resetFormField = () => setFormFields(defaultFormFields);
 
@@ -54,6 +55,9 @@ const Loan = () => {
   const handleSubmit = async event => {
     event.preventDefault();
     console.log('submitted');
+    const { tel, creditCard } = formFields;
+    if (tel.length < '+7 (999) 999-99-99'.length) return;
+    if (creditCard < '9999 9999 9999 9999'.length) return;
     if (isLoading) return;
 
     setIsLoading(true);
@@ -62,7 +66,8 @@ const Loan = () => {
     console.log(formFileFields);
 
     try {
-      await uploadInfoForLoan(currentUser, formFileFields);
+      await uploadInfoForLoan(currentUser, formFileFields, formFields);
+
       resetFormField();
       event.target.reset();
     } catch (error) {
@@ -84,8 +89,8 @@ const Loan = () => {
         <OperationInput
           id='loan-name'
           type='text'
-          name='name'
-          value={name}
+          name='displayName'
+          value={displayName}
           onChange={handleChange}
           required
         />
@@ -105,9 +110,23 @@ const Loan = () => {
           id='loan-tel'
           type='tel'
           mask='+7 (999) 999-99-99'
-          maskChar='_'
+          maskChar={null}
           name='tel'
           value={tel}
+          onChange={handleChange}
+          required
+        >
+          {inputProps => <OperationInput {...inputProps} />}
+        </InputMask>
+
+        <OperationLabel htmlFor='loan-credit-card'>Номер карты</OperationLabel>
+        <InputMask
+          id='loan-credit-card'
+          type='text'
+          mask='9999 9999 9999 9999'
+          maskChar={null}
+          name='creditCard'
+          value={creditCard}
           onChange={handleChange}
           required
         >

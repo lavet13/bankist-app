@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+
+import { selectBalance } from '../../store/movement/movement.selector';
+import { selectCurrentUser } from '../../store/user/user.selector';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
@@ -10,14 +14,18 @@ import {
   OperationLabel,
 } from './transfer.styles';
 
+import { transferAmountToUser } from '../../utils/firebase/firebase.utils';
+
 const defaultFormFields = {
-  transfer: '',
+  email: '',
   amount: '',
 };
 
 const Transfer = () => {
+  const balance = useSelector(selectBalance);
+  const currentUser = useSelector(selectCurrentUser);
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const { transfer, amount } = formFields;
+  const { email, amount } = formFields;
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -27,8 +35,20 @@ const Transfer = () => {
     setFormFields({ ...formFields, [name]: value });
   };
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
+
+    const amountToTransfer = balance - amount;
+
+    try {
+      if (amountToTransfer > 0) {
+        await transferAmountToUser(currentUser, email, amountToTransfer);
+      } else {
+        throw new Error('Недостаточно средств для перевода!');
+      }
+    } catch (error) {
+      alert(error.message);
+    }
 
     resetFormFields();
 
@@ -39,12 +59,12 @@ const Transfer = () => {
     <TransferContainer>
       <Title>Перечисление депозита</Title>
       <Form onSubmit={handleSubmit}>
-        <OperationLabel htmlFor='transfer'>Перевод</OperationLabel>
+        <OperationLabel htmlFor='transfer-email'>Перевод</OperationLabel>
         <OperationInput
-          id='transfer'
-          type='text'
-          name='transfer'
-          value={transfer}
+          id='transfer-email'
+          type='email'
+          name='email'
+          value={email}
           onChange={handleChange}
           required
         />

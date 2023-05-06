@@ -3,6 +3,7 @@ import { HomeContainer } from './home.styles';
 import Button, {
   BUTTON_TYPE_CLASSES,
 } from '../../components/button/button.component';
+import Spinner from '../../components/spinner/spinner.component';
 
 const Home = () => {
   const navigate = useNavigate();

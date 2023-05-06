@@ -25,14 +25,15 @@ import {
 } from './navigation.styles';
 
 const Navigation = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
-  const loanArray = useSelector(selectLoanArray);
-  console.log(loanArray);
+  console.log('render/navigation');
+  // const loanArray = useSelector(selectLoanArray);
+  // console.log(loanArray);
 
-  useEffect(() => {
-    dispatch(fetchLoanAsync(currentUser));
-  }, [currentUser]);
+  // useEffect(() => {
+  //   dispatch(fetchLoanAsync(currentUser));
+  // }, [currentUser]);
 
   return (
     <NavigationContainer>

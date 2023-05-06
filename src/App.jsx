@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 
 import Home from './routes/home/home.component';
@@ -14,11 +14,9 @@ import {
 } from './utils/firebase/firebase.utils';
 
 import { setCurrentUser } from './store/user/user.action';
-import { selectCurrentUser } from './store/user/user.selector';
 
 const App = () => {
   const dispatch = useDispatch();
-  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener(user => {
