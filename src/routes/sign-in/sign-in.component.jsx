@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Button, {
@@ -79,42 +79,44 @@ const SignIn = () => {
   };
 
   return (
-    <SignInFormContainer onSubmit={handleSubmit}>
-      <FormInput
-        type='email'
-        name='email'
-        value={email}
-        placeholder='E-mail'
-        required
-        onChange={handleChange}
-        wide
-      />
+    <Fragment>
+      <SignInFormContainer onSubmit={handleSubmit}>
+        <FormInput
+          type='email'
+          name='email'
+          value={email}
+          placeholder='E-mail'
+          required
+          onChange={handleChange}
+          wide
+        />
 
-      <FormInput
-        type='password'
-        name='password'
-        value={password}
-        placeholder='Пароль'
-        minLength='6'
-        required
-        onChange={handleChange}
-        wide
-      />
+        <FormInput
+          type='password'
+          name='password'
+          value={password}
+          placeholder='Пароль'
+          minLength='6'
+          required
+          onChange={handleChange}
+          wide
+        />
 
-      <SignInButton
-        spinner={isLoading}
-        buttonType={BUTTON_TYPE_CLASSES.arrow}
-        type='submit'
-      >
-        <span>→</span>
-      </SignInButton>
+        <SignInButton
+          spinner={isLoading}
+          buttonType={BUTTON_TYPE_CLASSES.arrow}
+          type='submit'
+        >
+          <span>→</span>
+        </SignInButton>
+      </SignInFormContainer>
       <Button
         onClick={signInWithGoogleRedirect}
         buttonType={BUTTON_TYPE_CLASSES.google}
       >
         Sign In With Google
       </Button>
-    </SignInFormContainer>
+    </Fragment>
   );
 };
 

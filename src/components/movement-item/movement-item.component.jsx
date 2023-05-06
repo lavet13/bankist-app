@@ -17,7 +17,7 @@ const MovementItem = ({ movement }) => {
   return (
     <MovementItemContainer>
       <MovementType type={MOVEMENT_TYPES[type]}>{type}</MovementType>
-      <MovementDate>{moment(date).fromNow()}</MovementDate>
+      <MovementDate>{moment(date.toDate()).fromNow()}</MovementDate>
       <MovementValue>
         {Intl.NumberFormat('ru-RU', {
           style: 'currency',

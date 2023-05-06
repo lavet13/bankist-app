@@ -26,18 +26,16 @@ const Movements = () => {
         );
 
         dispatch(setMovements(movementItems));
+        setIsLoading(querySnapshot.metadata.hasPendingWrites);
       });
-      setIsLoading(false);
 
       return unsub;
     }
-
-    setIsLoading(false);
   }, [currentUser]);
 
   return (
     <MovementsContainer>
-      {isLoading ? (
+      {isLoading && currentUser ? (
         <Spinner />
       ) : movementsItems.length ? (
         movementsItems.map((movement, idx) => (

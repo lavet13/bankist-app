@@ -24,6 +24,7 @@ const defaultFormFields = {
 const Transfer = () => {
   const balance = useSelector(selectBalance);
   const currentUser = useSelector(selectCurrentUser);
+  const [isLoading, setIsLoading] = useState(false);
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, amount } = formFields;
 
@@ -37,20 +38,22 @@ const Transfer = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-
-    const amountToTransfer = balance - amount;
+    setIsLoading(true);
+    if (isLoading) return;
 
     try {
-      if (amountToTransfer > 0) {
-        await transferAmountToUser(currentUser, email, amountToTransfer);
+      if (balance - amount > 0) {
+        await transferAmountToUser(currentUser, email, amount);
+
+        resetFormFields();
       } else {
         throw new Error('Недостаточно средств для перевода!');
       }
     } catch (error) {
       alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    resetFormFields();
 
     console.log(formFields);
   };
@@ -77,7 +80,11 @@ const Transfer = () => {
           onChange={handleChange}
           required
         />
-        <Button type='submit' buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
+        <Button
+          spinner={isLoading}
+          type='submit'
+          buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
+        >
           →
         </Button>
       </Form>

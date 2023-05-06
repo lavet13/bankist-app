@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
+import { selectCurrentUser } from '../../store/user/user.selector';
 
 import {
   BalanceContainer,
@@ -12,6 +12,7 @@ import {
 } from './balance.styles';
 
 const Balance = () => {
+  const currentUser = useSelector(selectCurrentUser);
   const balance = useSelector(selectBalance);
 
   return (
@@ -30,7 +31,7 @@ const Balance = () => {
         </BalanceDate>
       </BalanceWrapper>
       <BalanceValue>
-        {balance
+        {currentUser && balance
           ? `${Intl.NumberFormat('ru-RU', {
               style: 'currency',
               currency: 'RUB',

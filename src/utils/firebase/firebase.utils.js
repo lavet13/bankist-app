@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { initializeApp } from 'firebase/app';
 
 import {
@@ -16,14 +18,16 @@ import {
   getDoc,
   getDocs,
   setDoc,
-  addDoc,
   doc,
   Timestamp,
   collection,
   onSnapshot,
   query,
+  writeBatch,
   runTransaction,
   where,
+  serverTimestamp,
+  orderBy,
 } from 'firebase/firestore';
 
 import {
@@ -133,39 +137,57 @@ export const createUserLoanDocument = async (userAuth, data) => {
   return folderDocRef;
 };
 
-const addMovementsToUser = async (objectsToAdd, userAuth) => {
-  const usersRef = collection(db, 'users');
+export const addMovementsToUser = async (objectsToAdd, userAuth) => {
+  const usersCollectionRef = collection(db, 'users');
+  const batch = writeBatch(db);
 
-  const sendDataPromise = objectsToAdd.map(object =>
-    addDoc(collection(usersRef, userAuth.uid, 'movements'), object)
-  );
+  objectsToAdd.forEach(object => {
+    const docRef = doc(usersCollectionRef, userAuth.uid, 'movements', uuidv4());
+    batch.set(docRef, object);
+  });
 
-  await Promise.all(sendDataPromise);
-
+  await batch.commit();
   console.log('done');
 };
 
 export const onMovementChangeListener = (userAuth, callback) => {
-  const q = query(collection(db, 'users', userAuth.uid, 'movements'));
-  return onSnapshot(q, callback);
+  const q = query(
+    collection(db, 'users', userAuth.uid, 'movements'),
+    orderBy('date', 'desc')
+  );
+  return onSnapshot(q, { includeMetadataChanges: true }, callback);
 };
 
 export const transferAmountToUser = async (userAuth, email, amount) => {
+  const q = query(collection(db, 'users'), where('email', '==', email));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.size)
+    throw new Error('Пользователя с таким E-mail не существует');
+
+  if (querySnapshot.docs[0].data().email === userAuth.email)
+    throw new Error('Вы не можете передать себе деньги :)');
+
+  const collectionUsersRef = collection(db, 'users');
+
+  const userDocRef = doc(collectionUsersRef, querySnapshot.docs[0].id);
+  const userAuthDocRef = doc(collectionUsersRef, userAuth.uid);
+
+  const movementDepositRef = doc(userDocRef, 'movements', uuidv4());
+  const movementWithdrawalRef = doc(userAuthDocRef, 'movements', uuidv4());
+
   await runTransaction(db, async transaction => {
-    const q = query(collection(db, 'users'), where('email', '==', email));
-    const querySnapshot = await getDocs(q);
-    // const userDocRef = doc(db, 'users', userAuth.uid);
-    // console.log(userDocRef, querySnapshot);
+    await transaction.get(userDocRef);
 
-    if (querySnapshot.docs[0].data().email === userAuth.email)
-      return alert('Вы не можете передать себе деньги :)');
+    transaction.set(movementDepositRef, {
+      value: amount,
+      date: serverTimestamp(),
+    });
 
-    const userDocRef = await transaction.get(querySnapshot.docs[0]);
-    console.log(userDocRef);
-
-    if (!userDocRef.exists()) {
-      alert("doesn't exist");
-    }
+    transaction.set(movementWithdrawalRef, {
+      value: -amount,
+      date: serverTimestamp(),
+    });
   });
 };
 
