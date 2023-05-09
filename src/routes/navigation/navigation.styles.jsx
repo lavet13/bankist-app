@@ -37,6 +37,7 @@ export const NavigationWrapper = styled.div`
 `;
 
 export const NavigationWrapperFlex = styled.div`
+  position: relative;
   display: flex;
   column-gap: 15px;
 `;

@@ -28,15 +28,12 @@ const SignIn = () => {
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const navigateToWorkPage = () => navigate('/work');
 
-  const [formIsLoading, setFormIsLoading] = useState(false);
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
 
   const signInWithGoogle = () => {
     dispatch(googleSignInStart(navigateToWorkPage));
   };
-
-  const resetForm = () => setFormFields(defaultFormFields);
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -48,15 +45,7 @@ const SignIn = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    dispatch(
-      emailSignInStart(
-        email,
-        password,
-        resetForm,
-        navigateToWorkPage,
-        setFormIsLoading
-      )
-    );
+    dispatch(emailSignInStart(email, password, navigateToWorkPage));
     console.log(formFields);
 
     // switch (error.code) {
@@ -103,11 +92,7 @@ const SignIn = () => {
               wide
             />
 
-            <SignInButton
-              spinner={formIsLoading}
-              buttonType={BUTTON_TYPE_CLASSES.arrow}
-              type='submit'
-            >
+            <SignInButton buttonType={BUTTON_TYPE_CLASSES.arrow} type='submit'>
               <span>Войти в аккаунт</span>
             </SignInButton>
           </SignInFormContainer>

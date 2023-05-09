@@ -14,6 +14,7 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
     case USER_ACTION_TYPES.EMAIL_SIGN_IN_START:
     case USER_ACTION_TYPES.GOOGLE_SIGN_IN_START:
     case USER_ACTION_TYPES.SIGN_OUT_START:
+    case USER_ACTION_TYPES.SIGN_UP_START:
       return { ...state, isLoading: true };
     case USER_ACTION_TYPES.SIGN_IN_SUCCESS:
       return { ...state, currentUser: payload, isLoading: false };
@@ -21,6 +22,7 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
       return { ...state, currentUser: null, isLoading: false };
     case USER_ACTION_TYPES.SIGN_OUT_FAILED:
     case USER_ACTION_TYPES.SIGN_IN_FAILED:
+    case USER_ACTION_TYPES.SIGN_UP_FAILED:
       return { ...state, error: payload, isLoading: false };
     default:
       return state;

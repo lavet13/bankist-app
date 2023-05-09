@@ -11,10 +11,13 @@ import {
   signInFailed,
   signOutSuccess,
   signOutFailed,
+  signUpFailed,
+  signUpSuccess,
 } from './user.action';
 import {
   createUserDocumentFromAuth,
   signInAuthUserWithEmailAndPassword,
+  createAuthUserWithEmailAndPassword,
   signOutUser,
 } from '../../utils/firebase/firebase.utils';
 
@@ -36,10 +39,7 @@ export function* isUserAuthenticated() {
   try {
     const userAuth = yield call(getCurrentUser);
 
-    if (!userAuth) {
-      yield put(signInSuccess(null));
-      return;
-    }
+    if (!userAuth) return yield put(signInSuccess(null));
 
     yield call(getSnapshotFromUserAuth, userAuth);
   } catch (error) {
@@ -48,9 +48,8 @@ export function* isUserAuthenticated() {
 }
 
 export function* signInWithEmail({
-  payload: { email, password, resetForm, navigateToWorkPage, formIsLoading },
+  payload: { email, password, navigateToWorkPage },
 }) {
-  formIsLoading(true);
   try {
     const { user } = yield call(
       signInAuthUserWithEmailAndPassword,
@@ -59,12 +58,9 @@ export function* signInWithEmail({
     );
 
     yield call(getSnapshotFromUserAuth, user);
-    yield call(resetForm);
     yield call(navigateToWorkPage);
   } catch (error) {
     yield put(signInFailed(error));
-  } finally {
-    formIsLoading(false);
   }
 }
 
@@ -79,12 +75,44 @@ export function* signInWithGoogle({ payload: navigateToWorkPage }) {
   }
 }
 
-export function* signOut({ payload: navigateToHome }) {
+export function* signUpWithEmail({
+  payload: {
+    email,
+    password,
+    confirmPassword,
+    navigateToWork,
+    ...additionalDetails
+  },
+}) {
+  try {
+    if (password !== confirmPassword) {
+      return yield put(signUpFailed(new Error('Пароли не совпадают!')));
+    }
+
+    const { user } = yield call(
+      createAuthUserWithEmailAndPassword,
+      email,
+      password
+    );
+
+    yield put(signUpSuccess(user, additionalDetails, navigateToWork));
+  } catch (error) {
+    yield put(signUpFailed(error));
+  }
+}
+
+export function* signInAfterSignUp({
+  payload: { user, navigateToWork, ...additionalDetails },
+}) {
+  yield call(getSnapshotFromUserAuth, user, additionalDetails);
+  yield call(navigateToWork);
+}
+
+export function* signOut() {
   try {
     yield call(signOutUser);
 
     yield put(signOutSuccess());
-    yield call(navigateToHome);
   } catch (error) {
     yield put(signOutFailed(error));
   }
@@ -102,6 +130,14 @@ export function* onGoogleSignInStart() {
   yield takeLatest(USER_ACTION_TYPES.GOOGLE_SIGN_IN_START, signInWithGoogle);
 }
 
+export function* onSignUpStart() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_UP_START, signUpWithEmail);
+}
+
+export function* onSignUpSuccess() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_UP_SUCCESS, signInAfterSignUp);
+}
+
 export function* onSignOut() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_START, signOut);
 }
@@ -111,6 +147,8 @@ export function* userSagas() {
     call(onCheckUserSession),
     call(onEmailSignInStart),
     call(onGoogleSignInStart),
+    call(onSignUpStart),
+    call(onSignUpSuccess),
     call(onSignOut),
   ]);
 }
