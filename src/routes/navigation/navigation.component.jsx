@@ -20,6 +20,7 @@ import {
   NavigationContainer,
   NavigationWrapper,
   NavigationWrapperFlex,
+  Title,
   Anchor,
 } from './navigation.styles';
 
