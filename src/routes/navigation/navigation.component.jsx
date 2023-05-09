@@ -1,19 +1,21 @@
-import { Fragment, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { Fragment } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { selectCurrentUser } from '../../store/user/user.selector';
+import {
+  selectCurrentUser,
+  selectCurrentUserIsLoading,
+} from '../../store/user/user.selector';
+import { signOutStart } from '../../store/user/user.action';
 
-import { fetchLoanAsync } from '../../store/loan/loan.action';
-import { selectLoanArray } from '../../store/loan/loan.selector';
+// import { fetchLoanStart } from '../../store/loan/loan.action';
+// import { selectLoanArray } from '../../store/loan/loan.selector';
 
 import Button, {
   BUTTON_TYPE_CLASSES,
 } from '../../components/button/button.component';
 
 import LogoSrc from '../../assets/logo.png';
-
-import { signOutUser } from '../../utils/firebase/firebase.utils';
 
 import {
   LogoIcon,
@@ -25,40 +27,46 @@ import {
 } from './navigation.styles';
 
 const Navigation = () => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const currentUser = useSelector(selectCurrentUser);
-  console.log('render/navigation');
-  // const loanArray = useSelector(selectLoanArray);
-  // console.log(loanArray);
+  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
 
-  // useEffect(() => {
-  //   dispatch(fetchLoanAsync(currentUser));
-  // }, [currentUser]);
+  const navigateToHome = () => navigate('/');
+
+  console.log('render/navigation');
+
+  const signOutUser = () => dispatch(signOutStart(navigateToHome));
 
   return (
     <NavigationContainer>
-      <NavigationWrapper>
-        <Anchor to='/'>
-          <Title>Bankist app</Title>
-        </Anchor>
+      {currentUserIsLoading ? null : (
+        <NavigationWrapper>
+          <Anchor to='/'>
+            <Title>Bankist app</Title>
+          </Anchor>
 
-        <Anchor to='/'>
-          <LogoIcon src={LogoSrc} />
-        </Anchor>
+          <Anchor to='/'>
+            <LogoIcon src={LogoSrc} />
+          </Anchor>
 
-        <NavigationWrapperFlex>
-          {!currentUser ? (
-            <Fragment>
-              <Anchor to='/sign-in'>Sign In</Anchor>
-              <Anchor to='/sign-up'>Sign Up</Anchor>
-            </Fragment>
-          ) : (
-            <Button onClick={signOutUser} buttonType={BUTTON_TYPE_CLASSES.base}>
-              Sign Out
-            </Button>
-          )}
-        </NavigationWrapperFlex>
-      </NavigationWrapper>
+          <NavigationWrapperFlex>
+            {!currentUser ? (
+              <Fragment>
+                <Anchor to='/sign-in'>Sign In</Anchor>
+                <Anchor to='/sign-up'>Sign Up</Anchor>
+              </Fragment>
+            ) : (
+              <Button
+                onClick={signOutUser}
+                buttonType={BUTTON_TYPE_CLASSES.base}
+              >
+                Sign Out
+              </Button>
+            )}
+          </NavigationWrapperFlex>
+        </NavigationWrapper>
+      )}
       <Outlet />
     </NavigationContainer>
   );

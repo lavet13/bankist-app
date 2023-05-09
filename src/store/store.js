@@ -4,15 +4,18 @@ import {
   applyMiddleware,
 } from 'redux';
 
-import thunk from 'redux-thunk';
-
 import logger from 'redux-logger';
 
 import { rootReducer } from './root-reducer';
+import { rootSaga } from './root-saga';
+
+import createSagaMiddleware from 'redux-saga';
+
+const sagaMiddleware = createSagaMiddleware();
 
 const middleWares = [
   process.env.NODE_ENV !== 'production' && logger,
-  thunk,
+  sagaMiddleware,
 ].filter(Boolean);
 
 const composeEnhancer =
@@ -24,3 +27,5 @@ const composeEnhancer =
 const composedEnhancers = composeEnhancer(applyMiddleware(...middleWares));
 
 export const store = createStore(rootReducer, undefined, composedEnhancers);
+
+sagaMiddleware.run(rootSaga);

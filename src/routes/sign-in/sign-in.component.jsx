@@ -1,18 +1,21 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+
+import {
+  googleSignInStart,
+  emailSignInStart,
+} from '../../store/user/user.action';
+
+import { selectCurrentUserIsLoading } from '../../store/user/user.selector';
 
 import Button, {
   BUTTON_TYPE_CLASSES,
 } from '../../components/button/button.component';
 import FormInput from '../../components/form-input/form-input.component';
+import Spinner from '../../components/spinner/spinner.component';
 
 import { SignInFormContainer, SignInButton } from './sign-in.styles';
-import {
-  signInAuthUserWithEmailAndPassword,
-  signInWithGoogleRedirect,
-  getGoogleRedirectResult,
-  createUserDocumentFromAuth,
-} from '../../utils/firebase/firebase.utils';
 
 const defaultFormFields = {
   email: '',
@@ -21,24 +24,19 @@ const defaultFormFields = {
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const goToWork = () => navigate('/work');
+  const dispatch = useDispatch();
+  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
+  const navigateToWorkPage = () => navigate('/work');
 
+  const [formIsLoading, setFormIsLoading] = useState(false);
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const [isLoading, setIsLoading] = useState(false);
   const { email, password } = formFields;
 
-  useEffect(() => {
-    (async () => {
-      const response = await getGoogleRedirectResult();
+  const signInWithGoogle = () => {
+    dispatch(googleSignInStart(navigateToWorkPage));
+  };
 
-      if (response) {
-        await createUserDocumentFromAuth(response.user);
-        goToWork();
-      }
-    })();
-  }, []);
-
-  const resetFormFields = () => setFormFields(defaultFormFields);
+  const resetForm = () => setFormFields(defaultFormFields);
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -50,72 +48,77 @@ const SignIn = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    setIsLoading(true);
+    dispatch(
+      emailSignInStart(
+        email,
+        password,
+        resetForm,
+        navigateToWorkPage,
+        setFormIsLoading
+      )
+    );
+    console.log(formFields);
 
-    try {
-      await signInAuthUserWithEmailAndPassword(email, password);
+    // switch (error.code) {
+    //   case 'auth/wrong-password':
+    //     alert('Incorrect password for email');
+    //     break;
+    //   case 'auth/user-not-found':
+    //     alert('No user associated with this email');
+    //     break;
+    //   case 'auth/network-request-failed':
+    //     alert('Blocked by Firebase');
+    //     break;
 
-      resetFormFields();
-      console.log(formFields);
-      goToWork();
-    } catch (error) {
-      switch (error.code) {
-        case 'auth/wrong-password':
-          alert('Incorrect password for email');
-          break;
-        case 'auth/user-not-found':
-          alert('No user associated with this email');
-          break;
-        case 'auth/network-request-failed':
-          alert('Blocked by Firebase');
-          break;
-
-        default:
-          console.log(error.code);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    //   default:
+    //     console.log(error.code);
+    // }
   };
 
   return (
     <Fragment>
-      <SignInFormContainer onSubmit={handleSubmit}>
-        <FormInput
-          type='email'
-          name='email'
-          value={email}
-          placeholder='E-mail'
-          required
-          onChange={handleChange}
-          wide
-        />
+      {currentUserIsLoading ? (
+        <Spinner />
+      ) : (
+        <Fragment>
+          <SignInFormContainer onSubmit={handleSubmit}>
+            <FormInput
+              type='email'
+              name='email'
+              value={email}
+              placeholder='E-mail'
+              required
+              onChange={handleChange}
+              wide
+            />
 
-        <FormInput
-          type='password'
-          name='password'
-          value={password}
-          placeholder='Пароль'
-          minLength='6'
-          required
-          onChange={handleChange}
-          wide
-        />
+            <FormInput
+              type='password'
+              name='password'
+              value={password}
+              placeholder='Пароль'
+              minLength='6'
+              required
+              onChange={handleChange}
+              wide
+            />
 
-        <SignInButton
-          spinner={isLoading}
-          buttonType={BUTTON_TYPE_CLASSES.arrow}
-          type='submit'
-        >
-          <span>→</span>
-        </SignInButton>
-      </SignInFormContainer>
-      <Button
-        onClick={signInWithGoogleRedirect}
-        buttonType={BUTTON_TYPE_CLASSES.google}
-      >
-        Sign In With Google
-      </Button>
+            <SignInButton
+              spinner={formIsLoading}
+              buttonType={BUTTON_TYPE_CLASSES.arrow}
+              type='submit'
+            >
+              <span>→</span>
+            </SignInButton>
+          </SignInFormContainer>
+          <Button
+            onClick={signInWithGoogle}
+            buttonType={BUTTON_TYPE_CLASSES.google}
+          >
+            Sign In With Google
+          </Button>
+        </Fragment>
+      )}
     </Fragment>
   );
 };

@@ -4,7 +4,7 @@ import { initializeApp } from 'firebase/app';
 
 import {
   getAuth,
-  signInWithRedirect,
+  signInWithPopup,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -58,8 +58,8 @@ googleProvider.setCustomParameters({
 
 export const auth = getAuth();
 
-export const signInWithGoogleRedirect = async () =>
-  await signInWithRedirect(auth, googleProvider);
+export const signInWithGooglePopup = async () =>
+  await signInWithPopup(auth, googleProvider);
 
 export const getGoogleRedirectResult = async () =>
   await getRedirectResult(auth);
@@ -152,10 +152,10 @@ export const addMovementsToUser = async (objectsToAdd, userAuth) => {
 
 export const onMovementChangeListener = (userAuth, callback) => {
   const q = query(
-    collection(db, 'users', userAuth.uid, 'movements'),
+    collection(db, 'users', userAuth.id, 'movements'),
     orderBy('date', 'desc')
   );
-  return onSnapshot(q, { includeMetadataChanges: true }, callback);
+  return onSnapshot(q, callback);
 };
 
 export const transferAmountToUser = async (userAuth, email, amount) => {
@@ -233,12 +233,14 @@ export const createUserDocumentFromAuth = async (
         createdAt,
         ...additionalInformation,
       });
+
+      return await getDoc(userDocRef);
     } catch (error) {
       console.log('error creating the user', error.message);
     }
   }
 
-  return userDocRef;
+  return userSnapshot;
 };
 
 export const createAuthUserWithEmailAndPassword = async (email, password) => {
@@ -257,3 +259,15 @@ export const onAuthStateChangedListener = callback =>
   onAuthStateChanged(auth, callback);
 
 export const signOutUser = async () => await signOut(auth);
+
+export const getCurrentUser = () =>
+  new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      user => {
+        unsubscribe();
+        resolve(user);
+      },
+      reject
+    );
+  });
