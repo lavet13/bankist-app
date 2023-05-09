@@ -1,18 +1,26 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ReactComponent as ProfileIcon } from '../../assets/user.svg';
 
 export const UserProfileIcon = styled(ProfileIcon)``;
+
+export const userIconStyles = css`
+  fill: #333;
+`;
+
+export const userProfileIconStyles = css`
+  background-color: rgba(100, 100, 100, 0.1);
+  border-radius: 20px;
+`;
 
 export const UserIconContainer = styled.div`
   padding: 20px;
   cursor: pointer;
 
   &:hover ${UserProfileIcon} {
-    fill: #333;
+    ${userIconStyles}
   }
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: 20px;
+    ${userProfileIconStyles}
   }
 `;

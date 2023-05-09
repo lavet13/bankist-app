@@ -42,8 +42,8 @@ const Navigation = () => {
               </Fragment>
             ) : (
               <Fragment>
-                <UserIcon />
                 {isUserDropdownOpen && <UserDropdown />}
+                <UserIcon />
               </Fragment>
             )}
           </NavigationWrapperFlex>

@@ -1,31 +1,55 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import {
   UserIconContainer,
   UserProfileIcon,
+  userProfileIconStyles,
+  userIconStyles,
 } from '../user-icon/user-icon.styles';
+
+import { ArrowBase } from '../button/button.styles';
+
+const signOutStyles = css`
+  &:hover,
+  &:focus {
+    color: #f00;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+`;
 
 export const UserDropdownContainer = styled.div`
   position: absolute;
-  top: 70px;
+  top: 72px;
   right: 0;
   display: flex;
   flex-direction: column;
-  row-gap: 10px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(100, 100, 100, 0.1);
+  border-radius: 10px;
+  border-top-right-radius: 0;
   backdrop-filter: blur(3px);
   min-width: 300px;
   max-height: 300px;
   width: 100%;
-  padding: 20px 30px;
+  padding: 10px 0;
   z-index: 10;
 
-  &:hover ${UserIconContainer} {
-    background-color: rgba(255, 255, 255, 0.6) !important;
-    border-radius: 20px !important;
+  & ~ ${UserIconContainer} {
+    ${userProfileIconStyles}
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
-  &:hover ${UserProfileIcon} {
-    fill: #333 !important;
+  & ~ ${UserIconContainer}${UserProfileIcon} {
+    ${userIconStyles}
   }
+`;
+
+export const UserDropdownButton = styled(ArrowBase)`
+  padding: 10px 0;
+
+  &:hover {
+    background-color: rgba(51, 51, 51, 0.12);
+  }
+
+  ${({ signOut }) => signOut && signOutStyles}
 `;

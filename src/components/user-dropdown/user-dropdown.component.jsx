@@ -2,8 +2,10 @@ import { useDispatch } from 'react-redux';
 
 import { signOutStart } from '../../store/user/user.action';
 
-import { UserDropdownContainer } from './user-dropdown.styles';
-import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
+import {
+  UserDropdownContainer,
+  UserDropdownButton,
+} from './user-dropdown.styles';
 
 const UserDropdown = () => {
   const dispatch = useDispatch();
@@ -12,10 +14,10 @@ const UserDropdown = () => {
 
   return (
     <UserDropdownContainer>
-      <Button buttonType={BUTTON_TYPE_CLASSES.base}>Настройки</Button>
-      <Button onClick={signOutUser} buttonType={BUTTON_TYPE_CLASSES.base}>
+      <UserDropdownButton>Настройки</UserDropdownButton>
+      <UserDropdownButton onClick={signOutUser} signOut>
         Выйти
-      </Button>
+      </UserDropdownButton>
     </UserDropdownContainer>
   );
 };

@@ -46,7 +46,7 @@ export const ArrowBase = styled.button`
   &:hover,
   &:focus {
     outline: none;
-    color: #777;
+    color: #000;
   }
 `;
 
