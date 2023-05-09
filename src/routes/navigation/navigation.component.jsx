@@ -43,7 +43,7 @@ const Navigation = () => {
       {currentUserIsLoading ? null : (
         <NavigationWrapper>
           <Anchor to='/'>
-            <Title>Bankist app</Title>
+            <Title>CreditGo</Title>
           </Anchor>
 
           <Anchor to='/'>

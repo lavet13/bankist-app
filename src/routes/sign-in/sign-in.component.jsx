@@ -108,14 +108,15 @@ const SignIn = () => {
               buttonType={BUTTON_TYPE_CLASSES.arrow}
               type='submit'
             >
-              <span>→</span>
+              <span>Войти в аккаунт</span>
             </SignInButton>
           </SignInFormContainer>
           <Button
             onClick={signInWithGoogle}
             buttonType={BUTTON_TYPE_CLASSES.google}
+            mt
           >
-            Sign In With Google
+            Войти через Google
           </Button>
         </Fragment>
       )}

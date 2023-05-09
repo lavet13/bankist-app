@@ -51,10 +51,10 @@ export const ArrowBase = styled.button`
 `;
 
 export const ArrowButton = styled(ArrowBase)`
-  font-size: 22px;
+  font-size: 18px;
   background: #e2e6e4;
   border-radius: 30px;
-  padding: 6px 30px;
+  padding: 10px 30px;
 
   &:hover,
   &:focus {
@@ -97,8 +97,10 @@ export const GoogleButton = styled(ArrowSubmit)`
   white-space: nowrap;
   transition: background-color 0.2s, border 0.2s, box-shadow 0.2s;
   border: 1px solid transparent;
-  width: 60%;
+  width: 30%;
+  border-radius: 40px;
   align-self: center;
+  margin-top: ${({ mt }) => (mt ? '-10px' : '0')};
 
   &:hover {
     color: #fff;
