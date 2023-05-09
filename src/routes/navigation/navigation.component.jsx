@@ -15,8 +15,6 @@ import Button, {
   BUTTON_TYPE_CLASSES,
 } from '../../components/button/button.component';
 
-import LogoSrc from '../../assets/logo.png';
-
 import {
   LogoIcon,
   NavigationContainer,
@@ -43,11 +41,7 @@ const Navigation = () => {
       {currentUserIsLoading ? null : (
         <NavigationWrapper>
           <Anchor to='/'>
-            <Title>CreditGo</Title>
-          </Anchor>
-
-          <Anchor to='/'>
-            <LogoIcon src={LogoSrc} />
+            <LogoIcon />
           </Anchor>
 
           <NavigationWrapperFlex>

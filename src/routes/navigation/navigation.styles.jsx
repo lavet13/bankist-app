@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import styled, { css } from 'styled-components';
+import { ReactComponent as Logo } from '../../assets/logo.svg';
 
 export const Title = styled.h1`
   font-size: 36px;
@@ -40,10 +41,10 @@ export const NavigationWrapperFlex = styled.div`
   column-gap: 15px;
 `;
 
-export const LogoIcon = styled.img`
+export const LogoIcon = styled(Logo)`
   display: block;
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 80px;
   object-fit: cover;
 `;
 
