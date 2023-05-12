@@ -71,7 +71,7 @@ const Transfer = () => {
           onChange={handleChange}
           required
         />
-        <OperationLabel htmlFor='transfer-amount'>Количество</OperationLabel>
+        <OperationLabel htmlFor='transfer-amount'>Сумма (руб.)</OperationLabel>
         <OperationInput
           id='transfer-amount'
           type='number'

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 
 import Home from './routes/home/home.component';
@@ -11,13 +11,20 @@ import UnauthenticatedRoute from './routes/unauthenticated/unauthenticated-route
 import AuthenticatedRoute from './routes/authenticated/authenticated-route.component';
 
 import { checkUserSession } from './store/user/user.action';
+import { fetchLoanStart } from './store/loan/loan.action';
+import { selectCurrentUser } from './store/user/user.selector';
 
 const App = () => {
   const dispatch = useDispatch();
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     dispatch(checkUserSession());
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchLoanStart(currentUser));
+  }, [currentUser]);
 
   return (
     <Routes>

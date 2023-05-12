@@ -173,14 +173,17 @@ export const transferAmountToUser = async (userAuth, email, amount) => {
 
   const collectionUsersRef = collection(db, 'users');
 
-  const userDocRef = doc(collectionUsersRef, querySnapshot.docs[0].id);
-  const userAuthDocRef = doc(collectionUsersRef, userAuth.id);
+  const userTransferToDocRef = doc(
+    collectionUsersRef,
+    querySnapshot.docs[0].id
+  );
+  const currentUserDocRef = doc(collectionUsersRef, userAuth.id);
 
-  const movementDepositRef = doc(userDocRef, 'movements', uuidv4());
-  const movementWithdrawalRef = doc(userAuthDocRef, 'movements', uuidv4());
+  const movementDepositRef = doc(userTransferToDocRef, 'movements', uuidv4());
+  const movementWithdrawalRef = doc(currentUserDocRef, 'movements', uuidv4());
 
   await runTransaction(db, async transaction => {
-    await transaction.get(userDocRef);
+    await transaction.get(userTransferToDocRef);
 
     transaction.set(movementDepositRef, {
       value: amount,

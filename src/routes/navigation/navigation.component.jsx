@@ -43,6 +43,7 @@ const Navigation = () => {
             ) : (
               <Fragment>
                 {isUserDropdownOpen && <UserDropdown />}
+                {currentUser.email}
                 <UserIcon />
               </Fragment>
             )}
