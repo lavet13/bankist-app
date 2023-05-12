@@ -81,7 +81,7 @@ const Transfer = () => {
           required
         />
         <Button
-          spinner={isLoading}
+          isLoading={isLoading}
           type='submit'
           buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
         >

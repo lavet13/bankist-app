@@ -15,7 +15,11 @@ import Button, {
 import FormInput from '../../components/form-input/form-input.component';
 import Spinner from '../../components/spinner/spinner.component';
 
-import { SignInFormContainer, SignInButton } from './sign-in.styles';
+import {
+  SignInFormContainer,
+  SignInButton,
+  SignInGoogleButton,
+} from './sign-in.styles';
 
 const defaultFormFields = {
   email: '',
@@ -37,8 +41,6 @@ const SignIn = () => {
 
   const handleChange = event => {
     const { name, value } = event.target;
-
-    if (password === 'password' && password.length > 6) return;
 
     setFormFields({ ...formFields, [name]: value });
   };
@@ -96,13 +98,12 @@ const SignIn = () => {
               <span>Войти в аккаунт</span>
             </SignInButton>
           </SignInFormContainer>
-          <Button
+          <SignInGoogleButton
             onClick={signInWithGoogle}
             buttonType={BUTTON_TYPE_CLASSES.google}
-            mt
           >
             Войти через Google
-          </Button>
+          </SignInGoogleButton>
         </Fragment>
       )}
     </Fragment>

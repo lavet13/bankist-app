@@ -7,6 +7,8 @@ import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
 import { LoanContainer } from './loan.styles';
 
+import { Timestamp } from 'firebase/firestore';
+
 import {
   Title,
   OperationInput,
@@ -66,14 +68,20 @@ const Loan = () => {
     console.log(formFileFields);
 
     try {
-      await uploadInfoForLoan(currentUser, formFileFields, formFields);
+      const result = await uploadInfoForLoan(
+        currentUser,
+        formFileFields,
+        formFields
+      );
+
+      console.log(result.data());
 
       resetFormField();
       event.target.reset();
     } catch (error) {
       switch (error.code) {
         default:
-          alert(error);
+          console.log(error);
           break;
       }
     } finally {
@@ -183,7 +191,7 @@ const Loan = () => {
         />
 
         <Button
-          spinner={isLoading}
+          isLoading={isLoading}
           type='submit'
           buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
         >

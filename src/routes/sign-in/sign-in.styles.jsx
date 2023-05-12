@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { ArrowButton } from '../../components/button/button.styles';
+import Button from '../../components/button/button.component';
 
 export const SignInFormContainer = styled.form`
   max-width: 600px;
@@ -23,7 +24,11 @@ export const SignInFormContainer = styled.form`
   }
 `;
 
-export const SignInButton = styled(ArrowButton)`
+export const SignInButton = styled(Button)`
   width: 60%;
   align-self: center;
+`;
+
+export const SignInGoogleButton = styled(Button)`
+  margin-top: -10px;
 `;

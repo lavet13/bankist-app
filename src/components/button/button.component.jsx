@@ -3,6 +3,7 @@ import {
   ArrowButton,
   ArrowSort,
   ArrowSubmit,
+  ButtonSpinner,
   GoogleButton,
 } from './button.styles';
 
@@ -23,11 +24,11 @@ const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
     [BUTTON_TYPE_CLASSES.google]: GoogleButton,
   }[buttonType]);
 
-const Button = ({ buttonType, type, children, ...otherProps }) => {
+const Button = ({ buttonType, type, isLoading, children, ...otherProps }) => {
   const CustomButton = getButton(buttonType);
   return (
-    <CustomButton type={type || 'button'} {...otherProps}>
-      <span>{children}</span>
+    <CustomButton disabled={isLoading} type={type || 'button'} {...otherProps}>
+      {isLoading ? <ButtonSpinner /> : <span>{children}</span>}
     </CustomButton>
   );
 };

@@ -1,38 +1,5 @@
-import styled, { css } from 'styled-components';
-import Spinner from '../../assets/loading.png';
-
-const spinnerStyles = css`
-  span {
-    visibility: hidden;
-  }
-
-  @keyframes animate {
-    0% {
-      transform: translate(-50%, -50%) rotate(0);
-    }
-
-    50% {
-      transform: translate(-50%, -50%) rotate(180deg);
-    }
-
-    100% {
-      transform: translate(-50%, -50%) rotate(360deg);
-    }
-  }
-
-  &:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: block;
-    width: 15px;
-    height: 15px;
-    background: url(${Spinner}) no-repeat center/cover;
-    animation: animate 1s infinite;
-  }
-`;
+import styled from 'styled-components';
+import { SpinnerContainer } from '../spinner/spinner.styles';
 
 export const ArrowBase = styled.button`
   position: relative;
@@ -60,8 +27,6 @@ export const ArrowButton = styled(ArrowBase)`
   &:focus {
     background: #f3f1d5;
   }
-
-  ${({ spinner }) => spinner && spinnerStyles}
 `;
 
 export const ArrowSort = styled(ArrowBase)`
@@ -77,8 +42,6 @@ export const ArrowSubmit = styled(ArrowBase)`
   border-radius: 7px;
   font-size: 18px;
   background-color: #fff;
-
-  ${({ spinner }) => spinner && spinnerStyles}
 
   &:focus {
     outline: none;
@@ -100,7 +63,6 @@ export const GoogleButton = styled(ArrowSubmit)`
   width: 30%;
   border-radius: 40px;
   align-self: center;
-  margin-top: ${({ mt }) => (mt ? '-10px' : '0')};
 
   &:hover {
     color: #fff;
@@ -112,4 +74,9 @@ export const GoogleButton = styled(ArrowSubmit)`
       0 1px 3px 1px rgba(60, 64, 67, 0.15)
     );
   }
+`;
+
+export const ButtonSpinner = styled(SpinnerContainer)`
+  width: 15px;
+  height: 15px;
 `;

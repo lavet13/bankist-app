@@ -81,11 +81,11 @@ export const uploadInfoForLoan = async (
   );
   const files = Object.values(formFileFields);
 
-  const userRef = ref(storage, `users/${userAuth.uid}`);
+  const userRef = ref(storage, `users/${userAuth.id}`);
 
-  const folderName = new Date();
+  const folderName = uuidv4();
 
-  const timestamp = Timestamp.fromDate(folderName);
+  const timestamp = Timestamp.fromDate(new Date());
 
   const dateFolderRef = ref(userRef, folderName);
 
@@ -97,6 +97,7 @@ export const uploadInfoForLoan = async (
 
     return snapshot;
   });
+
   const snapshots = await Promise.all(loadFiles);
 
   const downloadURLs = snapshots.map(
@@ -110,7 +111,7 @@ export const uploadInfoForLoan = async (
     ...formFields,
   };
 
-  await createUserLoanDocument(userAuth, result);
+  return await createUserLoanDocument(userAuth, result);
 };
 
 export const createUserLoanDocument = async (userAuth, data) => {
@@ -118,7 +119,7 @@ export const createUserLoanDocument = async (userAuth, data) => {
 
   const { folderName, images, timestamp, ...formFields } = data;
 
-  const folderDocRef = doc(db, 'users', userAuth.uid, 'loans', folderName);
+  const folderDocRef = doc(db, 'users', userAuth.id, 'loans', folderName);
   const folderSnapshot = await getDoc(folderDocRef);
 
   if (!folderSnapshot.exists()) {
@@ -129,12 +130,14 @@ export const createUserLoanDocument = async (userAuth, data) => {
         isAllowed: false,
         ...formFields,
       });
+
+      return await getDoc(folderDocRef);
     } catch (error) {
       console.log('error creating the loan', error.message);
     }
   }
 
-  return folderDocRef;
+  return folderSnapshot;
 };
 
 export const addMovementsToUser = async (objectsToAdd, userAuth) => {
@@ -142,7 +145,7 @@ export const addMovementsToUser = async (objectsToAdd, userAuth) => {
   const batch = writeBatch(db);
 
   objectsToAdd.forEach(object => {
-    const docRef = doc(usersCollectionRef, userAuth.uid, 'movements', uuidv4());
+    const docRef = doc(usersCollectionRef, userAuth.id, 'movements', uuidv4());
     batch.set(docRef, object);
   });
 
@@ -171,7 +174,7 @@ export const transferAmountToUser = async (userAuth, email, amount) => {
   const collectionUsersRef = collection(db, 'users');
 
   const userDocRef = doc(collectionUsersRef, querySnapshot.docs[0].id);
-  const userAuthDocRef = doc(collectionUsersRef, userAuth.uid);
+  const userAuthDocRef = doc(collectionUsersRef, userAuth.id);
 
   const movementDepositRef = doc(userDocRef, 'movements', uuidv4());
   const movementWithdrawalRef = doc(userAuthDocRef, 'movements', uuidv4());
@@ -194,7 +197,7 @@ export const transferAmountToUser = async (userAuth, email, amount) => {
 export const getListOfFilesFromLoan = async userAuth => {
   // @FOR ADMIN
   // @RECURSIVE FUNCTION: INCOMPLETE
-  const listRef = ref(storage, `users/${userAuth.uid}`);
+  const listRef = ref(storage, `users/${userAuth.id}`);
 
   const fetchFolders = await list(listRef, { maxResults: 100 });
 
