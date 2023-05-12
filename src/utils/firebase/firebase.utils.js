@@ -153,22 +153,35 @@ export const addMovementsToUser = async (objectsToAdd, userAuth) => {
   console.log('done');
 };
 
-export const onMovementChangeListener = (userAuth, callback) => {
-  const q = query(
-    collection(db, 'users', userAuth.id, 'movements'),
-    orderBy('date', 'desc')
-  );
-  return onSnapshot(q, callback);
+export const getMovements = userAuth => {
+  return new Promise((resolve, reject) => {
+    const q = query(
+      collection(db, 'users', userAuth.id, 'movements'),
+      orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      querySnapshot => {
+        unsubscribe();
+        resolve(querySnapshot);
+      },
+      reject
+    );
+  });
 };
 
-export const transferAmountToUser = async (userAuth, email, amount) => {
-  const q = query(collection(db, 'users'), where('email', '==', email));
+export const transferAmountToUser = async (userAuth, creditCard, amount) => {
+  const q = query(
+    collection(db, 'users'),
+    where('creditCard', '==', creditCard)
+  );
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.size)
-    throw new Error('Пользователя с таким E-mail не существует');
+    throw new Error('Пользователя с такой кредитной картой не существует');
 
-  if (querySnapshot.docs[0].data().email === userAuth.email)
+  if (querySnapshot.docs[0].data().creditCard === userAuth.creditCard)
     throw new Error('Вы не можете передать себе деньги :)');
 
   const collectionUsersRef = collection(db, 'users');
@@ -219,6 +232,8 @@ export const getListOfFilesFromLoan = async userAuth => {
   return result;
 };
 
+const generator = require('../credit-card-generator/credit-card-generator.utils');
+
 export const createUserDocumentFromAuth = async (
   userAuth,
   additionalInformation = {}
@@ -237,6 +252,7 @@ export const createUserDocumentFromAuth = async (
         displayName,
         email,
         createdAt,
+        creditCard: generator.GenCC('Mastercard', 1, Math.random)[0],
         ...additionalInformation,
       });
 

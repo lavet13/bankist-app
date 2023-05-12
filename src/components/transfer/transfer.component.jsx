@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { fetchMovementsStart } from '../../store/movement/movement.action';
 
 import { selectBalance } from '../../store/movement/movement.selector';
 import { selectCurrentUser } from '../../store/user/user.selector';
+import InputMask from 'react-input-mask';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
@@ -17,16 +20,17 @@ import {
 import { transferAmountToUser } from '../../utils/firebase/firebase.utils';
 
 const defaultFormFields = {
-  email: '',
+  creditCard: '',
   amount: '',
 };
 
 const Transfer = () => {
+  const dispatch = useDispatch();
   const balance = useSelector(selectBalance);
   const currentUser = useSelector(selectCurrentUser);
   const [isLoading, setIsLoading] = useState(false);
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const { email, amount } = formFields;
+  const { creditCard, amount } = formFields;
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -41,9 +45,15 @@ const Transfer = () => {
     setIsLoading(true);
     if (isLoading) return;
 
+    const creditCardNoSpaces = creditCard
+      .split('')
+      .filter(char => char !== ' ')
+      .join('');
+
     try {
       if (balance - amount > 0) {
-        await transferAmountToUser(currentUser, email, amount);
+        await transferAmountToUser(currentUser, creditCardNoSpaces, amount);
+        dispatch(fetchMovementsStart(currentUser));
 
         resetFormFields();
       } else {
@@ -54,23 +64,26 @@ const Transfer = () => {
     } finally {
       setIsLoading(false);
     }
-
-    console.log(formFields);
   };
 
   return (
     <TransferContainer>
       <Title>Перечисление депозита</Title>
       <Form onSubmit={handleSubmit}>
-        <OperationLabel htmlFor='transfer-email'>Перевод</OperationLabel>
-        <OperationInput
-          id='transfer-email'
-          type='email'
-          name='email'
-          value={email}
+        <OperationLabel htmlFor='transfer-credit-card'>Перевод</OperationLabel>
+        <InputMask
+          id='transfer-credit-card'
+          type='text'
+          mask='9999 9999 9999 9999'
+          maskChar={null}
+          name='creditCard'
+          value={creditCard}
           onChange={handleChange}
           required
-        />
+        >
+          {inputProps => <OperationInput {...inputProps} />}
+        </InputMask>
+
         <OperationLabel htmlFor='transfer-amount'>Сумма (руб.)</OperationLabel>
         <OperationInput
           id='transfer-amount'
@@ -80,6 +93,7 @@ const Transfer = () => {
           onChange={handleChange}
           required
         />
+
         <Button
           isLoading={isLoading}
           type='submit'

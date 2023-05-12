@@ -7,6 +7,11 @@ export const selectMovementsItems = createSelector(
   movementSlice => movementSlice.movementsItems
 );
 
+export const selectMovementsIsLoading = createSelector(
+  [selectMovementReducer],
+  movement => movement.isLoading
+);
+
 export const selectBalance = createSelector(
   [selectMovementsItems],
   movementsItems => movementsItems.reduce((acc, { value }) => acc + +value, 0)
