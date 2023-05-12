@@ -9,6 +9,7 @@ import SignIn from './routes/sign-in/sign-in.component';
 import SignUp from './routes/sign-up/sign-up.component';
 import UnauthenticatedRoute from './routes/unauthenticated/unauthenticated-route-.component';
 import AuthenticatedRoute from './routes/authenticated/authenticated-route.component';
+import Settings from './routes/settings/settings.component';
 
 import { checkUserSession } from './store/user/user.action';
 import { fetchLoanStart } from './store/loan/loan.action';
@@ -51,6 +52,14 @@ const App = () => {
           element={
             <AuthenticatedRoute>
               <Work />
+            </AuthenticatedRoute>
+          }
+        />
+        <Route
+          path='settings'
+          element={
+            <AuthenticatedRoute>
+              <Settings />
             </AuthenticatedRoute>
           }
         />

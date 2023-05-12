@@ -210,12 +210,12 @@ export const transferAmountToUser = async (userAuth, creditCard, amount) => {
   });
 };
 
-export const getListOfFilesFromLoan = async userAuth => {
+export const getListOfFilesFromLoan = async (userAuth, nextPageToken) => {
   // @FOR ADMIN
   // @RECURSIVE FUNCTION: INCOMPLETE
   const listRef = ref(storage, `users/${userAuth.id}`);
 
-  const fetchFolders = await list(listRef, { maxResults: 100 });
+  const fetchFolders = await list(listRef, { maxResults: 1, nextPageToken });
 
   const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
     const filesRef = await listAll(folderRef);
