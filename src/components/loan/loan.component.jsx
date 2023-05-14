@@ -7,8 +7,6 @@ import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
 import { LoanContainer } from './loan.styles';
 
-import { Timestamp } from 'firebase/firestore';
-
 import {
   Title,
   OperationInput,
@@ -16,6 +14,7 @@ import {
   OperationLabel,
 } from '../transfer/transfer.styles';
 import { uploadInfoForLoan } from '../../utils/firebase/firebase.utils';
+import { Link } from 'react-router-dom';
 
 const defaultFormFields = {
   displayName: '',
@@ -197,6 +196,7 @@ const Loan = () => {
         >
           <span>→</span>
         </Button>
+        <Link to='/loans'>Мои кредиты</Link>
       </Form>
     </LoanContainer>
   );

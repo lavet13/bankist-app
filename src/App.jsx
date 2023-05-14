@@ -14,6 +14,7 @@ import Settings from './routes/settings/settings.component';
 import { checkUserSession } from './store/user/user.action';
 import { fetchLoanStart } from './store/loan/loan.action';
 import { selectCurrentUser } from './store/user/user.selector';
+import Loans from './routes/loans/loans.component';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -52,6 +53,14 @@ const App = () => {
           element={
             <AuthenticatedRoute>
               <Work />
+            </AuthenticatedRoute>
+          }
+        />
+        <Route
+          path='loans'
+          element={
+            <AuthenticatedRoute>
+              <Loans />
             </AuthenticatedRoute>
           }
         />
