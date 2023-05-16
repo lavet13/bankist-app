@@ -22,6 +22,11 @@ const App = () => {
 
   useEffect(() => {
     dispatch(checkUserSession());
+    const initializeAdmin = async () => {
+      const data = await fetch('/.netlify/functions/initialize-admin-sdk');
+      console.log(data);
+    };
+    initializeAdmin();
   }, []);
 
   useEffect(() => {
