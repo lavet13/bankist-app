@@ -14,10 +14,14 @@ const UserDropdown = () => {
 
   const navigateToSettings = () => navigate('settings');
   const navigateToWork = () => navigate('work');
+  const navigateToLoans = () => navigate('loans');
   const signOutUser = () => dispatch(signOutStart());
 
   return (
     <UserDropdownContainer>
+      <UserDropdownButton onClick={navigateToLoans}>
+        Мои кредиты
+      </UserDropdownButton>
       <UserDropdownButton onClick={navigateToWork}>
         Личный кабинет
       </UserDropdownButton>

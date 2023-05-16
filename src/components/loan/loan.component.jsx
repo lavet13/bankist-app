@@ -196,7 +196,6 @@ const Loan = () => {
         >
           <span>→</span>
         </Button>
-        <Link to='/loans'>Мои кредиты</Link>
       </Form>
     </LoanContainer>
   );

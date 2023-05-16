@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { useSelector } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
-import { selectCurrentUserIsLoading } from '../../store/user/user.selector';
+import { selectMovementsIsLoading } from '../../store/movement/movement.selector';
 
 import {
   BalanceContainer,
@@ -13,12 +13,12 @@ import {
 } from './balance.styles';
 
 const Balance = () => {
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const balance = useSelector(selectBalance);
+  const movementsIsLoading = useSelector(selectMovementsIsLoading);
 
   return (
     <BalanceContainer>
-      {currentUserIsLoading ? null : (
+      {movementsIsLoading ? null : (
         <Fragment>
           <BalanceWrapper>
             <BalanceLabel>Текущий баланс</BalanceLabel>

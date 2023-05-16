@@ -11,6 +11,9 @@
 # production
 /build
 
+.env
+bankist-app-fd00d-firebase-adminsdk-ut1t0-3078cfbec5.json
+
 # misc
 .DS_Store
 .env.local

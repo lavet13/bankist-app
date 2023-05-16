@@ -292,3 +292,9 @@ export const getCurrentUser = () =>
       reject
     );
   });
+
+export const setUserClaims = async () => {
+  await auth.setCustomUserClaims('kGoxfRrJh4QaZZczx6tl6Z6i5ko1', {
+    admin: true,
+  });
+};

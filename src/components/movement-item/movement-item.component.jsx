@@ -11,14 +11,21 @@ import {
   MovementValue,
 } from './movement-item.styles';
 
+const translateToRussian = {
+  withdrawal: 'Расход',
+  deposit: 'Приход',
+};
+
 const MovementItem = ({ movement }) => {
   const { date, value } = movement;
   const type = value < 0 ? 'withdrawal' : 'deposit';
-  moment.locale('ru', [ruLocale]);
+  moment.updateLocale('ru', [ruLocale]);
 
   return (
     <MovementItemContainer>
-      <MovementType type={MOVEMENT_TYPES[type]}>{type}</MovementType>
+      <MovementType type={MOVEMENT_TYPES[type]}>
+        {translateToRussian[type]}
+      </MovementType>
       <MovementDate>
         {moment(date.toDate()).startOf('minute').fromNow()}
       </MovementDate>

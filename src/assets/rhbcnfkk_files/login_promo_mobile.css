@@ -1,0 +1,137 @@
+body {
+  /*padding-bottom: 40px;*/
+}
+
+.login-container {
+  margin-top: 25px;
+}
+
+@media (min-width: 992px){
+  .login-container--alone {
+    display: flex;
+    margin-top: 20px;
+    min-height: calc(100vh - 20px);
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}
+
+.btn-social-circle {
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+}
+
+.unselectable {
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  user-select: none;
+  /* Rules below not implemented in browsers yet */
+
+  -o-user-select: none;
+}
+
+/*.form-wrapper {*/
+/*max-width: 330px;*/
+/*margin: 0 auto;*/
+/*}*/
+.form-signin {
+  max-width: 330px;
+  margin: 0 auto;
+  padding-top: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+
+.form-signin .checkbox {
+  font-weight: normal;
+}
+
+.form-signin .form-control {
+  position: relative;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+
+  font-size: 16px;
+}
+
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+
+.form-signin input[name='login'] {
+  margin-bottom: -1px;
+
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type='password'] {
+  /*margin-bottom: 10px;*/
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+div#picture img {
+  /*height: 150px;*/
+}
+
+.btn-social {
+  margin-bottom: 10px;
+}
+
+.social-title {
+  margin-top: 20px;
+}
+
+.social-buttons {
+  text-align: center;
+
+  font-size: 0;
+}
+
+.social-button {
+  display: inline-block;
+
+  margin-right: 15px;
+}
+
+.social-button.vk-login .fa-vk {
+  padding: 3px;
+
+  font-size: 24px;
+}
+
+.social-button.fb-login .fa-facebook {
+  padding: 3px 7px;
+
+  font-size: 24px;
+}
+
+.social-links__container {
+  text-align: right;
+}
+
+.login-form__bottom-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+}
