@@ -231,6 +231,17 @@ export const getListOfFilesFromLoan = async userAuth => {
   return result;
 };
 
+export const getUserLoans = async userAuth => {
+  const userDocRef = doc(db, 'users', userAuth.id);
+  const q = query(
+    collection(userDocRef, 'loans'),
+    orderBy('timestamp', 'desc')
+  );
+
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
 const generator = require('../credit-card-generator/credit-card-generator.utils');
 
 export const createUserDocumentFromAuth = async (
@@ -292,9 +303,3 @@ export const getCurrentUser = () =>
       reject
     );
   });
-
-export const setUserClaims = async () => {
-  await auth.setCustomUserClaims('kGoxfRrJh4QaZZczx6tl6Z6i5ko1', {
-    admin: true,
-  });
-};

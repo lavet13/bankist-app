@@ -1,7 +1,7 @@
 import { call, all, put, takeLatest } from 'redux-saga/effects';
 import { LOAN_ACTION_TYPES } from './loan.types';
 
-import { getListOfFilesFromLoan } from '../../utils/firebase/firebase.utils';
+import { getUserLoans } from '../../utils/firebase/firebase.utils';
 
 import { fetchLoanSuccess, fetchLoanFailed } from './loan.action';
 
@@ -9,8 +9,8 @@ export function* fetchLoanAsync({ payload: user }) {
   if (!user) return;
 
   try {
-    const files = yield call(getListOfFilesFromLoan, user);
-    yield put(fetchLoanSuccess(files));
+    const userLoans = yield call(getUserLoans, user);
+    yield put(fetchLoanSuccess(userLoans));
   } catch (error) {
     yield put(fetchLoanFailed(error));
   }

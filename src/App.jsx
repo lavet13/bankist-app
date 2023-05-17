@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 
 import Home from './routes/home/home.component';
@@ -12,26 +12,14 @@ import AuthenticatedRoute from './routes/authenticated/authenticated-route.compo
 import Settings from './routes/settings/settings.component';
 
 import { checkUserSession } from './store/user/user.action';
-import { fetchLoanStart } from './store/loan/loan.action';
-import { selectCurrentUser } from './store/user/user.selector';
 import Loans from './routes/loans/loans.component';
 
 const App = () => {
   const dispatch = useDispatch();
-  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
     dispatch(checkUserSession());
-    const initializeAdmin = async () => {
-      const data = await fetch('/.netlify/functions/initialize-admin-sdk');
-      console.log(data);
-    };
-    initializeAdmin();
   }, []);
-
-  useEffect(() => {
-    dispatch(fetchLoanStart(currentUser));
-  }, [currentUser]);
 
   return (
     <Routes>
@@ -62,7 +50,7 @@ const App = () => {
           }
         />
         <Route
-          path='loans'
+          path='loans/*'
           element={
             <AuthenticatedRoute>
               <Loans />

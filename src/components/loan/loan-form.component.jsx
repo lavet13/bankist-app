@@ -30,7 +30,7 @@ const defaultFormFileFields = {
   collateral: null,
 };
 
-const Loan = () => {
+const LoanForm = () => {
   const currentUser = useSelector(selectCurrentUser);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
@@ -201,4 +201,4 @@ const Loan = () => {
   );
 };
 
-export default Loan;
+export default LoanForm;

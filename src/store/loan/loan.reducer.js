@@ -2,7 +2,7 @@ import { LOAN_ACTION_TYPES } from './loan.types';
 
 export const LOAN_INITIAL_STATE = {
   loanItems: [],
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 
