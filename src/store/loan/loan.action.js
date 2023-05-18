@@ -9,3 +9,12 @@ export const fetchLoanSuccess = loanItems =>
 
 export const fetchLoanFailed = error =>
   createAction(LOAN_ACTION_TYPES.FETCH_LOAN_FAILED, error);
+
+export const fetchLoansStart = () =>
+  createAction(LOAN_ACTION_TYPES.FETCH_LOANS_START);
+
+export const fetchLoansSuccess = loanItems =>
+  createAction(LOAN_ACTION_TYPES.FETCH_LOANS_SUCCESS, loanItems);
+
+export const fetchLoansFailed = error =>
+  createAction(LOAN_ACTION_TYPES.FETCH_LOANS_FAILED, error);

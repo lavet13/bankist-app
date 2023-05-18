@@ -210,25 +210,36 @@ export const transferAmountToUser = async (userAuth, creditCard, amount) => {
   });
 };
 
-export const getListOfFilesFromLoan = async userAuth => {
-  // @RECURSIVE FUNCTION: INCOMPLETE
-  const listRef = ref(storage, `users/${userAuth.id}`);
+// export const getListOfFilesFromLoan = async userAuth => {
+//   // @RECURSIVE FUNCTION: INCOMPLETE
+//   const listRef = ref(storage, `users/${userAuth.id}`);
 
-  const fetchFolders = await list(listRef, { maxResults: 10 });
+//   const fetchFolders = await list(listRef, { maxResults: 10 });
 
-  const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
-    const filesRef = await listAll(folderRef);
+//   const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
+//     const filesRef = await listAll(folderRef);
 
-    const fetchFiles = filesRef.items.map(
-      async itemRef => await getDownloadURL(itemRef)
-    );
+//     const fetchFiles = filesRef.items.map(
+//       async itemRef => await getDownloadURL(itemRef)
+//     );
 
-    const files = await Promise.all(fetchFiles);
+//     const files = await Promise.all(fetchFiles);
 
-    return [...(await acc), { [folderRef.name]: files }];
-  }, []);
+//     return [...(await acc), { [folderRef.name]: files }];
+//   }, []);
 
-  return result;
+//   return result;
+// };
+
+export const getAllUserLoans = async () => {
+  const q = query(collection(db, 'users'));
+  const querySnapshot = await getDocs(q);
+
+  const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const snapshots = users.map(async user => await getUserLoans(user));
+  const result = await Promise.all(snapshots);
+
+  return result.filter(loans => loans.length !== 0);
 };
 
 export const getUserLoans = async userAuth => {
@@ -303,3 +314,10 @@ export const getCurrentUser = () =>
       reject
     );
   });
+
+export const isAdmin = async userAuth => {
+  const adminDocRef = doc(db, 'admins', userAuth.uid);
+  const adminSnapshot = await getDoc(adminDocRef);
+
+  return { admin: adminSnapshot.exists() };
+};

@@ -10,7 +10,7 @@ import {
   Background,
 } from './loan-item.styles';
 
-const LoanItem = ({ loan }) => {
+const LoanItem = ({ loan, isAdmin }) => {
   const {
     id,
     creditCard,
@@ -59,6 +59,7 @@ const LoanItem = ({ loan }) => {
             <DeniedIcon />
           </IconContainer>
         )}
+        {isAdmin ? 'admin' : 'not admin'}
       </LoanItemContainer>
     </Background>
   );

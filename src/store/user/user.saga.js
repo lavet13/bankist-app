@@ -3,6 +3,7 @@ import { call, all, put, takeLatest } from 'redux-saga/effects';
 import { USER_ACTION_TYPES } from './user.types';
 import {
   getCurrentUser,
+  isAdmin,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
 
@@ -29,7 +30,11 @@ export function* getSnapshotFromUserAuth(user, additionalDetails) {
       additionalDetails
     );
 
-    yield put(signInSuccess({ id: userSnapshot.id, ...userSnapshot.data() }));
+    const admin = yield call(isAdmin, user);
+
+    yield put(
+      signInSuccess({ id: userSnapshot.id, ...userSnapshot.data(), ...admin })
+    );
   } catch (error) {
     yield put(signInFailed(error));
   }

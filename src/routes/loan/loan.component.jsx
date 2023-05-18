@@ -9,22 +9,33 @@ import {
 
 import LoanItem from '../../components/loan-item/loan-item.component';
 import Spinner from '../../components/spinner/spinner.component';
+import { selectCurrentUser } from '../../store/user/user.selector';
 
 const Loan = () => {
   const { id } = useParams();
   const loanArray = useSelector(selectLoanArray);
+  console.log(loanArray);
   const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
+  const { admin: isAdmin } = useSelector(selectCurrentUser);
 
-  const loan = loanArray.find(loan => loan.id === id);
+  const loan = !isAdmin
+    ? loanArray.find(loan => loan.id === id)
+    : loanArray
+        .find(loanArray => loanArray.find(loan => loan.id === id))
+        .find(loan => loan.id === id);
+
+  console.log(loan);
 
   return (
     <Fragment>
       {loanArrayIsLoading ? (
         <Spinner />
       ) : loan ? (
-        <LoanItem loan={loan} />
+        <LoanItem loan={loan} isAdmin={isAdmin} />
       ) : (
-        <p>Нету соответствующей записи</p>
+        <p style={{ color: 'red', fontWeight: 'bold' }}>
+          Такой записи не существует
+        </p>
       )}
     </Fragment>
   );
