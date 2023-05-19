@@ -28,6 +28,7 @@ import {
   where,
   serverTimestamp,
   orderBy,
+  updateDoc,
 } from 'firebase/firestore';
 
 import {
@@ -35,8 +36,6 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
-  list,
-  listAll,
 } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -127,7 +126,7 @@ export const createUserLoanDocument = async (userAuth, data) => {
       await setDoc(folderDocRef, {
         images,
         timestamp,
-        isAllowed: false,
+        isAllowed: null,
         ...formFields,
       });
 
@@ -210,34 +209,13 @@ export const transferAmountToUser = async (userAuth, creditCard, amount) => {
   });
 };
 
-// export const getListOfFilesFromLoan = async userAuth => {
-//   // @RECURSIVE FUNCTION: INCOMPLETE
-//   const listRef = ref(storage, `users/${userAuth.id}`);
-
-//   const fetchFolders = await list(listRef, { maxResults: 10 });
-
-//   const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
-//     const filesRef = await listAll(folderRef);
-
-//     const fetchFiles = filesRef.items.map(
-//       async itemRef => await getDownloadURL(itemRef)
-//     );
-
-//     const files = await Promise.all(fetchFiles);
-
-//     return [...(await acc), { [folderRef.name]: files }];
-//   }, []);
-
-//   return result;
-// };
-
 export const getAllUserLoans = async () => {
   const q = query(collection(db, 'users'));
   const querySnapshot = await getDocs(q);
 
   const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const snapshots = users.map(async user => await getUserLoans(user));
-  const result = await Promise.all(snapshots);
+  const loanSnapshots = users.map(async user => await getUserLoans(user));
+  const result = await Promise.all(loanSnapshots);
 
   return result.filter(loans => loans.length !== 0);
 };
@@ -249,8 +227,12 @@ export const getUserLoans = async userAuth => {
     orderBy('timestamp', 'desc')
   );
 
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const loanSnapshot = await getDocs(q);
+  return loanSnapshot.docs.map(loanDoc => ({
+    id: loanDoc.id,
+    ...loanDoc.data(),
+    userAuth,
+  }));
 };
 
 const generator = require('../credit-card-generator/credit-card-generator.utils');
@@ -320,4 +302,14 @@ export const isAdmin = async userAuth => {
   const adminSnapshot = await getDoc(adminDocRef);
 
   return { admin: adminSnapshot.exists() };
+};
+
+export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
+  const userDocRef = doc(db, 'users', userAuth.id);
+  const loanDocRef = doc(userDocRef, 'loans', loan.id);
+
+  await updateDoc(loanDocRef, {
+    isAllowed: flag,
+    timestamp: serverTimestamp(),
+  });
 };

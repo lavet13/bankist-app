@@ -21,6 +21,7 @@ import {
   createAuthUserWithEmailAndPassword,
   signOutUser,
 } from '../../utils/firebase/firebase.utils';
+import { clearLoans } from '../loan/loan.action';
 
 export function* getSnapshotFromUserAuth(user, additionalDetails) {
   try {
@@ -123,6 +124,10 @@ export function* signOut() {
   }
 }
 
+export function* clearUserLoans() {
+  yield put(clearLoans());
+}
+
 export function* onCheckUserSession() {
   yield takeLatest(USER_ACTION_TYPES.CHECK_USER_SESSION, isUserAuthenticated);
 }
@@ -147,6 +152,10 @@ export function* onSignOut() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_START, signOut);
 }
 
+export function* onSignOutSuccess() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_SUCCESS, clearUserLoans);
+}
+
 export function* userSagas() {
   yield all([
     call(onCheckUserSession),
@@ -155,5 +164,6 @@ export function* userSagas() {
     call(onSignUpStart),
     call(onSignUpSuccess),
     call(onSignOut),
+    call(onSignOutSuccess),
   ]);
 }

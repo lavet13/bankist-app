@@ -18,3 +18,5 @@ export const fetchLoansSuccess = loanItems =>
 
 export const fetchLoansFailed = error =>
   createAction(LOAN_ACTION_TYPES.FETCH_LOANS_FAILED, error);
+
+export const clearLoans = () => createAction(LOAN_ACTION_TYPES.CLEAR_LOAN);

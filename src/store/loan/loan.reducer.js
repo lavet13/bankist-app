@@ -16,6 +16,8 @@ export const loanReducer = (state = LOAN_INITIAL_STATE, action = {}) => {
     case LOAN_ACTION_TYPES.FETCH_LOAN_SUCCESS:
     case LOAN_ACTION_TYPES.FETCH_LOANS_SUCCESS:
       return { ...state, loanItems: payload, isLoading: false };
+    case LOAN_ACTION_TYPES.CLEAR_LOAN:
+      return { ...state, loanItems: [], isLoading: true };
     case LOAN_ACTION_TYPES.FETCH_LOAN_FAILED:
     case LOAN_ACTION_TYPES.FETCH_LOANS_FAILED:
       return { ...state, error: payload, isLoading: false };

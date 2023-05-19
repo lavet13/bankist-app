@@ -1,14 +1,9 @@
 import styled from 'styled-components';
+import Button from '../button/button.component';
+
 import { ReactComponent as Checkmark } from '../../assets/checkmark.svg';
 import { ReactComponent as Times } from '../../assets/times-circle.svg';
-
-export const Background = styled.div`
-  background-color: #eee;
-  border-bottom: 1px solid #ccc;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  padding-bottom: 20px;
-`;
+import { ReactComponent as InProcess } from '../../assets/hour-glass.svg';
 
 export const LoanItemContainer = styled.div`
   max-width: 900px;
@@ -53,4 +48,25 @@ export const AllowedIcon = styled(Checkmark)`
 
 export const DeniedIcon = styled(Times)`
   fill: #cb1f1f;
+`;
+
+export const InProcessIcon = styled(InProcess)`
+  fill: orange;
+  width: 20px;
+  height: 20px;
+`;
+
+export const AllowButton = styled(Button)`
+  color: #fff;
+  background: #9be15d;
+`;
+
+export const DenyButton = styled(Button)`
+  color: #fff;
+  background: red;
+`;
+
+export const ButtonContainer = styled.div`
+  display: flex;
+  column-gap: 10px;
 `;
