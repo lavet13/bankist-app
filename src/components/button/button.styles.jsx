@@ -80,3 +80,41 @@ export const ButtonSpinner = styled(SpinnerContainer)`
   width: 15px;
   height: 15px;
 `;
+
+export const BlackButton = styled(ArrowBase)`
+  background: #000;
+  color: #fff;
+  padding: 15px 45px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  font-size: 15px;
+
+  &:hover {
+    color: #000;
+    background: transparent;
+    border: 1px solid #000;
+  }
+
+  &:active,
+  &:focus {
+    color: #000;
+    background: #ddd;
+  }
+`;
+
+export const WhiteButton = styled(ArrowBase)`
+  padding: 15px 45px;
+  border-radius: 5px;
+  font-size: 15px;
+
+  &:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  &:active,
+  &:focus {
+    background: #222;
+    color: #fff;
+  }
+`;

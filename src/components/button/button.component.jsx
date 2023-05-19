@@ -5,6 +5,8 @@ import {
   ArrowSubmit,
   ButtonSpinner,
   GoogleButton,
+  BlackButton,
+  WhiteButton,
 } from './button.styles';
 
 export const BUTTON_TYPE_CLASSES = {
@@ -13,6 +15,8 @@ export const BUTTON_TYPE_CLASSES = {
   arrowSort: 'button/arrowSort',
   arrowSubmit: 'button/arrowSubmit',
   google: 'button/google',
+  black: 'button/black',
+  white: 'button/white',
 };
 
 const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
@@ -22,6 +26,8 @@ const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
     [BUTTON_TYPE_CLASSES.arrowSort]: ArrowSort,
     [BUTTON_TYPE_CLASSES.arrowSubmit]: ArrowSubmit,
     [BUTTON_TYPE_CLASSES.google]: GoogleButton,
+    [BUTTON_TYPE_CLASSES.black]: BlackButton,
+    [BUTTON_TYPE_CLASSES.white]: WhiteButton,
   }[buttonType]);
 
 const Button = ({ buttonType, type, isLoading, children, ...otherProps }) => {
