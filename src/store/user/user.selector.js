@@ -8,3 +8,18 @@ export const selectCurrentUserIsLoading = createSelector(
   [selectUserReducer],
   user => user.isLoading
 );
+
+export const selectEmailSignInIsLoading = createSelector(
+  [selectUserReducer],
+  user => user.emailSignInIsLoading
+);
+
+export const selectGoogleSignInIsLoading = createSelector(
+  [selectUserReducer],
+  user => user.googleSignInIsLoading
+);
+
+export const selectError = createSelector(
+  [selectUserReducer],
+  user => user.error
+);

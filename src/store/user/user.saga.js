@@ -53,9 +53,7 @@ export function* isUserAuthenticated() {
   }
 }
 
-export function* signInWithEmail({
-  payload: { email, password, navigateToWorkPage },
-}) {
+export function* signInWithEmail({ payload: { email, password } }) {
   try {
     const { user } = yield call(
       signInAuthUserWithEmailAndPassword,
@@ -64,18 +62,16 @@ export function* signInWithEmail({
     );
 
     yield call(getSnapshotFromUserAuth, user);
-    yield call(navigateToWorkPage);
   } catch (error) {
     yield put(signInFailed(error));
   }
 }
 
-export function* signInWithGoogle({ payload: navigateToWorkPage }) {
+export function* signInWithGoogle() {
   try {
     const { user } = yield call(signInWithGooglePopup);
 
     yield call(getSnapshotFromUserAuth, user);
-    yield call(navigateToWorkPage);
   } catch (error) {
     yield put(signInFailed(error));
   }
