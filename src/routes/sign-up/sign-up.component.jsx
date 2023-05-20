@@ -1,15 +1,28 @@
 import { Fragment, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { signUpStart } from '../../store/user/user.action';
+import { closeErrorMessage, signUpStart } from '../../store/user/user.action';
 
-import { BUTTON_TYPE_CLASSES } from '../../components/button/button.component';
-import FormInput from '../../components/form-input/form-input.component';
 import Spinner from '../../components/spinner/spinner.component';
 
-import { SignUpButton, SignUpContainer } from './sign-up.styles';
-import { selectCurrentUserIsLoading } from '../../store/user/user.selector';
+import { SignUpContainer } from './sign-up.styles';
+import {
+  selectCurrentUserIsLoading,
+  selectEmailSignUpIsLoading,
+  selectError,
+} from '../../store/user/user.selector';
+import {
+  FormControl,
+  FilledInput,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Alert,
+  AlertTitle,
+} from '@mui/material';
+import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
+import { LoadingButton } from '@mui/lab';
 
 const defaultFormFields = {
   displayName: '',
@@ -19,13 +32,22 @@ const defaultFormFields = {
 };
 
 const SignUp = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const navigateToWork = () => navigate('/work');
+  const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
+  const error = useSelector(selectError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword(show => !show);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(show => !show);
+  const handleMouseDownPassword = event => event.preventDefault();
+  const handleErrorMessage = () => dispatch(closeErrorMessage());
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -41,22 +63,64 @@ const SignUp = () => {
         email,
         password,
         confirmPassword,
-        navigateToWork,
         displayName,
       })
     );
-
-    console.log(formFields);
-
-    // switch (error.code) {
-    //   case 'auth/email-already-in-use':
-    //     alert('Уже существует аккаунт с таким E-mail');
-    //     break;
-
-    //   default:
-    //     alert('User creation encountered an error', error);
-    // }
   };
+
+  const getSignUpDisplayNameError = error => {
+    switch (error.code) {
+      case 'auth/display-name-not-found':
+        return error.message;
+
+      default:
+        return null;
+    }
+  };
+
+  const getSignUpEmailError = error => {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        return 'Уже существует аккаунт с таким E-mail';
+      case 'auth/invalid-email':
+        return 'Неверный формат E-mail';
+      case 'auth/invalid-email-validation':
+        return error.message;
+
+      default:
+        return null;
+    }
+  };
+
+  const getSignUpPasswordError = error => {
+    switch (error.code) {
+      case 'auth/wrong-password':
+        return error.message;
+      case 'auth/weak-password-validation':
+        return error.message;
+      case 'auth/weak-password':
+        return 'Пароль должен составлять как минимум 6 символов';
+
+      default:
+        return null;
+    }
+  };
+
+  const getErrorMessage = error => {
+    switch (error.code) {
+      case 'auth/network-request-failed':
+        return 'Ошибка сети! Это все что могу сказать!';
+      case 'auth/popup-blocked':
+        return 'Заблокирован сервером Firebase!';
+      default:
+        return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
+    }
+  };
+
+  const hasUnknownErrors = error =>
+    getSignUpDisplayNameError(error) ||
+    getSignUpEmailError(error) ||
+    getSignUpPasswordError(error);
 
   return (
     <Fragment>
@@ -64,51 +128,139 @@ const SignUp = () => {
         <Spinner />
       ) : (
         <SignUpContainer onSubmit={handleSubmit}>
-          <FormInput
-            type='text'
-            name='displayName'
-            value={displayName}
-            placeholder='Имя пользователя'
-            onChange={handleChange}
-            wide
-            required
-          />
+          <FormControl
+            sx={{ m: 1, width: '40ch' }}
+            variant='filled'
+            error={error && !!getSignUpDisplayNameError(error)}
+          >
+            <InputLabel htmlFor='filled-display-name'>
+              Имя пользователя
+            </InputLabel>
+            <FilledInput
+              id='filled-display-name'
+              type='text'
+              name='displayName'
+              value={displayName}
+              onChange={handleChange}
+            />
+            {error && (
+              <FormHelperText>
+                {getSignUpDisplayNameError(error)}
+              </FormHelperText>
+            )}
+          </FormControl>
 
-          <FormInput
-            type='email'
-            name='email'
-            value={email}
-            placeholder='E-mail'
-            onChange={handleChange}
-            wide
-            required
-          />
+          <FormControl
+            sx={{ m: 1, width: '40ch' }}
+            variant='filled'
+            error={error && !!getSignUpEmailError(error)}
+          >
+            <InputLabel htmlFor='filled-email'>E-mail</InputLabel>
+            <FilledInput
+              id='filled-email'
+              type='email'
+              name='email'
+              value={email}
+              onChange={handleChange}
+            />
+            {error && (
+              <FormHelperText>{getSignUpEmailError(error)}</FormHelperText>
+            )}
+          </FormControl>
 
-          <FormInput
-            type='password'
-            name='password'
-            value={password}
-            placeholder='Пароль'
-            onChange={handleChange}
-            minLength={6}
-            wide
-            required
-          />
+          <FormControl
+            sx={{ m: 1, width: '40ch' }}
+            variant='filled'
+            error={error && !!getSignUpPasswordError(error)}
+          >
+            <InputLabel htmlFor='filled-adornment-password'>Пароль</InputLabel>
+            <FilledInput
+              id='filled-adornment-password'
+              type={showPassword ? 'text' : 'password'}
+              name='password'
+              value={password}
+              onChange={handleChange}
+              endAdornment={
+                <InputAdornment position='end'>
+                  <IconButton
+                    aria-label='toggle password visibility'
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge='end'
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+            {error && (
+              <FormHelperText>{getSignUpPasswordError(error)}</FormHelperText>
+            )}
+          </FormControl>
 
-          <FormInput
-            type='password'
-            name='confirmPassword'
-            value={confirmPassword}
-            placeholder='Повторите пароль'
-            onChange={handleChange}
-            minLength={6}
-            wide
-            required
-          />
+          <FormControl
+            sx={{ m: 1, width: '40ch' }}
+            variant='filled'
+            error={error && !!getSignUpPasswordError(error)}
+          >
+            <InputLabel htmlFor='filled-adornment-confirm-password'>
+              Подтвердить пароль
+            </InputLabel>
+            <FilledInput
+              id='filled-adornment-confirm-password'
+              type={showConfirmPassword ? 'text' : 'password'}
+              name='confirmPassword'
+              value={confirmPassword}
+              onChange={handleChange}
+              required
+              endAdornment={
+                <InputAdornment position='end'>
+                  <IconButton
+                    aria-label='toggle password visibility'
+                    onClick={handleClickShowConfirmPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge='end'
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+            {error && (
+              <FormHelperText>{getSignUpPasswordError(error)}</FormHelperText>
+            )}
+          </FormControl>
 
-          <SignUpButton buttonType={BUTTON_TYPE_CLASSES.arrow} type='submit'>
-            <span>Зарегистрироваться</span>
-          </SignUpButton>
+          <LoadingButton
+            sx={{ m: 1, width: '40ch' }}
+            size='large'
+            type='submit'
+            variant='contained'
+            color='primary'
+            loading={emailSignUpIsLoading}
+          >
+            Зарегестрироваться
+          </LoadingButton>
+
+          {error && hasUnknownErrors(error) === null ? (
+            <Alert
+              action={
+                <IconButton
+                  aria-label='close'
+                  color='inherit'
+                  size='small'
+                  onClick={handleErrorMessage}
+                >
+                  <Close fontSize='inherit' />
+                </IconButton>
+              }
+              severity='error'
+              sx={{ margin: '0 auto', width: '90%' }}
+            >
+              <AlertTitle>Ошибка</AlertTitle>
+              {getErrorMessage(error)}
+            </Alert>
+          ) : null}
         </SignUpContainer>
       )}
     </Fragment>

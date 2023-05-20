@@ -19,6 +19,11 @@ export const selectGoogleSignInIsLoading = createSelector(
   user => user.googleSignInIsLoading
 );
 
+export const selectEmailSignUpIsLoading = createSelector(
+  [selectUserReducer],
+  user => user.emailSignUpIsLoading
+);
+
 export const selectError = createSelector(
   [selectUserReducer],
   user => user.error

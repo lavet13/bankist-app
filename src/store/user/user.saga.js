@@ -6,6 +6,7 @@ import {
   isAdmin,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
+import { generateErrorAndErrorCode } from '../../utils/error/error.utils';
 
 import {
   signInSuccess,
@@ -55,6 +56,30 @@ export function* isUserAuthenticated() {
 
 export function* signInWithEmail({ payload: { email, password } }) {
   try {
+    if (
+      !email.match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      )
+    )
+      return yield put(
+        signInFailed(
+          generateErrorAndErrorCode(
+            'Неверный формат E-mail',
+            'auth/invalid-email-validation'
+          )
+        )
+      );
+
+    if (password.length < 6)
+      return yield put(
+        signInFailed(
+          generateErrorAndErrorCode(
+            'Пароль должен составлять как минимум 6 символов',
+            'auth/weak-password-validation'
+          )
+        )
+      );
+
     const { user } = yield call(
       signInAuthUserWithEmailAndPassword,
       email,
@@ -79,17 +104,58 @@ export function* signInWithGoogle() {
 
 export function* signUpWithEmail({
   payload: {
+    displayName,
     email,
     password,
     confirmPassword,
-    navigateToWork,
     ...additionalDetails
   },
 }) {
   try {
+    if (!displayName.length)
+      return yield put(
+        signUpFailed(
+          generateErrorAndErrorCode(
+            'Имя пользователя не было указано!',
+            'auth/display-name-not-found'
+          )
+        )
+      );
+
+    if (
+      !email.match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      )
+    )
+      return yield put(
+        signUpFailed(
+          generateErrorAndErrorCode(
+            'Неверный формат E-mail',
+            'auth/invalid-email-validation'
+          )
+        )
+      );
+
     if (password !== confirmPassword) {
-      return yield put(signUpFailed(new Error('Пароли не совпадают!')));
+      return yield put(
+        signUpFailed(
+          generateErrorAndErrorCode(
+            'Пароли не совпадают!',
+            'auth/wrong-password'
+          )
+        )
+      );
     }
+
+    if (password.length < 6)
+      return yield put(
+        signUpFailed(
+          generateErrorAndErrorCode(
+            'Пароль должен составлять как минимум 6 символов',
+            'auth/weak-password-validation'
+          )
+        )
+      );
 
     const { user } = yield call(
       createAuthUserWithEmailAndPassword,
@@ -97,17 +163,16 @@ export function* signUpWithEmail({
       password
     );
 
-    yield put(signUpSuccess(user, additionalDetails, navigateToWork));
+    yield put(signUpSuccess(user, additionalDetails));
   } catch (error) {
     yield put(signUpFailed(error));
   }
 }
 
 export function* signInAfterSignUp({
-  payload: { user, navigateToWork, ...additionalDetails },
+  payload: { user, ...additionalDetails },
 }) {
   yield call(getSnapshotFromUserAuth, user, additionalDetails);
-  yield call(navigateToWork);
 }
 
 export function* signOut() {

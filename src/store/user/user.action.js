@@ -22,10 +22,9 @@ export const signOutStart = () =>
 export const signInSuccess = user =>
   createAction(USER_ACTION_TYPES.SIGN_IN_SUCCESS, user);
 
-export const signUpSuccess = (user, additionalDetails, navigateToWork) =>
+export const signUpSuccess = (user, additionalDetails) =>
   createAction(USER_ACTION_TYPES.SIGN_UP_SUCCESS, {
     user,
-    navigateToWork,
     ...additionalDetails,
   });
 

@@ -25,7 +25,6 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  TextField,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Close } from '@mui/icons-material';
@@ -64,19 +63,19 @@ const SignIn = () => {
     dispatch(emailSignInStart(email, password));
   };
 
-  const getErrorMessage = errorCode => {
-    switch (errorCode) {
+  const getErrorMessage = error => {
+    switch (error.code) {
       case 'auth/network-request-failed':
         return 'Ошибка сети! Это все что могу сказать!';
       case 'auth/popup-blocked':
         return 'Заблокирован сервером Firebase!';
       default:
-        return null;
+        return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
     }
   };
 
-  const getWarningMessage = errorCode => {
-    switch (errorCode) {
+  const getWarningMessage = error => {
+    switch (error.code) {
       case 'auth/cancelled-popup-request':
         return 'Аутентификация при помощи Google была отменена!';
       case 'auth/popup-closed-by-user':
@@ -86,23 +85,36 @@ const SignIn = () => {
     }
   };
 
-  const getSignInEmailError = errorCode => {
-    switch (errorCode) {
+  const getSignInEmailError = error => {
+    switch (error.code) {
       case 'auth/user-not-found':
         return 'Нет пользователя ассоциированного с данным E-mail';
+
+      case 'auth/invalid-email-validation':
+        return error.message;
+
       default:
         return null;
     }
   };
 
-  const getSignInPasswordError = errorCode => {
-    switch (errorCode) {
+  const getSignInPasswordError = error => {
+    switch (error.code) {
       case 'auth/wrong-password':
         return 'Указан неправильный пароль!';
+
+      case 'auth/weak-password-validation':
+        return error.message;
+
       default:
         return null;
     }
   };
+
+  const hasUnknownErrors = error =>
+    getSignInPasswordError(error) ||
+    getSignInEmailError(error) ||
+    getWarningMessage(error);
 
   return (
     <Fragment>
@@ -114,7 +126,7 @@ const SignIn = () => {
             <FormControl
               sx={{ m: 1, width: '40ch' }}
               variant='filled'
-              error={error && !!getSignInEmailError(error.code)}
+              error={error && !!getSignInEmailError(error)}
             >
               <InputLabel htmlFor='filled-email'>E-mail</InputLabel>
               <FilledInput
@@ -123,22 +135,19 @@ const SignIn = () => {
                 name='email'
                 value={email}
                 onChange={handleChange}
-                required
               />
               {error && (
-                <FormHelperText>
-                  {getSignInEmailError(error.code)}
-                </FormHelperText>
+                <FormHelperText>{getSignInEmailError(error)}</FormHelperText>
               )}
             </FormControl>
 
             <FormControl
               sx={{ m: 1, width: '40ch' }}
               variant='filled'
-              error={error && !!getSignInPasswordError(error.code)}
+              error={error && !!getSignInPasswordError(error)}
             >
               <InputLabel htmlFor='filled-adornment-password'>
-                Password
+                Пароль
               </InputLabel>
               <FilledInput
                 id='filled-adornment-password'
@@ -146,7 +155,6 @@ const SignIn = () => {
                 name='password'
                 value={password}
                 onChange={handleChange}
-                required
                 endAdornment={
                   <InputAdornment position='end'>
                     <IconButton
@@ -161,9 +169,7 @@ const SignIn = () => {
                 }
               />
               {error && (
-                <FormHelperText>
-                  {getSignInPasswordError(error.code)}
-                </FormHelperText>
+                <FormHelperText>{getSignInPasswordError(error)}</FormHelperText>
               )}
             </FormControl>
 
@@ -186,46 +192,46 @@ const SignIn = () => {
             >
               <span>Войти через Google</span>
             </LoadingButton>
-          </SignInFormContainer>
-          {error && getErrorMessage(error.code) !== null ? (
-            <Alert
-              action={
-                <IconButton
-                  aria-label='close'
-                  color='inherit'
-                  size='small'
-                  onClick={handleErrorMessage}
-                >
-                  <Close fontSize='inherit' />
-                </IconButton>
-              }
-              severity='error'
-              sx={{ margin: '0 auto', width: '90%' }}
-            >
-              <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(error.code)}
-            </Alert>
-          ) : null}
+            {error && hasUnknownErrors(error) === null ? (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='error'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Ошибка</AlertTitle>
+                {getErrorMessage(error)}
+              </Alert>
+            ) : null}
 
-          {error && getWarningMessage(error.code) !== null ? (
-            <Alert
-              action={
-                <IconButton
-                  aria-label='close'
-                  color='inherit'
-                  size='small'
-                  onClick={handleErrorMessage}
-                >
-                  <Close fontSize='inherit' />
-                </IconButton>
-              }
-              severity='info'
-              sx={{ margin: '0 auto', width: '90%' }}
-            >
-              <AlertTitle>Информация</AlertTitle>
-              {getWarningMessage(error.code)}
-            </Alert>
-          ) : null}
+            {error && getWarningMessage(error) && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='info'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Информация</AlertTitle>
+                {getWarningMessage(error)}
+              </Alert>
+            )}
+          </SignInFormContainer>
         </Fragment>
       )}
     </Fragment>

@@ -8,6 +8,7 @@ export const SignUpContainer = styled.form`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   row-gap: 12px;
 `;
 
