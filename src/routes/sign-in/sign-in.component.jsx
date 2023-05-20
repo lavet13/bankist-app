@@ -111,18 +111,26 @@ const SignIn = () => {
       ) : (
         <Fragment>
           <SignInFormContainer onSubmit={handleSubmit}>
-            <TextField
+            <FormControl
               sx={{ m: 1, width: '40ch' }}
-              name='email'
-              type='email'
-              value={email}
-              label='E-mail'
               variant='filled'
-              onChange={handleChange}
-              helperText={error && getSignInEmailError(error.code)}
               error={error && !!getSignInEmailError(error.code)}
-              required
-            />
+            >
+              <InputLabel htmlFor='filled-email'>E-mail</InputLabel>
+              <FilledInput
+                id='filled-email'
+                type='email'
+                name='email'
+                value={email}
+                onChange={handleChange}
+                required
+              />
+              {error && (
+                <FormHelperText>
+                  {getSignInEmailError(error.code)}
+                </FormHelperText>
+              )}
+            </FormControl>
 
             <FormControl
               sx={{ m: 1, width: '40ch' }}
