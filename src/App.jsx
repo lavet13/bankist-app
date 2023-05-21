@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Routes, Route } from 'react-router-dom';
 
 import Home from './routes/home/home.component';
@@ -13,13 +13,25 @@ import Settings from './routes/settings/settings.component';
 
 import { checkUserSession } from './store/user/user.action';
 import Loans from './routes/loans/loans.component';
+import { selectCurrentUser } from './store/user/user.selector';
+import { addMovementsToUser } from './utils/firebase/firebase.utils';
+import { MOVEMENTS_DATA } from './movements-data';
 
 const App = () => {
+  const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(checkUserSession());
   }, []);
+
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     (async () => {
+  //       await addMovementsToUser(MOVEMENTS_DATA, currentUser);
+  //     })();
+  //   }
+  // }, [currentUser]);
 
   return (
     <Routes>

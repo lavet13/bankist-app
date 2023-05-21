@@ -103,15 +103,10 @@ export function* signInWithGoogle() {
 }
 
 export function* signUpWithEmail({
-  payload: {
-    displayName,
-    email,
-    password,
-    confirmPassword,
-    ...additionalDetails
-  },
+  payload: { email, password, confirmPassword, ...additionalDetails },
 }) {
   try {
+    const { displayName } = additionalDetails;
     if (!displayName.length)
       return yield put(
         signUpFailed(

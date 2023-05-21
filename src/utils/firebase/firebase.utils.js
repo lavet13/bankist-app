@@ -11,6 +11,7 @@ import {
   signOut,
   onAuthStateChanged,
   getRedirectResult,
+  deleteUser,
 } from 'firebase/auth';
 
 import {
@@ -18,6 +19,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  deleteDoc,
   doc,
   Timestamp,
   collection,
@@ -56,6 +58,7 @@ googleProvider.setCustomParameters({
 });
 
 export const auth = getAuth();
+auth.useDeviceLanguage();
 
 export const signInWithGooglePopup = async () =>
   await signInWithPopup(auth, googleProvider);
@@ -235,7 +238,7 @@ export const getUserLoans = async userAuth => {
   }));
 };
 
-const generator = require('../credit-card-generator/credit-card-generator.utils');
+// const generator = require('../credit-card-generator/credit-card-generator.utils');
 
 export const createUserDocumentFromAuth = async (
   userAuth,
@@ -255,7 +258,8 @@ export const createUserDocumentFromAuth = async (
         displayName,
         email,
         createdAt,
-        creditCard: generator.GenCC('Mastercard', 1, Math.random)[0],
+        // creditCard: generator.GenCC('Mastercard', 1, Math.random)[0],
+        creditCard: null,
         ...additionalInformation,
       });
 
@@ -308,8 +312,65 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
   const userDocRef = doc(db, 'users', userAuth.id);
   const loanDocRef = doc(userDocRef, 'loans', loan.id);
 
+  const loanSnapshot = await getDoc(loanDocRef);
+  const { creditCard } = loanSnapshot.data();
+
+  await updateDoc(userDocRef, {
+    creditCard,
+  });
+
   await updateDoc(loanDocRef, {
     isAllowed: flag,
     timestamp: serverTimestamp(),
   });
+};
+
+export const deleteUserAccount = async currentUser => {
+  try {
+    const userDocRef = doc(db, 'users', currentUser.uid);
+    const loanCollectionRef = collection(userDocRef, 'loans');
+    const movementsCollectionRef = collection(userDocRef, 'movements');
+
+    const loanQuery = query(loanCollectionRef);
+    const loanSnapshots = await getDocs(loanQuery);
+
+    if (!loanSnapshots.empty) {
+      const deletedLoanDocuments = loanSnapshots.docs.map(
+        async loanSnapshot => {
+          try {
+            await deleteDoc(doc(loanCollectionRef, loanSnapshot.id));
+            return { message: 'loan/Успешно удален' };
+          } catch (error) {
+            throw new Error('Ошибка при удалении документа!');
+          }
+        }
+      );
+
+      console.log(await Promise.all(deletedLoanDocuments));
+
+      const listRef = ref(storage, `users/${currentUser.uid}`);
+    }
+
+    const movementsQuery = query(movementsCollectionRef);
+    const movementsSnapshots = await getDocs(movementsQuery);
+
+    if (!movementsSnapshots.empty) {
+      const deletedMovementsDocuments = movementsSnapshots.docs.map(
+        async movementSnapshot => {
+          try {
+            await deleteDoc(doc(movementsCollectionRef, movementSnapshot.id));
+            return { message: 'movement/Успешно удален' };
+          } catch (error) {
+            throw new Error('Ошибка при удалении документа!');
+          }
+        }
+      );
+
+      console.log(await Promise.all(deletedMovementsDocuments));
+    }
+
+    // await deleteUser(currentUser);
+  } catch (error) {
+    throw error;
+  }
 };

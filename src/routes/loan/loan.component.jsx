@@ -13,8 +13,8 @@ import { selectCurrentUser } from '../../store/user/user.selector';
 
 const Loan = () => {
   const { id } = useParams();
-  const loanArray = useSelector(selectLoanArray);
   const [loan, setLoan] = useState(null);
+  const loanArray = useSelector(selectLoanArray);
   const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
   const { admin: isAdmin } = useSelector(selectCurrentUser);
 

@@ -23,7 +23,7 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
     case USER_ACTION_TYPES.SIGN_OUT_START:
       return { ...state, isLoading: true };
     case USER_ACTION_TYPES.SIGN_UP_SUCCESS:
-      return { ...state, error: null, emailSignUpIsLoading: false };
+      return { ...state, error: null, emailSignUpIsLoading: true };
     case USER_ACTION_TYPES.SIGN_IN_SUCCESS:
       return {
         ...state,
@@ -44,6 +44,7 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
         error: payload,
         isLoading: false,
         emailSignInIsLoading: false,
+        emailSignUpIsLoading: false,
         googleSignInIsLoading: false,
       };
     case USER_ACTION_TYPES.CLOSE_ERROR_MESSAGE:

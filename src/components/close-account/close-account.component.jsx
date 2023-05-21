@@ -2,6 +2,12 @@ import { useState } from 'react';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
+import {
+  auth,
+  deleteUserAccount,
+  signOutUser,
+} from '../../utils/firebase/firebase.utils';
+
 import { CloseAccountContainer } from './close-account.styles';
 
 import {
@@ -12,13 +18,20 @@ import {
 } from '../transfer/transfer.styles';
 
 const defaultFormFields = {
-  user: '',
-  pin: '',
+  password: '',
 };
+
+const onTimeoutInvoke = (callback, seconds) =>
+  new Promise(resolve =>
+    setTimeout(async () => {
+      await callback();
+      resolve();
+    }, seconds * 1000)
+  );
 
 const CloseAccount = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const { user, pin } = formFields;
+  const { password } = formFields;
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -31,7 +44,14 @@ const CloseAccount = () => {
   const handleSubmit = event => {
     event.preventDefault();
 
-    resetFormFields();
+    if (auth.currentUser) {
+      const deleteUser = async () => {
+        await deleteUserAccount(auth.currentUser);
+        // await onTimeoutInvoke();
+      };
+
+      deleteUser();
+    }
 
     console.log(formFields);
   };
@@ -39,28 +59,17 @@ const CloseAccount = () => {
     <CloseAccountContainer>
       <Title>Закрыть аккаунт</Title>
       <Form onSubmit={handleSubmit}>
+        <OperationLabel htmlFor='close-account-password'>Пароль</OperationLabel>
         <OperationInput
-          id='user'
-          type='text'
-          name='user'
-          value={user}
+          id='close-account-password'
+          type='password'
+          name='password'
+          value={password}
           onChange={handleChange}
-          required
-        ></OperationInput>
-        <OperationInput
-          id='pin'
-          type='number'
-          name='pin'
-          value={pin}
-          onChange={handleChange}
-          maxLength={4}
-          required
         />
         <Button type='submit' buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
           →
         </Button>
-        <OperationLabel htmlFor='user'>Пользователь</OperationLabel>
-        <OperationLabel htmlFor='pin'>PIN</OperationLabel>
       </Form>
     </CloseAccountContainer>
   );

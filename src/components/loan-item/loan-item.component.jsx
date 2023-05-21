@@ -1,8 +1,7 @@
 import { Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { selectCurrentUser } from '../../store/user/user.selector';
-import { fetchLoanStart, fetchLoansStart } from '../../store/loan/loan.action';
+import { fetchLoansStart } from '../../store/loan/loan.action';
 
 import moment from 'moment';
 
@@ -24,7 +23,6 @@ import {
 import { updatePermissionCreditLoan } from '../../utils/firebase/firebase.utils';
 
 const LoanItem = ({ loan, isAdmin }) => {
-  const currentUser = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
 
   const {
@@ -62,6 +60,12 @@ const LoanItem = ({ loan, isAdmin }) => {
       <p style={{ marginBottom: '20px' }}>
         <b>Дата оформления кредита </b>
         {moment(timestamp.toDate()).calendar().toLowerCase()}
+      </p>
+      <p>
+        <b>Идентификатор пользователя:</b> {userAuth.id}
+      </p>
+      <p>
+        <b>Идентификатор кредита:</b> {id}
       </p>
       <p>
         <b>Имя кредитора:</b> {displayName}
