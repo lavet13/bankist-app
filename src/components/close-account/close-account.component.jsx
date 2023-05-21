@@ -1,12 +1,8 @@
-import { useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
-import {
-  auth,
-  deleteUserAccount,
-  signOutUser,
-} from '../../utils/firebase/firebase.utils';
+import { auth } from '../../utils/firebase/firebase.utils';
 
 import { CloseAccountContainer } from './close-account.styles';
 
@@ -16,22 +12,29 @@ import {
   OperationInput,
   OperationLabel,
 } from '../transfer/transfer.styles';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  closeAccountStart,
+  getProviderPassword,
+  hasProviderPassword,
+} from '../../store/user/user.action';
+import {
+  selectCloseAccountIsLoading,
+  selectCurrentUser,
+} from '../../store/user/user.selector';
 
 const defaultFormFields = {
   password: '',
 };
 
-const onTimeoutInvoke = (callback, seconds) =>
-  new Promise(resolve =>
-    setTimeout(async () => {
-      await callback();
-      resolve();
-    }, seconds * 1000)
-  );
-
 const CloseAccount = () => {
+  const dispatch = useDispatch();
+  const currentUser = useSelector(selectCurrentUser);
+  const closeAccountIsLoading = useSelector(selectCloseAccountIsLoading);
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { password } = formFields;
+
+  const [isProviderPasswordExist, setIsProviderPasswordExist] = useState(false);
 
   const resetFormFields = () => setFormFields(defaultFormFields);
 
@@ -45,29 +48,47 @@ const CloseAccount = () => {
     event.preventDefault();
 
     if (auth.currentUser) {
-      const deleteUser = async () => {
-        await deleteUserAccount(auth.currentUser);
-        // await onTimeoutInvoke();
-      };
-
-      deleteUser();
+      dispatch(
+        closeAccountStart({
+          currentUser: auth.currentUser,
+          password: isProviderPasswordExist ? password : null,
+          resetFormFields,
+        })
+      );
     }
-
-    console.log(formFields);
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      const providerInfo = getProviderPassword(auth.currentUser);
+      setIsProviderPasswordExist(hasProviderPassword(providerInfo));
+    }
+  }, [currentUser]);
+
   return (
     <CloseAccountContainer>
       <Title>Закрыть аккаунт</Title>
       <Form onSubmit={handleSubmit}>
-        <OperationLabel htmlFor='close-account-password'>Пароль</OperationLabel>
-        <OperationInput
-          id='close-account-password'
-          type='password'
-          name='password'
-          value={password}
-          onChange={handleChange}
-        />
-        <Button type='submit' buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}>
+        {isProviderPasswordExist ? (
+          <Fragment>
+            <OperationLabel htmlFor='close-account-password'>
+              Пароль
+            </OperationLabel>
+            <OperationInput
+              id='close-account-password'
+              type='password'
+              name='password'
+              value={password}
+              onChange={handleChange}
+            />
+          </Fragment>
+        ) : null}
+
+        <Button
+          isLoading={closeAccountIsLoading}
+          type='submit'
+          buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
+        >
           →
         </Button>
       </Form>

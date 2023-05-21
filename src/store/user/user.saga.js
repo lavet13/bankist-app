@@ -2,6 +2,7 @@ import { call, all, put, takeLatest } from 'redux-saga/effects';
 
 import { USER_ACTION_TYPES } from './user.types';
 import {
+  deleteUserAccount,
   getCurrentUser,
   isAdmin,
   signInWithGooglePopup,
@@ -15,6 +16,10 @@ import {
   signOutFailed,
   signUpFailed,
   signUpSuccess,
+  closeAccountFailed,
+  closeAccountSuccess,
+  getProviderPassword,
+  hasProviderPassword,
 } from './user.action';
 import {
   createUserDocumentFromAuth,
@@ -23,6 +28,7 @@ import {
   signOutUser,
 } from '../../utils/firebase/firebase.utils';
 import { clearLoans } from '../loan/loan.action';
+import { onTimeoutInvoke } from '../../utils/timeout/timeout.utils';
 
 export function* getSnapshotFromUserAuth(user, additionalDetails) {
   try {
@@ -180,6 +186,48 @@ export function* signOut() {
   }
 }
 
+export function* closeUserAccount({
+  payload: { currentUser, resetFormFields, password = null },
+}) {
+  try {
+    // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
+    // @REPEATED PROVIDER INFO
+    if (password) {
+      const providerInfo = getProviderPassword(currentUser);
+
+      // console.log(currentUser.providerData);
+
+      if (hasProviderPassword(providerInfo)) {
+        try {
+          yield call(
+            signInAuthUserWithEmailAndPassword,
+            providerInfo.at(0)['email'],
+            password
+          );
+        } catch (error) {
+          yield put(closeAccountFailed(error));
+        }
+      }
+    }
+
+    // yield call(deleteUserAccount, currentUser);
+    // yield call(resetFormFields);
+    // yield put(closeAccountSuccess());
+  } catch (error) {
+    yield put(closeAccountFailed(error));
+  }
+}
+
+export function* signOutAfterDeletedUser() {
+  try {
+    yield call(onTimeoutInvoke, signOutUser, 2);
+
+    yield put(signOutSuccess());
+  } catch (error) {
+    yield put(signOutFailed(error));
+  }
+}
+
 export function* clearUserLoans() {
   yield put(clearLoans());
 }
@@ -212,6 +260,17 @@ export function* onSignOutSuccess() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_SUCCESS, clearUserLoans);
 }
 
+export function* onCloseAccountStart() {
+  yield takeLatest(USER_ACTION_TYPES.CLOSE_ACCOUNT_START, closeUserAccount);
+}
+
+export function* onCloseAccountSuccess() {
+  yield takeLatest(
+    USER_ACTION_TYPES.CLOSE_ACCOUNT_SUCCESS,
+    signOutAfterDeletedUser
+  );
+}
+
 export function* userSagas() {
   yield all([
     call(onCheckUserSession),
@@ -221,5 +280,7 @@ export function* userSagas() {
     call(onSignUpSuccess),
     call(onSignOut),
     call(onSignOutSuccess),
+    call(onCloseAccountStart),
+    call(onCloseAccountSuccess),
   ]);
 }

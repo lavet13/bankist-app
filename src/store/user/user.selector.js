@@ -28,3 +28,8 @@ export const selectError = createSelector(
   [selectUserReducer],
   user => user.error
 );
+
+export const selectCloseAccountIsLoading = createSelector(
+  [selectUserReducer],
+  user => user.closeAccountIsLoading
+);

@@ -38,6 +38,9 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  list,
+  listAll,
+  deleteObject,
 } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -346,9 +349,8 @@ export const deleteUserAccount = async currentUser => {
         }
       );
 
-      console.log(await Promise.all(deletedLoanDocuments));
-
-      const listRef = ref(storage, `users/${currentUser.uid}`);
+      await Promise.all(deletedLoanDocuments);
+      await deleteListOfFilesFromLoan(currentUser.uid);
     }
 
     const movementsQuery = query(movementsCollectionRef);
@@ -366,11 +368,46 @@ export const deleteUserAccount = async currentUser => {
         }
       );
 
-      console.log(await Promise.all(deletedMovementsDocuments));
+      await Promise.all(deletedMovementsDocuments);
     }
 
-    // await deleteUser(currentUser);
+    await deleteUser(currentUser);
   } catch (error) {
     throw error;
   }
+};
+
+export const getListOfFilesFromLoan = async id => {
+  // @RECURSIVE FUNCTION: INCOMPLETE
+  const listRef = ref(storage, `users/${id}`);
+  // const fetchFolders = await list(listRef, { maxResults: 10 });
+  const fetchFolders = await list(listRef);
+
+  const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
+    const filesRef = await listAll(folderRef);
+    const fetchFiles = filesRef.items.map(async itemRef => {
+      return await getDownloadURL(itemRef);
+    });
+    const files = await Promise.all(fetchFiles);
+    return [...(await acc), { [folderRef.name]: files }];
+  }, []);
+
+  return result;
+};
+
+export const deleteListOfFilesFromLoan = async id => {
+  const listRef = ref(storage, `users/${id}`);
+  const fetchFolders = await list(listRef);
+
+  const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
+    const filesRef = await listAll(folderRef);
+    const fetchFiles = filesRef.items.map(async itemRef => {
+      await deleteObject(itemRef);
+      return itemRef.fullPath;
+    });
+    const files = await Promise.all(fetchFiles);
+    return [...(await acc), { [folderRef.name]: files }];
+  }, []);
+
+  return result;
 };
