@@ -44,6 +44,7 @@ import {
   listAll,
   deleteObject,
 } from 'firebase/storage';
+import { generateErrorAndErrorCode } from '../error/error.utils';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDjVb89yW2JjQPvMjxSb3PiPRc73ttErGY',
@@ -186,10 +187,16 @@ export const transferAmountToUser = async (userAuth, creditCard, amount) => {
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.size)
-    throw new Error('Пользователя с такой кредитной картой не существует');
+    throw generateErrorAndErrorCode(
+      'Пользователя с такой кредитной картой не существует',
+      'transfer/credit-card-not-found'
+    );
 
   if (querySnapshot.docs[0].data().creditCard === userAuth.creditCard)
-    throw new Error('Вы не можете передать себе деньги :)');
+    throw generateErrorAndErrorCode(
+      'Вы не можете передать себе деньги',
+      'transfer/cannot-transfer-yourself'
+    );
 
   const collectionUsersRef = collection(db, 'users');
 
@@ -335,8 +342,6 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
 
 export const deleteUserAccount = async user => {
   try {
-    await deleteUser(auth.currentUser);
-
     const userDocRef = doc(db, 'users', user.uid);
     const loanCollectionRef = collection(userDocRef, 'loans');
     const movementsCollectionRef = collection(userDocRef, 'movements');
@@ -377,6 +382,9 @@ export const deleteUserAccount = async user => {
 
       await Promise.all(deletedMovementsDocuments);
     }
+
+    await deleteDoc(userDocRef);
+    await deleteUser(auth.currentUser);
   } catch (error) {
     throw error;
   }

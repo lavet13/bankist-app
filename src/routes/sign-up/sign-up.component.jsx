@@ -1,7 +1,11 @@
 import { Fragment, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { closeErrorMessage, signUpStart } from '../../store/user/user.action';
+import {
+  closeErrorMessage,
+  closeSignUpErrorMessage,
+  signUpStart,
+} from '../../store/user/user.action';
 
 import Spinner from '../../components/spinner/spinner.component';
 
@@ -10,6 +14,7 @@ import {
   selectCurrentUserIsLoading,
   selectEmailSignUpIsLoading,
   selectError,
+  selectSignUpError,
 } from '../../store/user/user.selector';
 import {
   FormControl,
@@ -35,7 +40,7 @@ const SignUp = () => {
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
-  const error = useSelector(selectError);
+  const error = useSelector(selectSignUpError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
@@ -47,7 +52,7 @@ const SignUp = () => {
   const handleClickShowConfirmPassword = () =>
     setShowConfirmPassword(show => !show);
   const handleMouseDownPassword = event => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeErrorMessage());
+  const handleErrorMessage = () => dispatch(closeSignUpErrorMessage());
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -212,7 +217,6 @@ const SignUp = () => {
               name='confirmPassword'
               value={confirmPassword}
               onChange={handleChange}
-              required
               endAdornment={
                 <InputAdornment position='end'>
                   <IconButton

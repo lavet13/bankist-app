@@ -29,6 +29,16 @@ export const selectError = createSelector(
   user => user.error
 );
 
+export const selectSignInError = createSelector(
+  [selectUserReducer],
+  user => user.signInError
+);
+
+export const selectSignUpError = createSelector(
+  [selectUserReducer],
+  user => user.signUpError
+);
+
 export const selectCloseAccountIsLoading = createSelector(
   [selectUserReducer],
   user => user.closeAccountIsLoading

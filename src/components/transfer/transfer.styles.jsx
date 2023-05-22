@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab';
 import styled from 'styled-components';
 
 export const OperationBase = styled.div`
@@ -8,9 +9,13 @@ export const OperationBase = styled.div`
 
 export const Form = styled.form`
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1.15fr;
   grid-template-rows: auto auto;
   gap: 4px 10px;
+
+  & > div {
+    grid-column: 1 / -1;
+  }
 `;
 
 export const OperationInput = styled.input`
@@ -47,3 +52,5 @@ export const Title = styled.h2`
 export const TransferContainer = styled(OperationBase)`
   background-image: linear-gradient(to top left, #ffb003, #ffcb03);
 `;
+
+export const TransferButton = styled(LoadingButton)``;

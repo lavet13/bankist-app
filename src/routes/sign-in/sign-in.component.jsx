@@ -4,14 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   googleSignInStart,
   emailSignInStart,
-  closeErrorMessage,
+  closeSignInErrorMessage,
 } from '../../store/user/user.action';
 
 import {
   selectCurrentUserIsLoading,
   selectEmailSignInIsLoading,
-  selectError,
   selectGoogleSignInIsLoading,
+  selectSignInError,
 } from '../../store/user/user.selector';
 
 import Spinner from '../../components/spinner/spinner.component';
@@ -42,7 +42,7 @@ const SignIn = () => {
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
   const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
-  const error = useSelector(selectError);
+  const error = useSelector(selectSignInError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
@@ -50,7 +50,7 @@ const SignIn = () => {
 
   const handleClickShowPassword = () => setShowPassword(show => !show);
   const handleMouseDownPassword = event => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeErrorMessage());
+  const handleErrorMessage = () => dispatch(closeSignInErrorMessage());
   const signInWithGoogle = () => dispatch(googleSignInStart());
   const handleChange = event => {
     const { name, value } = event.target;

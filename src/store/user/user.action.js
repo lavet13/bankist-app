@@ -62,3 +62,9 @@ export const closeAccountFailed = error =>
 
 export const closeErrorMessage = () =>
   createAction(USER_ACTION_TYPES.CLOSE_ERROR_MESSAGE);
+
+export const closeSignInErrorMessage = () =>
+  createAction(USER_ACTION_TYPES.CLOSE_SIGN_IN_ERROR_MESSAGE);
+
+export const closeSignUpErrorMessage = () =>
+  createAction(USER_ACTION_TYPES.CLOSE_SIGN_UP_ERROR_MESSAGE);

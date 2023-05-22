@@ -208,13 +208,19 @@ export function* closeUserAccount({
         profile.providerId === 'password' ? { ...profile, password } : profile
       );
 
-      yield call(reauthenticateUserWithCredential, providerInfo);
-      yield call(deleteUserAccount, currentUser);
+      const { user } = yield call(
+        reauthenticateUserWithCredential,
+        providerInfo
+      );
+      yield call(deleteUserAccount, user);
     } else {
       const providerInfo = getProvidersInfo(currentUser);
 
-      yield call(reauthenticateUserWithCredential, providerInfo);
-      yield call(deleteUserAccount, currentUser);
+      const { user } = yield call(
+        reauthenticateUserWithCredential,
+        providerInfo
+      );
+      yield call(deleteUserAccount, user);
     }
 
     yield call(resetFormFields);

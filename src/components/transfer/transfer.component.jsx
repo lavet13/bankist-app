@@ -1,25 +1,25 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { fetchMovementsStart } from '../../store/movement/movement.action';
-
 import { selectBalance } from '../../store/movement/movement.selector';
 import { selectCurrentUser } from '../../store/user/user.selector';
 import InputMask from 'react-input-mask';
 
-import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
-
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, InputAdornment, Snackbar, TextField } from '@mui/material';
 
 import {
   TransferContainer,
   Title,
   Form,
-  OperationInput,
-  OperationLabel,
+  TransferButton,
 } from './transfer.styles';
 
-import { transferAmountToUser } from '../../utils/firebase/firebase.utils';
+import { transferStart } from '../../store/transfer/transfer.action';
+import {
+  selectTransferError,
+  selectTransferIsLoading,
+} from '../../store/transfer/transfer.selector';
+import { Send } from '@mui/icons-material';
 
 const defaultFormFields = {
   creditCard: '',
@@ -30,7 +30,8 @@ const Transfer = () => {
   const dispatch = useDispatch();
   const balance = useSelector(selectBalance);
   const currentUser = useSelector(selectCurrentUser);
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = useSelector(selectTransferIsLoading);
+  const error = useSelector(selectTransferError);
   const [formFields, setFormFields] = useState(defaultFormFields);
   const [open, setOpen] = useState(false);
   const { creditCard, amount } = formFields;
@@ -38,11 +39,10 @@ const Transfer = () => {
   const resetFormFields = () => setFormFields(defaultFormFields);
 
   const handleClose = (event, reason) => {
+    console.log({ event, reason });
     if (reason === 'clickaway') {
       return;
     }
-
-    setOpen(false);
   };
 
   const handleChange = event => {
@@ -53,7 +53,6 @@ const Transfer = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    setIsLoading(true);
     if (isLoading) return;
 
     const creditCardNoSpaces = creditCard
@@ -61,58 +60,92 @@ const Transfer = () => {
       .filter(char => char !== ' ')
       .join('');
 
-    try {
-      if (balance - Math.abs(amount) >= 0) {
-        await transferAmountToUser(currentUser, creditCardNoSpaces, amount);
-        dispatch(fetchMovementsStart(currentUser));
-        setOpen(true);
+    dispatch(
+      transferStart({
+        currentUser,
+        creditCard: creditCardNoSpaces,
+        amount,
+        balance,
+        resetFormFields,
+      })
+    );
+  };
 
-        resetFormFields();
-      } else {
-        throw new Error('Недостаточно средств для перевода!');
-      }
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setIsLoading(false);
+  const getTransferAmountError = error => {
+    switch (error.code) {
+      case 'transfer/not-enough-cash':
+        return error.message;
+
+      default:
+        return null;
     }
   };
+
+  const getTransferCreditCardError = error => {
+    switch (error.code) {
+      case 'transfer/credit-card-not-found':
+        return error.message;
+
+      case 'transfer/cannot-transfer-yourself':
+        return error.message;
+
+      default:
+        return null;
+    }
+  };
+
+  const hasUnknownErrors = error =>
+    getTransferAmountError(error) || getTransferCreditCardError(error);
 
   return (
     <TransferContainer>
       <Title>Перечисление депозита</Title>
       <Form onSubmit={handleSubmit}>
-        <OperationLabel htmlFor='transfer-credit-card'>Перевод</OperationLabel>
         <InputMask
-          id='transfer-credit-card'
           type='text'
+          label='Кредитная карта'
+          variant='filled'
+          helperText={error && getTransferCreditCardError(error)}
           mask='9999 9999 9999 9999'
+          error={error && !!getTransferCreditCardError(error)}
           maskChar={null}
           name='creditCard'
           value={creditCard}
           onChange={handleChange}
-          required
         >
-          {inputProps => <OperationInput {...inputProps} />}
+          {inputProps => <TextField {...inputProps} />}
         </InputMask>
 
-        <OperationLabel htmlFor='transfer-amount'>Сумма (руб.)</OperationLabel>
-        <OperationInput
+        <InputMask
           id='transfer-amount'
-          type='number'
+          label='Сумма'
+          InputProps={{
+            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
+          }}
+          mask='999999999'
+          maskChar={null}
+          variant='filled'
+          type='text'
+          error={error && !!getTransferAmountError(error)}
           name='amount'
           value={amount}
           onChange={handleChange}
-          required
-        />
-
-        <Button
-          isLoading={isLoading}
-          type='submit'
-          buttonType={BUTTON_TYPE_CLASSES.arrowSubmit}
         >
-          →
-        </Button>
+          {inputProps => <TextField {...inputProps}></TextField>}
+        </InputMask>
+
+        <TransferButton
+          size='medium'
+          sx={{ width: '100%' }}
+          type='submit'
+          endIcon={<Send />}
+          loading={isLoading}
+          loadingPosition='end'
+          variant='text'
+        >
+          <span>Перевести</span>
+        </TransferButton>
+
         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
           <Alert onClose={handleClose} severity='success'>
             Кредит отправлен на проверку!
