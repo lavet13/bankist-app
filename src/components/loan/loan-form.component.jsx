@@ -15,6 +15,7 @@ import {
 } from '../transfer/transfer.styles';
 import { uploadInfoForLoan } from '../../utils/firebase/firebase.utils';
 import { Link } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
 
 const defaultFormFields = {
   displayName: '',
@@ -36,10 +37,19 @@ const LoanForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const [formFileFields, setFormFileFields] = useState(defaultFormFileFields);
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { displayName, email, tel, creditCard } = formFields;
 
   const resetFormField = () => setFormFields(defaultFormFields);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   const handleFilesChange = event => {
     const { name, files } = event.target;
@@ -77,6 +87,7 @@ const LoanForm = () => {
 
       resetFormField();
       event.target.reset();
+      setOpen(true);
     } catch (error) {
       switch (error.code) {
         default:
@@ -196,6 +207,11 @@ const LoanForm = () => {
         >
           <span>→</span>
         </Button>
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity='success'>
+            Кредит отправлен на проверку!
+          </Alert>
+        </Snackbar>
       </Form>
     </LoanContainer>
   );

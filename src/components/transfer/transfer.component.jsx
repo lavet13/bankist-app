@@ -9,6 +9,8 @@ import InputMask from 'react-input-mask';
 
 import Button, { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
+import { Alert, Snackbar } from '@mui/material';
+
 import {
   TransferContainer,
   Title,
@@ -30,9 +32,18 @@ const Transfer = () => {
   const currentUser = useSelector(selectCurrentUser);
   const [isLoading, setIsLoading] = useState(false);
   const [formFields, setFormFields] = useState(defaultFormFields);
+  const [open, setOpen] = useState(false);
   const { creditCard, amount } = formFields;
 
   const resetFormFields = () => setFormFields(defaultFormFields);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -54,6 +65,7 @@ const Transfer = () => {
       if (balance - Math.abs(amount) > 0) {
         await transferAmountToUser(currentUser, creditCardNoSpaces, amount);
         dispatch(fetchMovementsStart(currentUser));
+        setOpen(true);
 
         resetFormFields();
       } else {
@@ -101,6 +113,11 @@ const Transfer = () => {
         >
           →
         </Button>
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+          <Alert onClose={handleClose} severity='success'>
+            Кредит отправлен на проверку!
+          </Alert>
+        </Snackbar>
       </Form>
     </TransferContainer>
   );

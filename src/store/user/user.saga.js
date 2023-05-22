@@ -192,7 +192,18 @@ export function* closeUserAccount({
   try {
     // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
     // @REPEATED PROVIDER INFO
-    if (password) {
+
+    if (password !== null) {
+      if (password === '')
+        return yield put(
+          closeAccountFailed(
+            generateErrorAndErrorCode(
+              'Не указан пароль!',
+              'closed-account/missing-password'
+            )
+          )
+        );
+
       const providerInfo = getProviderPassword(currentUser);
 
       // console.log(currentUser.providerData);
@@ -210,9 +221,16 @@ export function* closeUserAccount({
       }
     }
 
-    // yield call(deleteUserAccount, currentUser);
-    // yield call(resetFormFields);
-    // yield put(closeAccountSuccess());
+    // console.log(
+    //   currentUser.providerData.map(profile => ({
+    //     providerId: profile.providerId,
+    //     email: profile.email,
+    //   }))
+    // );
+
+    yield call(deleteUserAccount, currentUser);
+    yield call(resetFormFields);
+    yield put(closeAccountSuccess());
   } catch (error) {
     yield put(closeAccountFailed(error));
   }
