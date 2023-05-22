@@ -62,7 +62,7 @@ const Transfer = () => {
       .join('');
 
     try {
-      if (balance - Math.abs(amount) > 0) {
+      if (balance - Math.abs(amount) >= 0) {
         await transferAmountToUser(currentUser, creditCardNoSpaces, amount);
         dispatch(fetchMovementsStart(currentUser));
         setOpen(true);

@@ -1,13 +1,11 @@
 import { createAction } from '../../utils/reducer/reducer.utils';
 import { USER_ACTION_TYPES } from './user.types';
 
-export const getProviderPassword = currentUser => {
-  return currentUser.providerData
-    .map(profile => ({
-      providerId: profile.providerId,
-      email: profile.email,
-    }))
-    .filter(({ providerId }) => providerId === 'password');
+export const getProvidersInfo = currentUser => {
+  return currentUser.providerData.map(profile => ({
+    providerId: profile.providerId,
+    email: profile.email,
+  }));
 };
 
 export const hasProviderPassword = providerInfo => {

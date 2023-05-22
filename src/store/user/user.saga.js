@@ -5,6 +5,7 @@ import {
   deleteUserAccount,
   getCurrentUser,
   isAdmin,
+  reauthenticateUserWithCredential,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
 import { generateErrorAndErrorCode } from '../../utils/error/error.utils';
@@ -18,8 +19,7 @@ import {
   signUpSuccess,
   closeAccountFailed,
   closeAccountSuccess,
-  getProviderPassword,
-  hasProviderPassword,
+  getProvidersInfo,
 } from './user.action';
 import {
   createUserDocumentFromAuth,
@@ -204,31 +204,19 @@ export function* closeUserAccount({
           )
         );
 
-      const providerInfo = getProviderPassword(currentUser);
+      const providerInfo = getProvidersInfo(currentUser).map(profile =>
+        profile.providerId === 'password' ? { ...profile, password } : profile
+      );
 
-      // console.log(currentUser.providerData);
+      yield call(reauthenticateUserWithCredential, providerInfo);
+      yield call(deleteUserAccount, currentUser);
+    } else {
+      const providerInfo = getProvidersInfo(currentUser);
 
-      if (hasProviderPassword(providerInfo)) {
-        try {
-          yield call(
-            signInAuthUserWithEmailAndPassword,
-            providerInfo.at(0)['email'],
-            password
-          );
-        } catch (error) {
-          yield put(closeAccountFailed(error));
-        }
-      }
+      yield call(reauthenticateUserWithCredential, providerInfo);
+      yield call(deleteUserAccount, currentUser);
     }
 
-    // console.log(
-    //   currentUser.providerData.map(profile => ({
-    //     providerId: profile.providerId,
-    //     email: profile.email,
-    //   }))
-    // );
-
-    yield call(deleteUserAccount, currentUser);
     yield call(resetFormFields);
     yield put(closeAccountSuccess());
   } catch (error) {

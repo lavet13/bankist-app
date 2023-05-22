@@ -15,7 +15,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import {
   closeAccountStart,
-  getProviderPassword,
+  getProvidersInfo,
   hasProviderPassword,
 } from '../../store/user/user.action';
 import {
@@ -60,7 +60,7 @@ const CloseAccount = () => {
 
   useEffect(() => {
     if (currentUser) {
-      const providerInfo = getProviderPassword(auth.currentUser);
+      const providerInfo = getProvidersInfo(auth.currentUser);
       setIsProviderPasswordExist(hasProviderPassword(providerInfo));
     }
   }, [currentUser]);

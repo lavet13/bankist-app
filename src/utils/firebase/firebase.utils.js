@@ -12,6 +12,8 @@ import {
   onAuthStateChanged,
   getRedirectResult,
   deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from 'firebase/auth';
 
 import {
@@ -63,11 +65,11 @@ googleProvider.setCustomParameters({
 export const auth = getAuth();
 auth.useDeviceLanguage();
 
-export const signInWithGooglePopup = async () =>
-  await signInWithPopup(auth, googleProvider);
-
-export const getGoogleRedirectResult = async () =>
-  await getRedirectResult(auth);
+export const signInWithGooglePopup = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  return { ...result, credential };
+};
 
 export const db = getFirestore();
 
@@ -319,7 +321,10 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
   const { creditCard } = loanSnapshot.data();
 
   await updateDoc(userDocRef, {
-    creditCard,
+    creditCard: creditCard
+      .split('')
+      .filter(char => char !== ' ')
+      .join(''),
   });
 
   await updateDoc(loanDocRef, {
@@ -328,9 +333,11 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
   });
 };
 
-export const deleteUserAccount = async currentUser => {
+export const deleteUserAccount = async user => {
   try {
-    const userDocRef = doc(db, 'users', currentUser.uid);
+    await deleteUser(auth.currentUser);
+
+    const userDocRef = doc(db, 'users', user.uid);
     const loanCollectionRef = collection(userDocRef, 'loans');
     const movementsCollectionRef = collection(userDocRef, 'movements');
 
@@ -344,13 +351,13 @@ export const deleteUserAccount = async currentUser => {
             await deleteDoc(doc(loanCollectionRef, loanSnapshot.id));
             return { message: 'loan/Успешно удален' };
           } catch (error) {
-            throw new Error('Ошибка при удалении документа!');
+            throw new Error('loan/Ошибка при удалении документа!');
           }
         }
       );
 
       await Promise.all(deletedLoanDocuments);
-      await deleteListOfFilesFromLoan(currentUser.uid);
+      await deleteListOfFilesFromLoan(user.uid);
     }
 
     const movementsQuery = query(movementsCollectionRef);
@@ -363,15 +370,13 @@ export const deleteUserAccount = async currentUser => {
             await deleteDoc(doc(movementsCollectionRef, movementSnapshot.id));
             return { message: 'movement/Успешно удален' };
           } catch (error) {
-            throw new Error('Ошибка при удалении документа!');
+            throw new Error('movement/Ошибка при удалении документа!');
           }
         }
       );
 
       await Promise.all(deletedMovementsDocuments);
     }
-
-    await deleteUser(currentUser);
   } catch (error) {
     throw error;
   }
@@ -410,4 +415,36 @@ export const deleteListOfFilesFromLoan = async id => {
   }, []);
 
   return result;
+};
+
+export const reauthenticateUserWithCredential = async providers => {
+  try {
+    const promptForCredentials = async () => {
+      if (providers.some(profile => profile.providerId === 'password')) {
+        const { email, password } = providers.find(
+          profile => profile.providerId === 'password'
+        );
+
+        return EmailAuthProvider.credential(email, password);
+      }
+
+      if (providers.some(profile => profile.providerId === 'google.com')) {
+        const { credential } = await signInWithGooglePopup();
+
+        return credential;
+      }
+    };
+
+    const credential = await promptForCredentials();
+
+    const response = await reauthenticateWithCredential(
+      auth.currentUser,
+      credential
+    );
+    console.log(response);
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
