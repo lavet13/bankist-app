@@ -11,14 +11,10 @@ export function* fetchTransferAsync({
   payload: { currentUser, creditCard, amount, balance, resetFormFields },
 }) {
   try {
-    if (balance - Math.abs(amount) < 0) {
-      yield put(
-        transferFailed(
-          generateErrorAndErrorCode(
-            'Недостаточно средств для перевода!',
-            'transfer/not-enough-cash'
-          )
-        )
+    if (balance - Math.abs(amount) <= 0) {
+      throw generateErrorAndErrorCode(
+        'Недостаточно средств для перевода!',
+        'transfer/not-enough-cash'
       );
     }
     yield call(transferAmountToUser, currentUser, creditCard, amount);
@@ -30,7 +26,7 @@ export function* fetchTransferAsync({
 }
 
 export function* updateMovementsAfterTransaction({ payload: currentUser }) {
-  yield call(fetchMovementsStart, currentUser);
+  yield put(fetchMovementsStart(currentUser));
 }
 
 export function* onTransferStart() {

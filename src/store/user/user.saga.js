@@ -20,6 +20,8 @@ import {
   closeAccountFailed,
   closeAccountSuccess,
   getProvidersInfo,
+  resetErrors,
+  resetUserLoading,
 } from './user.action';
 import {
   createUserDocumentFromAuth,
@@ -67,23 +69,15 @@ export function* signInWithEmail({ payload: { email, password } }) {
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       )
     )
-      return yield put(
-        signInFailed(
-          generateErrorAndErrorCode(
-            'Неверный формат E-mail',
-            'auth/invalid-email-validation'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Неверный формат E-mail',
+        'auth/invalid-email-validation'
       );
 
     if (password.length < 6)
-      return yield put(
-        signInFailed(
-          generateErrorAndErrorCode(
-            'Пароль должен составлять как минимум 6 символов',
-            'auth/weak-password-validation'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Пароль должен составлять как минимум 6 символов',
+        'auth/weak-password-validation'
       );
 
     const { user } = yield call(
@@ -108,19 +102,20 @@ export function* signInWithGoogle() {
   }
 }
 
+export function* resetErrorsState() {
+  yield put(resetErrors());
+}
+
 export function* signUpWithEmail({
   payload: { email, password, confirmPassword, ...additionalDetails },
 }) {
   try {
     const { displayName } = additionalDetails;
+
     if (!displayName.length)
-      return yield put(
-        signUpFailed(
-          generateErrorAndErrorCode(
-            'Имя пользователя не было указано!',
-            'auth/display-name-not-found'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Имя пользователя не было указано!',
+        'auth/display-name-not-found'
       );
 
     if (
@@ -128,34 +123,22 @@ export function* signUpWithEmail({
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       )
     )
-      return yield put(
-        signUpFailed(
-          generateErrorAndErrorCode(
-            'Неверный формат E-mail',
-            'auth/invalid-email-validation'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Неверный формат E-mail',
+        'auth/invalid-email-validation'
       );
 
     if (password !== confirmPassword) {
-      return yield put(
-        signUpFailed(
-          generateErrorAndErrorCode(
-            'Пароли не совпадают!',
-            'auth/wrong-password'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Пароли не совпадают!',
+        'auth/wrong-password'
       );
     }
 
     if (password.length < 6)
-      return yield put(
-        signUpFailed(
-          generateErrorAndErrorCode(
-            'Пароль должен составлять как минимум 6 символов',
-            'auth/weak-password-validation'
-          )
-        )
+      throw generateErrorAndErrorCode(
+        'Пароль должен составлять как минимум 6 символов',
+        'auth/weak-password-validation'
       );
 
     const { user } = yield call(
@@ -195,13 +178,9 @@ export function* closeUserAccount({
 
     if (password !== null) {
       if (password === '')
-        return yield put(
-          closeAccountFailed(
-            generateErrorAndErrorCode(
-              'Не указан пароль!',
-              'closed-account/missing-password'
-            )
-          )
+        throw generateErrorAndErrorCode(
+          'Не указан пароль!',
+          'closed-account/missing-password'
         );
 
       const providerInfo = getProvidersInfo(currentUser).map(profile =>
@@ -233,6 +212,7 @@ export function* closeUserAccount({
 export function* signOutAfterDeletedUser() {
   try {
     yield call(onTimeoutInvoke, signOutUser, 2);
+    yield call(resetErrorsState);
 
     yield put(signOutSuccess());
   } catch (error) {
@@ -240,8 +220,13 @@ export function* signOutAfterDeletedUser() {
   }
 }
 
+export function* resetLoadingState() {
+  yield put(resetUserLoading());
+}
+
 export function* clearUserLoans() {
   yield put(clearLoans());
+  yield call(resetErrorsState);
 }
 
 export function* onCheckUserSession() {
@@ -264,12 +249,16 @@ export function* onSignUpSuccess() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_UP_SUCCESS, signInAfterSignUp);
 }
 
-export function* onSignOut() {
+export function* onSignOutStart() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_START, signOut);
 }
 
 export function* onSignOutSuccess() {
   yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_SUCCESS, clearUserLoans);
+}
+
+export function* onSignOutFailed() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_FAILED, resetLoadingState);
 }
 
 export function* onCloseAccountStart() {
@@ -283,16 +272,39 @@ export function* onCloseAccountSuccess() {
   );
 }
 
+export function* onCloseAccountFailed() {
+  yield takeLatest(USER_ACTION_TYPES.CLOSE_ACCOUNT_FAILED, resetLoadingState);
+}
+
+export function* onSignInSuccess() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_IN_SUCCESS, resetErrorsState);
+}
+
+export function* onSignInFailed() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_IN_FAILED, resetLoadingState);
+}
+
+export function* onResetErrors() {
+  yield takeLatest(USER_ACTION_TYPES.RESET_USER_ERRORS, resetLoadingState);
+}
+
+export function* onSignUpFailed() {
+  yield takeLatest(USER_ACTION_TYPES.SIGN_UP_FAILED, resetLoadingState);
+}
+
 export function* userSagas() {
   yield all([
     call(onCheckUserSession),
     call(onEmailSignInStart),
     call(onGoogleSignInStart),
+    call(onSignInSuccess),
     call(onSignUpStart),
     call(onSignUpSuccess),
-    call(onSignOut),
+    call(onSignUpFailed),
+    call(onSignOutStart),
     call(onSignOutSuccess),
     call(onCloseAccountStart),
     call(onCloseAccountSuccess),
+    call(onResetErrors),
   ]);
 }

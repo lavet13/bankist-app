@@ -2,7 +2,6 @@ import { Fragment, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  closeErrorMessage,
   closeSignUpErrorMessage,
   signUpStart,
 } from '../../store/user/user.action';
@@ -13,7 +12,6 @@ import { SignUpContainer } from './sign-up.styles';
 import {
   selectCurrentUserIsLoading,
   selectEmailSignUpIsLoading,
-  selectError,
   selectSignUpError,
 } from '../../store/user/user.selector';
 import {

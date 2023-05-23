@@ -60,11 +60,14 @@ export const signOutFailed = error =>
 export const closeAccountFailed = error =>
   createAction(USER_ACTION_TYPES.CLOSE_ACCOUNT_FAILED, error);
 
-export const closeErrorMessage = () =>
-  createAction(USER_ACTION_TYPES.CLOSE_ERROR_MESSAGE);
-
 export const closeSignInErrorMessage = () =>
   createAction(USER_ACTION_TYPES.CLOSE_SIGN_IN_ERROR_MESSAGE);
 
 export const closeSignUpErrorMessage = () =>
   createAction(USER_ACTION_TYPES.CLOSE_SIGN_UP_ERROR_MESSAGE);
+
+export const resetErrors = () =>
+  createAction(USER_ACTION_TYPES.RESET_USER_ERRORS);
+
+export const resetUserLoading = () =>
+  createAction(USER_ACTION_TYPES.RESET_USER_LOADING);

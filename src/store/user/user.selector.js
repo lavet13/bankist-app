@@ -24,9 +24,9 @@ export const selectEmailSignUpIsLoading = createSelector(
   user => user.emailSignUpIsLoading
 );
 
-export const selectError = createSelector(
+export const selectCloseAccountIsLoading = createSelector(
   [selectUserReducer],
-  user => user.error
+  user => user.closeAccountIsLoading
 );
 
 export const selectSignInError = createSelector(
@@ -39,7 +39,12 @@ export const selectSignUpError = createSelector(
   user => user.signUpError
 );
 
-export const selectCloseAccountIsLoading = createSelector(
+export const selectCloseAccountError = createSelector(
   [selectUserReducer],
-  user => user.closeAccountIsLoading
+  user => user.closeAccountError
+);
+
+export const selectSignOutError = createSelector(
+  [selectUserReducer],
+  user => user.signOutError
 );

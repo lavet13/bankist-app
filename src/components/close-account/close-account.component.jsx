@@ -19,6 +19,7 @@ import {
   hasProviderPassword,
 } from '../../store/user/user.action';
 import {
+  selectCloseAccountError,
   selectCloseAccountIsLoading,
   selectCurrentUser,
 } from '../../store/user/user.selector';
@@ -31,6 +32,7 @@ const CloseAccount = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
   const closeAccountIsLoading = useSelector(selectCloseAccountIsLoading);
+  const error = useSelector(selectCloseAccountError);
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { password } = formFields;
 

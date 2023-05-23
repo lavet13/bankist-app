@@ -127,6 +127,7 @@ const Transfer = () => {
           variant='filled'
           type='text'
           error={error && !!getTransferAmountError(error)}
+          helperText={error && getTransferAmountError(error)}
           name='amount'
           value={amount}
           onChange={handleChange}

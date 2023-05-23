@@ -12,6 +12,7 @@ import {
   selectEmailSignInIsLoading,
   selectGoogleSignInIsLoading,
   selectSignInError,
+  selectSignOutError,
 } from '../../store/user/user.selector';
 
 import Spinner from '../../components/spinner/spinner.component';
@@ -43,6 +44,7 @@ const SignIn = () => {
   const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
   const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
   const error = useSelector(selectSignInError);
+  const signOutError = useSelector(selectSignOutError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
@@ -211,6 +213,26 @@ const SignIn = () => {
                 {getErrorMessage(error)}
               </Alert>
             ) : null}
+
+            {signOutError && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='error'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Ошибка</AlertTitle>
+                {getErrorMessage(signOutError)}
+              </Alert>
+            )}
 
             {error && getWarningMessage(error) && (
               <Alert
