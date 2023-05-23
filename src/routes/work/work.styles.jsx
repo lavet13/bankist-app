@@ -8,6 +8,8 @@ export const WorkContainer = styled.main`
 
   display: grid;
   grid-template-columns: 4fr 3fr;
-  grid-template-rows: auto 250px 550px 200px auto;
+  grid-template-rows:
+    auto minmax(min-content, max-content) auto minmax(min-content, max-content)
+    auto;
   gap: 20px;
 `;

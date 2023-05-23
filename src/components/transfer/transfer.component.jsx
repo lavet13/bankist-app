@@ -5,21 +5,35 @@ import { selectBalance } from '../../store/movement/movement.selector';
 import { selectCurrentUser } from '../../store/user/user.selector';
 import InputMask from 'react-input-mask';
 
-import { Alert, InputAdornment, Snackbar, TextField } from '@mui/material';
+import {
+  Alert,
+  AlertTitle,
+  IconButton,
+  InputAdornment,
+  Snackbar,
+  TextField,
+} from '@mui/material';
+
+import { TransferContainer, Title, Form } from './transfer.styles';
 
 import {
-  TransferContainer,
-  Title,
-  Form,
-  TransferButton,
-} from './transfer.styles';
-
-import { transferStart } from '../../store/transfer/transfer.action';
+  closeSnackbar,
+  closeTransferErrorMessage,
+  transferStart,
+} from '../../store/transfer/transfer.action';
 import {
+  selectSnackbarIsOpen,
   selectTransferError,
   selectTransferIsLoading,
 } from '../../store/transfer/transfer.selector';
-import { Send } from '@mui/icons-material';
+import { Close, Send } from '@mui/icons-material';
+import {
+  getTransferAmountError,
+  getTransferCreditCardError,
+} from '../../store/transfer/transfer.error';
+import { getErrorMessage } from '../../utils/error/error.utils';
+import { LoadingButton } from '@mui/lab';
+import { Grow } from '@mui/material';
 
 const defaultFormFields = {
   creditCard: '',
@@ -32,8 +46,8 @@ const Transfer = () => {
   const currentUser = useSelector(selectCurrentUser);
   const isLoading = useSelector(selectTransferIsLoading);
   const error = useSelector(selectTransferError);
+  const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const [open, setOpen] = useState(false);
   const { creditCard, amount } = formFields;
 
   const resetFormFields = () => setFormFields(defaultFormFields);
@@ -43,6 +57,8 @@ const Transfer = () => {
     if (reason === 'clickaway') {
       return;
     }
+
+    dispatch(closeSnackbar());
   };
 
   const handleChange = event => {
@@ -71,30 +87,9 @@ const Transfer = () => {
     );
   };
 
-  const getTransferAmountError = error => {
-    switch (error.code) {
-      case 'transfer/not-enough-cash':
-        return error.message;
+  const handleErrorMessage = () => dispatch(closeTransferErrorMessage());
 
-      default:
-        return null;
-    }
-  };
-
-  const getTransferCreditCardError = error => {
-    switch (error.code) {
-      case 'transfer/credit-card-not-found':
-        return error.message;
-
-      case 'transfer/cannot-transfer-yourself':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const hasUnknownErrors = error =>
+  const hasUnknownError = error =>
     getTransferAmountError(error) || getTransferCreditCardError(error);
 
   return (
@@ -135,7 +130,7 @@ const Transfer = () => {
           {inputProps => <TextField {...inputProps}></TextField>}
         </InputMask>
 
-        <TransferButton
+        <LoadingButton
           size='medium'
           sx={{ width: '100%' }}
           type='submit'
@@ -145,13 +140,39 @@ const Transfer = () => {
           variant='text'
         >
           <span>Перевести</span>
-        </TransferButton>
+        </LoadingButton>
 
-        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Snackbar
+          open={snackbarIsOpen}
+          autoHideDuration={6000}
+          onClose={handleClose}
+          TransitionComponent={Grow}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        >
           <Alert onClose={handleClose} severity='success'>
             Кредит отправлен на проверку!
           </Alert>
         </Snackbar>
+
+        {error && hasUnknownError(error) === null ? (
+          <Alert
+            action={
+              <IconButton
+                aria-label='close'
+                color='inherit'
+                size='small'
+                onClick={handleErrorMessage}
+              >
+                <Close fontSize='inherit' />
+              </IconButton>
+            }
+            severity='error'
+            sx={{ margin: '0 auto', width: '90%' }}
+          >
+            <AlertTitle>Ошибка</AlertTitle>
+            {getErrorMessage(error)}
+          </Alert>
+        ) : null}
       </Form>
     </TransferContainer>
   );

@@ -298,13 +298,16 @@ export function* userSagas() {
     call(onEmailSignInStart),
     call(onGoogleSignInStart),
     call(onSignInSuccess),
+    call(onSignInFailed),
     call(onSignUpStart),
     call(onSignUpSuccess),
     call(onSignUpFailed),
     call(onSignOutStart),
     call(onSignOutSuccess),
+    call(onSignOutFailed),
     call(onCloseAccountStart),
     call(onCloseAccountSuccess),
+    call(onCloseAccountFailed),
     call(onResetErrors),
   ]);
 }

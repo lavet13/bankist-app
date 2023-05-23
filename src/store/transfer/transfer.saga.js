@@ -2,7 +2,11 @@ import { all, call, put, takeLatest } from 'redux-saga/effects';
 
 import { TRANSFER_ACTION_TYPES } from './transfer.types';
 
-import { transferSuccess, transferFailed } from './transfer.action';
+import {
+  transferSuccess,
+  transferFailed,
+  showSnackbar,
+} from './transfer.action';
 import { transferAmountToUser } from '../../utils/firebase/firebase.utils';
 import { fetchMovementsStart } from '../movement/movement.action';
 import { generateErrorAndErrorCode } from '../../utils/error/error.utils';
@@ -26,6 +30,7 @@ export function* fetchTransferAsync({
 }
 
 export function* updateMovementsAfterTransaction({ payload: currentUser }) {
+  yield put(showSnackbar());
   yield put(fetchMovementsStart(currentUser));
 }
 

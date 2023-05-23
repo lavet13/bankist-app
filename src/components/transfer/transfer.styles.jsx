@@ -52,5 +52,3 @@ export const Title = styled.h2`
 export const TransferContainer = styled(OperationBase)`
   background-image: linear-gradient(to top left, #ffb003, #ffcb03);
 `;
-
-export const TransferButton = styled(LoadingButton)``;

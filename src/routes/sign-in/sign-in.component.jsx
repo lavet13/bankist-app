@@ -32,6 +32,12 @@ import { Close } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 
 import { SignInFormContainer } from './sign-in.styles';
+import {
+  getSignInEmailError,
+  getSignInPasswordError,
+  getSignInWarningMessage,
+} from '../../store/user/user.error';
+import { getErrorMessage } from '../../utils/error/error.utils';
 
 const defaultFormFields = {
   email: '',
@@ -65,58 +71,10 @@ const SignIn = () => {
     dispatch(emailSignInStart(email, password));
   };
 
-  const getErrorMessage = error => {
-    switch (error.code) {
-      case 'auth/network-request-failed':
-        return 'Ошибка сети! Это все что могу сказать!';
-      case 'auth/popup-blocked':
-        return 'Заблокирован сервером Firebase!';
-      default:
-        return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
-    }
-  };
-
-  const getWarningMessage = error => {
-    switch (error.code) {
-      case 'auth/cancelled-popup-request':
-        return 'Аутентификация при помощи Google была отменена!';
-      case 'auth/popup-closed-by-user':
-        return 'Аутентификация при помощи Google была отменена пользователем!';
-      default:
-        return null;
-    }
-  };
-
-  const getSignInEmailError = error => {
-    switch (error.code) {
-      case 'auth/user-not-found':
-        return 'Нет пользователя ассоциированного с данным E-mail';
-
-      case 'auth/invalid-email-validation':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const getSignInPasswordError = error => {
-    switch (error.code) {
-      case 'auth/wrong-password':
-        return 'Указан неправильный пароль!';
-
-      case 'auth/weak-password-validation':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const hasUnknownErrors = error =>
+  const hasUnknownError = error =>
     getSignInPasswordError(error) ||
     getSignInEmailError(error) ||
-    getWarningMessage(error);
+    getSignInWarningMessage(error);
 
   return (
     <Fragment>
@@ -194,7 +152,7 @@ const SignIn = () => {
             >
               <span>Войти через Google</span>
             </LoadingButton>
-            {error && hasUnknownErrors(error) === null ? (
+            {error && hasUnknownError(error) === null ? (
               <Alert
                 action={
                   <IconButton
@@ -234,7 +192,7 @@ const SignIn = () => {
               </Alert>
             )}
 
-            {error && getWarningMessage(error) && (
+            {error && getSignInWarningMessage(error) && (
               <Alert
                 action={
                   <IconButton
@@ -250,7 +208,7 @@ const SignIn = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Информация</AlertTitle>
-                {getWarningMessage(error)}
+                {getSignInWarningMessage(error)}
               </Alert>
             )}
           </SignInFormContainer>
