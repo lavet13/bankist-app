@@ -1,6 +1,7 @@
 import { call, all, put, takeLatest } from 'redux-saga/effects';
 
 import { USER_ACTION_TYPES } from './user.types';
+import { USER_ERROR_CODE_TYPES, USER_ERROR_MESSAGES } from './user.error';
 import {
   deleteUserAccount,
   getCurrentUser,
@@ -64,20 +65,23 @@ export function* isUserAuthenticated() {
 
 export function* signInWithEmail({ payload: { email, password } }) {
   try {
+    const { INVALID_EMAIL_VALIDATION, WEAK_PASSWORD_VALIDATION } =
+      USER_ERROR_CODE_TYPES;
+
     if (
       !email.match(
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       )
     )
       throw generateErrorAndErrorCode(
-        'Неверный формат E-mail',
-        'auth/invalid-email-validation'
+        INVALID_EMAIL_VALIDATION,
+        USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
       );
 
     if (password.length < 6)
       throw generateErrorAndErrorCode(
-        'Пароль должен составлять как минимум 6 символов',
-        'auth/weak-password-validation'
+        WEAK_PASSWORD_VALIDATION,
+        USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
       );
 
     const { user } = yield call(
@@ -110,12 +114,18 @@ export function* signUpWithEmail({
   payload: { email, password, confirmPassword, ...additionalDetails },
 }) {
   try {
+    const {
+      DISPLAY_NAME_NOT_FOUND,
+      INVALID_EMAIL_VALIDATION,
+      WRONG_PASSWORD,
+      WEAK_PASSWORD_VALIDATION,
+    } = USER_ERROR_CODE_TYPES;
     const { displayName } = additionalDetails;
 
     if (!displayName.length)
       throw generateErrorAndErrorCode(
-        'Имя пользователя не было указано!',
-        'auth/display-name-not-found'
+        DISPLAY_NAME_NOT_FOUND,
+        USER_ERROR_MESSAGES[DISPLAY_NAME_NOT_FOUND]
       );
 
     if (
@@ -124,21 +134,21 @@ export function* signUpWithEmail({
       )
     )
       throw generateErrorAndErrorCode(
-        'Неверный формат E-mail',
-        'auth/invalid-email-validation'
+        INVALID_EMAIL_VALIDATION,
+        USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
       );
 
     if (password !== confirmPassword) {
       throw generateErrorAndErrorCode(
-        'Пароли не совпадают!',
-        'auth/wrong-password'
+        WRONG_PASSWORD,
+        USER_ERROR_MESSAGES[WRONG_PASSWORD]
       );
     }
 
     if (password.length < 6)
       throw generateErrorAndErrorCode(
-        'Пароль должен составлять как минимум 6 символов',
-        'auth/weak-password-validation'
+        WEAK_PASSWORD_VALIDATION,
+        USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
       );
 
     const { user } = yield call(
@@ -173,14 +183,15 @@ export function* closeUserAccount({
   payload: { currentUser, resetFormFields, password = null },
 }) {
   try {
+    const { MISSING_PASSWORD } = USER_ERROR_CODE_TYPES;
     // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
     // @REPEATED PROVIDER INFO
 
     if (password !== null) {
       if (password === '')
         throw generateErrorAndErrorCode(
-          'Не указан пароль!',
-          'closed-account/missing-password'
+          MISSING_PASSWORD,
+          USER_ERROR_MESSAGES[MISSING_PASSWORD]
         );
 
       const providerInfo = getProvidersInfo(currentUser).map(profile =>
