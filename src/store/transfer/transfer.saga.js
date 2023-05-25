@@ -16,7 +16,7 @@ import {
   transferAmountToUser,
 } from '../../utils/firebase/firebase.utils';
 import { fetchMovementsStart } from '../movement/movement.action';
-import { generateErrorAndErrorCode } from '../../utils/error/error.utils';
+import { generateError } from '../../utils/error/error.utils';
 
 export function* fetchTransferAsync({
   payload: { currentUser, creditCard, amount, balance, resetFormFields },
@@ -26,7 +26,7 @@ export function* fetchTransferAsync({
       TRANSFER_ERROR_CODE_TYPES;
 
     if (balance - Math.abs(amount) <= 0) {
-      throw generateErrorAndErrorCode(
+      throw generateError(
         NOT_ENOUGH_CASH,
         TRANSFER_ERROR_MESSAGES[NOT_ENOUGH_CASH]
       );
@@ -35,7 +35,7 @@ export function* fetchTransferAsync({
     const querySnapshot = yield call(getUserCreditCard, creditCard);
 
     if (!querySnapshot.size)
-      throw generateErrorAndErrorCode(
+      throw generateError(
         CREDIT_CARD_NOT_FOUND,
         TRANSFER_ERROR_MESSAGES[CREDIT_CARD_NOT_FOUND]
       );
@@ -43,7 +43,7 @@ export function* fetchTransferAsync({
     const [userToTransfer] = querySnapshot.docs;
 
     if (userToTransfer.data().creditCard === currentUser.creditCard)
-      throw generateErrorAndErrorCode(
+      throw generateError(
         CANNOT_TRANSFER_YOURSELF,
         TRANSFER_ERROR_MESSAGES[CANNOT_TRANSFER_YOURSELF]
       );

@@ -44,6 +44,8 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
       return { ...state, signInError: null };
     case USER_ACTION_TYPES.CLOSE_SIGN_UP_ERROR_MESSAGE:
       return { ...state, signUpError: null };
+    case USER_ACTION_TYPES.CLOSE_CLOSE_ACOUNT_ERROR_MESSAGE:
+      return { ...state, closeAccountError: null };
     case USER_ACTION_TYPES.RESET_USER_ERRORS:
       return {
         ...state,

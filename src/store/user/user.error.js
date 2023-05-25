@@ -124,11 +124,14 @@ export const getSignUpPasswordError = error => {
 };
 
 export const getCloseAccountPasswordError = error => {
-  const { MISSING_PASSWORD } = USER_ERROR_CODE_TYPES;
+  const { MISSING_PASSWORD, WRONG_PASSWORD } = USER_ERROR_CODE_TYPES;
 
   switch (error.code) {
     case MISSING_PASSWORD:
       return USER_ERROR_MESSAGES[MISSING_PASSWORD];
+
+    case WRONG_PASSWORD:
+      return USER_ERROR_MESSAGES[WRONG_PASSWORD];
 
     default:
       return null;

@@ -66,6 +66,9 @@ export const closeSignInErrorMessage = () =>
 export const closeSignUpErrorMessage = () =>
   createAction(USER_ACTION_TYPES.CLOSE_SIGN_UP_ERROR_MESSAGE);
 
+export const closeCloseAccountErrorMessage = () =>
+  createAction(USER_ACTION_TYPES.CLOSE_CLOSE_ACOUNT_ERROR_MESSAGE);
+
 export const resetErrors = () =>
   createAction(USER_ACTION_TYPES.RESET_USER_ERRORS);
 

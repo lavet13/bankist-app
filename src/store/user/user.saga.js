@@ -9,7 +9,7 @@ import {
   reauthenticateUserWithCredential,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
-import { generateErrorAndErrorCode } from '../../utils/error/error.utils';
+import { generateError } from '../../utils/error/error.utils';
 
 import {
   signInSuccess,
@@ -73,13 +73,13 @@ export function* signInWithEmail({ payload: { email, password } }) {
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       )
     )
-      throw generateErrorAndErrorCode(
+      throw generateError(
         INVALID_EMAIL_VALIDATION,
         USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
       );
 
     if (password.length < 6)
-      throw generateErrorAndErrorCode(
+      throw generateError(
         WEAK_PASSWORD_VALIDATION,
         USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
       );
@@ -123,7 +123,7 @@ export function* signUpWithEmail({
     const { displayName } = additionalDetails;
 
     if (!displayName.length)
-      throw generateErrorAndErrorCode(
+      throw generateError(
         DISPLAY_NAME_NOT_FOUND,
         USER_ERROR_MESSAGES[DISPLAY_NAME_NOT_FOUND]
       );
@@ -133,20 +133,17 @@ export function* signUpWithEmail({
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       )
     )
-      throw generateErrorAndErrorCode(
+      throw generateError(
         INVALID_EMAIL_VALIDATION,
         USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
       );
 
     if (password !== confirmPassword) {
-      throw generateErrorAndErrorCode(
-        WRONG_PASSWORD,
-        USER_ERROR_MESSAGES[WRONG_PASSWORD]
-      );
+      throw generateError(WRONG_PASSWORD, USER_ERROR_MESSAGES[WRONG_PASSWORD]);
     }
 
     if (password.length < 6)
-      throw generateErrorAndErrorCode(
+      throw generateError(
         WEAK_PASSWORD_VALIDATION,
         USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
       );
@@ -189,7 +186,7 @@ export function* closeUserAccount({
 
     if (password !== null) {
       if (password === '')
-        throw generateErrorAndErrorCode(
+        throw generateError(
           MISSING_PASSWORD,
           USER_ERROR_MESSAGES[MISSING_PASSWORD]
         );
@@ -202,6 +199,7 @@ export function* closeUserAccount({
         reauthenticateUserWithCredential,
         providerInfo
       );
+
       yield call(deleteUserAccount, user);
     } else {
       const providerInfo = getProvidersInfo(currentUser);
@@ -210,6 +208,7 @@ export function* closeUserAccount({
         reauthenticateUserWithCredential,
         providerInfo
       );
+
       yield call(deleteUserAccount, user);
     }
 

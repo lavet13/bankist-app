@@ -67,6 +67,7 @@ const SignIn = () => {
   };
   const handleSubmit = async event => {
     event.preventDefault();
+    if (emailSignInIsLoading || googleSignInIsLoading) return;
 
     dispatch(emailSignInStart(email, password));
   };

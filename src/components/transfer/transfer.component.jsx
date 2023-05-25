@@ -69,6 +69,7 @@ const Transfer = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
+
     if (isLoading) return;
 
     const creditCardNoSpaces = creditCard
@@ -150,7 +151,7 @@ const Transfer = () => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
           <Alert onClose={handleClose} severity='success'>
-            Кредит отправлен на проверку!
+            Транзакция произведена успешно!
           </Alert>
         </Snackbar>
 

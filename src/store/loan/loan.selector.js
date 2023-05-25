@@ -11,3 +11,18 @@ export const selectLoanArrayIsLoading = createSelector(
   [selectLoanReducer],
   loan => loan.isLoading
 );
+
+export const selectUploadLoanError = createSelector(
+  [selectLoanReducer],
+  loan => loan.uploadLoanError
+);
+
+export const selectUploadLoanIsLoading = createSelector(
+  [selectLoanReducer],
+  loan => loan.uploadLoanIsLoading
+);
+
+export const selectSnackbarIsOpen = createSelector(
+  [selectLoanReducer],
+  loan => loan.snackbarIsOpen
+);

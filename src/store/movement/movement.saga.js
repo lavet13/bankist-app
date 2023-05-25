@@ -6,11 +6,7 @@ import { fetchMovementsSuccess, fetchMovementsFailed } from './movement.action';
 
 export function* fetchMovementsAsync({ payload: { user } }) {
   try {
-    const querySnapshot = yield call(getMovements, user);
-
-    const movementItems = querySnapshot.docs.map(docSnapshot =>
-      docSnapshot.data()
-    );
+    const movementItems = yield call(getMovements, user);
 
     yield put(fetchMovementsSuccess(movementItems));
   } catch (error) {

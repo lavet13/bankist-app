@@ -10,7 +10,6 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  getRedirectResult,
   deleteUser,
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -44,11 +43,6 @@ import {
   listAll,
   deleteObject,
 } from 'firebase/storage';
-import { generateErrorAndErrorCode } from '../error/error.utils';
-import {
-  TRANSFER_ERROR_CODE_TYPES,
-  TRANSFER_ERROR_MESSAGES,
-} from '../../store/transfer/transfer.error';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDjVb89yW2JjQPvMjxSb3PiPRc73ttErGY',
@@ -135,18 +129,14 @@ export const createUserLoanDocument = async (userAuth, data) => {
   const folderSnapshot = await getDoc(folderDocRef);
 
   if (!folderSnapshot.exists()) {
-    try {
-      await setDoc(folderDocRef, {
-        images,
-        timestamp,
-        isAllowed: null,
-        ...formFields,
-      });
+    await setDoc(folderDocRef, {
+      images,
+      timestamp,
+      isAllowed: null,
+      ...formFields,
+    });
 
-      return await getDoc(folderDocRef);
-    } catch (error) {
-      console.log('error creating the loan', error.message);
-    }
+    return await getDoc(folderDocRef);
   }
 
   return folderSnapshot;
@@ -165,8 +155,8 @@ export const addMovementsToUser = async (objectsToAdd, userAuth) => {
   console.log('done');
 };
 
-export const getMovements = userAuth => {
-  return new Promise((resolve, reject) => {
+export const getMovements = async userAuth => {
+  const querySnapshot = await new Promise((resolve, reject) => {
     const q = query(
       collection(db, 'users', userAuth.id, 'movements'),
       orderBy('date', 'desc')
@@ -181,6 +171,12 @@ export const getMovements = userAuth => {
       reject
     );
   });
+
+  const movementItems = querySnapshot.docs.map(docSnapshot =>
+    docSnapshot.data()
+  );
+
+  return movementItems;
 };
 
 export const getUserCreditCard = async creditCard => {

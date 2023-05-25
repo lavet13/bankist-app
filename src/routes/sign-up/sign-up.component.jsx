@@ -72,6 +72,8 @@ const SignUp = () => {
   const handleSubmit = async event => {
     event.preventDefault();
 
+    if (emailSignUpIsLoading) return;
+
     dispatch(
       signUpStart({
         email,
