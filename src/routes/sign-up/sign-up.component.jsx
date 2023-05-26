@@ -40,21 +40,6 @@ const SignUp = () => {
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleClickShowPassword = () => setShowPassword(show => !show);
-  const handleClickShowConfirmPassword = () =>
-    setShowConfirmPassword(show => !show);
-  const handleMouseDownPassword = event => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeErrorMessage());
-
-  const handleChange = event => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
-
   const handleSubmit = async event => {
     event.preventDefault();
 
@@ -66,6 +51,20 @@ const SignUp = () => {
         displayName,
       })
     );
+  };
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(show => !show);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(show => !show);
+  const handleMouseDownPassword = event => event.preventDefault();
+  const handleErrorMessage = () => dispatch(closeErrorMessage());
+
+  const handleChange = event => {
+    const { name, value } = event.target;
+
+    setFormFields({ ...formFields, [name]: value });
   };
 
   const getSignUpDisplayNameError = error => {
