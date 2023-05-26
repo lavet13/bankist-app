@@ -6,6 +6,7 @@ export const MovementsContainer = styled.div`
   border-radius: 10px;
   overflow-y: auto;
   overflow-x: auto;
+  max-height: 960px;
 
   /* width */
   &::-webkit-scrollbar {

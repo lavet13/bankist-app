@@ -4,14 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   googleSignInStart,
   emailSignInStart,
-  closeErrorMessage,
+  closeSignInErrorMessage,
 } from '../../store/user/user.action';
 
 import {
   selectCurrentUserIsLoading,
   selectEmailSignInIsLoading,
-  selectError,
   selectGoogleSignInIsLoading,
+  selectSignInError,
+  selectSignOutError,
 } from '../../store/user/user.selector';
 
 import Spinner from '../../components/spinner/spinner.component';
@@ -31,6 +32,12 @@ import { Close } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 
 import { SignInFormContainer } from './sign-in.styles';
+import {
+  getSignInEmailError,
+  getSignInPasswordError,
+  getSignInWarningMessage,
+} from '../../store/user/user.error';
+import { getErrorMessage } from '../../utils/error/error.utils';
 
 const defaultFormFields = {
   email: '',
@@ -42,7 +49,8 @@ const SignIn = () => {
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
   const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
-  const error = useSelector(selectError);
+  const error = useSelector(selectSignInError);
+  const signOutError = useSelector(selectSignOutError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { email, password } = formFields;
@@ -50,7 +58,7 @@ const SignIn = () => {
 
   const handleClickShowPassword = () => setShowPassword(show => !show);
   const handleMouseDownPassword = event => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeErrorMessage());
+  const handleErrorMessage = () => dispatch(closeSignInErrorMessage());
   const signInWithGoogle = () => dispatch(googleSignInStart());
   const handleChange = event => {
     const { name, value } = event.target;
@@ -59,62 +67,15 @@ const SignIn = () => {
   };
   const handleSubmit = async event => {
     event.preventDefault();
+    if (emailSignInIsLoading || googleSignInIsLoading) return;
 
     dispatch(emailSignInStart(email, password));
   };
 
-  const getErrorMessage = error => {
-    switch (error.code) {
-      case 'auth/network-request-failed':
-        return 'Ошибка сети! Это все что могу сказать!';
-      case 'auth/popup-blocked':
-        return 'Заблокирован сервером Firebase!';
-      default:
-        return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
-    }
-  };
-
-  const getWarningMessage = error => {
-    switch (error.code) {
-      case 'auth/cancelled-popup-request':
-        return 'Аутентификация при помощи Google была отменена!';
-      case 'auth/popup-closed-by-user':
-        return 'Аутентификация при помощи Google была отменена пользователем!';
-      default:
-        return null;
-    }
-  };
-
-  const getSignInEmailError = error => {
-    switch (error.code) {
-      case 'auth/user-not-found':
-        return 'Нет пользователя ассоциированного с данным E-mail';
-
-      case 'auth/invalid-email-validation':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const getSignInPasswordError = error => {
-    switch (error.code) {
-      case 'auth/wrong-password':
-        return 'Указан неправильный пароль!';
-
-      case 'auth/weak-password-validation':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const hasUnknownErrors = error =>
+  const hasUnknownError = error =>
     getSignInPasswordError(error) ||
     getSignInEmailError(error) ||
-    getWarningMessage(error);
+    getSignInWarningMessage(error);
 
   return (
     <Fragment>
@@ -192,7 +153,7 @@ const SignIn = () => {
             >
               <span>Войти через Google</span>
             </LoadingButton>
-            {error && hasUnknownErrors(error) === null ? (
+            {error && hasUnknownError(error) === null ? (
               <Alert
                 action={
                   <IconButton
@@ -212,7 +173,27 @@ const SignIn = () => {
               </Alert>
             ) : null}
 
-            {error && getWarningMessage(error) && (
+            {signOutError && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='error'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Ошибка</AlertTitle>
+                {getErrorMessage(signOutError)}
+              </Alert>
+            )}
+
+            {error && getSignInWarningMessage(error) && (
               <Alert
                 action={
                   <IconButton
@@ -228,7 +209,7 @@ const SignIn = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Информация</AlertTitle>
-                {getWarningMessage(error)}
+                {getSignInWarningMessage(error)}
               </Alert>
             )}
           </SignInFormContainer>

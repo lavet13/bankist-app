@@ -4,10 +4,12 @@ import { userReducer } from './user/user.reducer';
 import { loanReducer } from './loan/loan.reducer';
 import { movementReducer } from './movement/movement.reducer';
 import { userProfileReducer } from './user-profile/user-profile.reducer';
+import { transferReducer } from './transfer/transfer.reducer';
 
 export const rootReducer = combineReducers({
   user: userReducer,
   userProfile: userProfileReducer,
   loan: loanReducer,
   movement: movementReducer,
+  transfer: transferReducer,
 });

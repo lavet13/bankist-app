@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import {
   selectCurrentUser,
@@ -18,13 +19,16 @@ import {
   NavigationWrapperFlex,
   Anchor,
 } from './navigation.styles';
+import { Button } from '@mui/material';
 
 const Navigation = () => {
+  const navigate = useNavigate();
   const currentUser = useSelector(selectCurrentUser);
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const isUserDropdownOpen = useSelector(selectUserDropdownIsOpen);
 
-  console.log('render/navigation');
+  const navigateToSignInHandler = () => navigate('/sign-in');
+  const navigateToSignUpHandler = () => navigate('/sign-up');
 
   return (
     <NavigationContainer>
@@ -37,8 +41,12 @@ const Navigation = () => {
           <NavigationWrapperFlex>
             {!currentUser ? (
               <Fragment>
-                <Anchor to='/sign-in'>Вход</Anchor>
-                <Anchor to='/sign-up'>Регистрация</Anchor>
+                <Button variant='text' onClick={navigateToSignInHandler}>
+                  Вход
+                </Button>
+                <Button variant='text' onClick={navigateToSignUpHandler}>
+                  Регистрация
+                </Button>
               </Fragment>
             ) : (
               <Fragment>

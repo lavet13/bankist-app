@@ -7,7 +7,10 @@ export const USER_INITIAL_STATE = {
   googleSignInIsLoading: false,
   emailSignUpIsLoading: false,
   closeAccountIsLoading: false,
-  error: null,
+  signInError: null,
+  signUpError: null,
+  signOutError: null,
+  closeAccountError: null,
 };
 
 export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
@@ -25,37 +28,41 @@ export const userReducer = (state = USER_INITIAL_STATE, action = {}) => {
     case USER_ACTION_TYPES.CHECK_USER_SESSION:
     case USER_ACTION_TYPES.SIGN_OUT_START:
       return { ...state, isLoading: true };
-    case USER_ACTION_TYPES.SIGN_UP_SUCCESS:
-      return { ...state, error: null, emailSignUpIsLoading: true };
     case USER_ACTION_TYPES.SIGN_IN_SUCCESS:
-      return {
-        ...state,
-        currentUser: payload,
-        isLoading: false,
-        error: null,
-        emailSignInIsLoading: false,
-        googleSignInIsLoading: false,
-      };
+      return { ...state, currentUser: payload };
     case USER_ACTION_TYPES.SIGN_OUT_SUCCESS:
-      return { ...state, currentUser: null, isLoading: false };
-    case USER_ACTION_TYPES.CLOSE_ACCOUNT_SUCCESS:
-      return { ...state, closeAccountIsLoading: false };
+      return { ...state, currentUser: null };
     case USER_ACTION_TYPES.SIGN_OUT_FAILED:
+      return { ...state, signOutError: payload };
     case USER_ACTION_TYPES.SIGN_UP_FAILED:
-      return { ...state, error: payload, emailSignUpIsLoading: false };
+      return { ...state, signUpError: payload };
     case USER_ACTION_TYPES.SIGN_IN_FAILED:
+      return { ...state, signInError: payload };
+    case USER_ACTION_TYPES.CLOSE_ACCOUNT_FAILED:
+      return { ...state, closeAccountError: payload };
+    case USER_ACTION_TYPES.CLOSE_SIGN_IN_ERROR_MESSAGE:
+      return { ...state, signInError: null };
+    case USER_ACTION_TYPES.CLOSE_SIGN_UP_ERROR_MESSAGE:
+      return { ...state, signUpError: null };
+    case USER_ACTION_TYPES.CLOSE_CLOSE_ACOUNT_ERROR_MESSAGE:
+      return { ...state, closeAccountError: null };
+    case USER_ACTION_TYPES.RESET_USER_ERRORS:
       return {
         ...state,
-        error: payload,
+        signInError: null,
+        signUpError: null,
+        closeAccountError: null,
+        signOutError: null,
+      };
+    case USER_ACTION_TYPES.RESET_USER_LOADING:
+      return {
+        ...state,
         isLoading: false,
         emailSignInIsLoading: false,
         emailSignUpIsLoading: false,
         googleSignInIsLoading: false,
+        closeAccountIsLoading: false,
       };
-    case USER_ACTION_TYPES.CLOSE_ACCOUNT_FAILED:
-      return { ...state, error: payload, closeAccountIsLoading: false };
-    case USER_ACTION_TYPES.CLOSE_ERROR_MESSAGE:
-      return { ...state, error: null };
     default:
       return state;
   }

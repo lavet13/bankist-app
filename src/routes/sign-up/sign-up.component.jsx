@@ -1,16 +1,8 @@
 import { Fragment, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { closeErrorMessage, signUpStart } from '../../store/user/user.action';
-
 import Spinner from '../../components/spinner/spinner.component';
 
-import { SignUpContainer } from './sign-up.styles';
-import {
-  selectCurrentUserIsLoading,
-  selectEmailSignUpIsLoading,
-  selectError,
-} from '../../store/user/user.selector';
 import {
   FormControl,
   FilledInput,
@@ -22,7 +14,29 @@ import {
   AlertTitle,
 } from '@mui/material';
 import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
+
 import { LoadingButton } from '@mui/lab';
+
+import {
+  selectCurrentUserIsLoading,
+  selectEmailSignUpIsLoading,
+  selectSignUpError,
+} from '../../store/user/user.selector';
+
+import {
+  getSignUpDisplayNameError,
+  getSignUpEmailError,
+  getSignUpPasswordError,
+} from '../../store/user/user.error';
+
+import { getErrorMessage } from '../../utils/error/error.utils';
+
+import {
+  closeSignUpErrorMessage,
+  signUpStart,
+} from '../../store/user/user.action';
+
+import { SignUpContainer } from './sign-up.styles';
 
 const defaultFormFields = {
   displayName: '',
@@ -35,13 +49,30 @@ const SignUp = () => {
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
-  const error = useSelector(selectError);
+  const error = useSelector(selectSignUpError);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
   const { displayName, email, password, confirmPassword } = formFields;
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword(show => !show);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(show => !show);
+  const handleMouseDownPassword = event => event.preventDefault();
+  const handleErrorMessage = () => dispatch(closeSignUpErrorMessage());
+
+  const handleChange = event => {
+    const { name, value } = event.target;
+
+    setFormFields({ ...formFields, [name]: value });
+  };
+
   const handleSubmit = async event => {
     event.preventDefault();
+
+    if (emailSignUpIsLoading) return;
 
     dispatch(
       signUpStart({
@@ -53,70 +84,7 @@ const SignUp = () => {
     );
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword(show => !show);
-  const handleClickShowConfirmPassword = () =>
-    setShowConfirmPassword(show => !show);
-  const handleMouseDownPassword = event => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeErrorMessage());
-
-  const handleChange = event => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
-
-  const getSignUpDisplayNameError = error => {
-    switch (error.code) {
-      case 'auth/display-name-not-found':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const getSignUpEmailError = error => {
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        return 'Уже существует аккаунт с таким E-mail';
-      case 'auth/invalid-email':
-        return 'Неверный формат E-mail';
-      case 'auth/invalid-email-validation':
-        return error.message;
-
-      default:
-        return null;
-    }
-  };
-
-  const getSignUpPasswordError = error => {
-    switch (error.code) {
-      case 'auth/wrong-password':
-        return error.message;
-      case 'auth/weak-password-validation':
-        return error.message;
-      case 'auth/weak-password':
-        return 'Пароль должен составлять как минимум 6 символов';
-
-      default:
-        return null;
-    }
-  };
-
-  const getErrorMessage = error => {
-    switch (error.code) {
-      case 'auth/network-request-failed':
-        return 'Ошибка сети! Это все что могу сказать!';
-      case 'auth/popup-blocked':
-        return 'Заблокирован сервером Firebase!';
-      default:
-        return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
-    }
-  };
-
-  const hasUnknownErrors = error =>
+  const hasUnknownError = error =>
     getSignUpDisplayNameError(error) ||
     getSignUpEmailError(error) ||
     getSignUpPasswordError(error);
@@ -211,7 +179,6 @@ const SignUp = () => {
               name='confirmPassword'
               value={confirmPassword}
               onChange={handleChange}
-              required
               endAdornment={
                 <InputAdornment position='end'>
                   <IconButton
@@ -241,7 +208,7 @@ const SignUp = () => {
             Зарегестрироваться
           </LoadingButton>
 
-          {error && hasUnknownErrors(error) === null ? (
+          {error && hasUnknownError(error) === null ? (
             <Alert
               action={
                 <IconButton
