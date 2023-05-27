@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
-import InputMask from 'react-input-mask';
 
-import { BUTTON_TYPE_CLASSES } from '../button/button.component';
+import { ErrorMessage, LoanContainer } from './loan.styles';
 
-import { LoanContainer } from './loan.styles';
-
-import {
-  Title,
-  OperationInput,
-  Form,
-  OperationLabel,
-} from '../transfer/transfer.styles';
+import { Title, Form } from '../transfer/transfer.styles';
 import {
   Snackbar,
   Alert,
@@ -21,6 +13,7 @@ import {
   Grow,
   TextField,
   Button,
+  InputAdornment,
 } from '@mui/material';
 import {
   selectSnackbarIsOpen,
@@ -33,18 +26,29 @@ import {
   uploadLoanStart,
 } from '../../store/loan/loan.action';
 import {
+  getLoanFormAmountError,
+  getLoanFormCollateralError,
   getLoanFormCreditCardError,
+  getLoanFormDisplayNameError,
+  getLoanFormEmailError,
+  getLoanFormEmploymentError,
+  getLoanFormFinancialsError,
+  getLoanFormPassportPhotoError,
   getLoanFormTelephoneError,
 } from '../../store/loan/loan.error';
 import { Close, Send, UploadFile } from '@mui/icons-material';
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
+import TelephoneInput from '../telephone-input/telephone-input.component';
+import CreditCardInput from '../credit-card-input/credit-card-input.component';
+import NumberInput from '../number-input/number-input.component';
 
 const defaultFormFields = {
   displayName: '',
   email: '',
-  tel: '',
+  tel: { value: '', formattedValue: '' },
   creditCard: '',
+  amount: '',
 };
 
 const defaultFormFileFields = {
@@ -65,11 +69,12 @@ const LoanForm = () => {
   const error = useSelector(selectUploadLoanError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
-  const { displayName, email, tel, creditCard } = formFields;
+  const { displayName, email, tel, creditCard, amount } = formFields;
+  const { passportPhoto, employment, financials, collateral } = formFileFields;
 
-  const resetFormField = reset => {
+  const resetFormField = () => {
     setFormFields(defaultFormFields);
-    reset();
+    this.call();
   };
 
   const handleClose = (event, reason) => {
@@ -84,18 +89,26 @@ const LoanForm = () => {
 
   const handleFilesChange = event => {
     const { name, files } = event.target;
+    console.log(formFileFields);
 
     setFormFileFields({ ...formFileFields, [name]: files[0] });
   };
 
   const handleChange = event => {
-    const { name, value } = event.target;
+    const { name, value, formattedValue } = event.target;
 
-    setFormFields({ ...formFields, [name]: value });
+    if (name === 'tel')
+      setFormFields({
+        ...formFields,
+        [name]: { value, formattedValue },
+      });
+    else setFormFields({ ...formFields, [name]: value });
   };
 
   const handleSubmit = async event => {
     event.preventDefault();
+    const { reset } = event.target;
+    console.log(formFileFields);
 
     if (isLoading) return;
 
@@ -104,13 +117,21 @@ const LoanForm = () => {
         currentUser,
         formFileFields,
         formFields,
-        resetForm: resetFormField.bind(null, event.target.reset),
+        resetForm: resetFormField.bind(reset),
       })
     );
   };
 
   const hasUnknownError = error =>
-    getLoanFormTelephoneError(error) || getLoanFormCreditCardError(error);
+    getLoanFormTelephoneError(error) ||
+    getLoanFormCreditCardError(error) ||
+    getLoanFormDisplayNameError(error) ||
+    getLoanFormEmailError(error) ||
+    getLoanFormAmountError(error) ||
+    getLoanFormPassportPhotoError(error) ||
+    getLoanFormEmploymentError(error) ||
+    getLoanFormFinancialsError(error) ||
+    getLoanFormCollateralError(error);
 
   return (
     <LoanContainer>
@@ -118,6 +139,8 @@ const LoanForm = () => {
       <Form onSubmit={handleSubmit}>
         <TextField
           label='ФИО *'
+          error={error && !!getLoanFormDisplayNameError(error)}
+          helperText={error && getLoanFormDisplayNameError(error)}
           type='text'
           name='displayName'
           value={displayName}
@@ -127,46 +150,67 @@ const LoanForm = () => {
 
         <TextField
           label='E-mail'
-          type='email'
+          error={error && !!getLoanFormEmailError(error)}
+          helperText={error && getLoanFormEmailError(error)}
           name='email'
           value={email}
           onChange={handleChange}
           variant='filled'
         />
 
-        <InputMask
+        <TextField
           label='Номер телефона'
+          error={error && !!getLoanFormTelephoneError(error)}
+          helperText={error && getLoanFormTelephoneError(error)}
           variant='filled'
           type='tel'
-          mask='+7 (999) 999-99-99'
-          maskChar={'_'}
           name='tel'
           value={tel}
           onChange={handleChange}
-        >
-          {inputProps => <TextField {...inputProps} />}
-        </InputMask>
+          InputProps={{ inputComponent: TelephoneInput }}
+        />
 
-        <InputMask
+        <TextField
           label='Номер карты'
-          type='text'
-          mask='9999 9999 9999 9999'
-          maskChar={'_'}
+          error={error && !!getLoanFormCreditCardError(error)}
+          helperText={error && getLoanFormCreditCardError(error)}
+          variant='filled'
           name='creditCard'
           value={creditCard}
           onChange={handleChange}
+          InputProps={{ inputComponent: CreditCardInput }}
+        />
+
+        <TextField
+          label='Сумма'
+          error={error && !!getLoanFormAmountError(error)}
+          helperText={error && getLoanFormAmountError(error)}
           variant='filled'
-        >
-          {inputProps => <TextField {...inputProps} />}
-        </InputMask>
+          name='amount'
+          value={amount}
+          onChange={handleChange}
+          InputProps={{
+            inputComponent: NumberInput,
+            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
+          }}
+        />
 
         <Button
           component='label'
           variant='outlined'
+          size='small'
+          color={`${
+            passportPhoto
+              ? 'success'
+              : !(error && getLoanFormPassportPhotoError(error))
+              ? 'primary'
+              : 'error'
+          }`}
           startIcon={<UploadFile />}
-          sx={{ marginRight: '10px' }}
+          sx={{ marginRight: '10px', fontSize: '12px' }}
         >
           Паспорт фото
+          <span></span>
           <input
             type='file'
             name='passportPhoto'
@@ -175,12 +219,25 @@ const LoanForm = () => {
             onChange={handleFilesChange}
           />
         </Button>
+        <ErrorMessage error={error && getLoanFormPassportPhotoError(error)}>
+          {error && getLoanFormPassportPhotoError(error)
+            ? getLoanFormPassportPhotoError(error)
+            : passportPhoto?.name}
+        </ErrorMessage>
 
         <Button
+          size='small'
           component='label'
           variant='outlined'
+          color={`${
+            employment
+              ? 'success'
+              : !(error && getLoanFormEmploymentError(error))
+              ? 'primary'
+              : 'error'
+          }`}
           startIcon={<UploadFile />}
-          sx={{ marginRight: '10px' }}
+          sx={{ marginRight: '10px', fontSize: '12px' }}
         >
           Трудовая книжка или справка
           <input
@@ -191,12 +248,25 @@ const LoanForm = () => {
             hidden
           />
         </Button>
+        <ErrorMessage error={error && getLoanFormEmploymentError(error)}>
+          {error && getLoanFormEmploymentError(error)
+            ? getLoanFormEmploymentError(error)
+            : employment?.name}
+        </ErrorMessage>
 
         <Button
+          size='small'
           component='label'
           variant='outlined'
+          color={`${
+            financials
+              ? 'success'
+              : !(error && getLoanFormFinancialsError(error))
+              ? 'primary'
+              : 'error'
+          }`}
           startIcon={<UploadFile />}
-          sx={{ marginRight: '10px' }}
+          sx={{ marginRight: '10px', fontSize: '12px' }}
         >
           Выписка из банковского счета
           <input
@@ -207,10 +277,23 @@ const LoanForm = () => {
             hidden
           />
         </Button>
+        <ErrorMessage error={error && getLoanFormFinancialsError(error)}>
+          {error && getLoanFormFinancialsError(error)
+            ? getLoanFormFinancialsError(error)
+            : financials?.name}
+        </ErrorMessage>
 
         <Button
+          size='small'
           component='label'
           variant='outlined'
+          color={`${
+            collateral
+              ? 'success'
+              : !(error && getLoanFormCollateralError(error))
+              ? 'primary'
+              : 'error'
+          }`}
           startIcon={<UploadFile />}
           sx={{ marginRight: '10px' }}
         >
@@ -223,6 +306,11 @@ const LoanForm = () => {
             hidden
           />
         </Button>
+        <ErrorMessage error={error && getLoanFormCollateralError(error)}>
+          {error && getLoanFormCollateralError(error)
+            ? getLoanFormCollateralError(error)
+            : collateral?.name}
+        </ErrorMessage>
 
         <LoadingButton
           size='medium'
@@ -261,7 +349,7 @@ const LoanForm = () => {
           autoHideDuration={6000}
           onClose={handleClose}
           TransitionComponent={Grow}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           <Alert onClose={handleClose} severity='success'>
             Кредит отправлен на проверку!
