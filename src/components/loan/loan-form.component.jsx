@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
-import { ErrorMessage, LoanContainer } from './loan.styles';
+import { LoanContainer, MuiFileInputStyled } from './loan.styles';
 
 import { Title, Form } from '../transfer/transfer.styles';
 import {
@@ -12,7 +12,6 @@ import {
   AlertTitle,
   Grow,
   TextField,
-  Button,
   InputAdornment,
 } from '@mui/material';
 import {
@@ -36,12 +35,13 @@ import {
   getLoanFormPassportPhotoError,
   getLoanFormTelephoneError,
 } from '../../store/loan/loan.error';
-import { Close, Send, UploadFile } from '@mui/icons-material';
+import { Close, Send } from '@mui/icons-material';
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import TelephoneInput from '../telephone-input/telephone-input.component';
 import CreditCardInput from '../credit-card-input/credit-card-input.component';
 import NumberInput from '../number-input/number-input.component';
+import { createAction } from '../../utils/reducer/reducer.utils';
 
 const defaultFormFields = {
   displayName: '',
@@ -51,11 +51,39 @@ const defaultFormFields = {
   amount: '',
 };
 
-const defaultFormFileFields = {
+const INITIAL_FILES_STATE = {
   passportPhoto: null,
   employment: null,
   financials: null,
   collateral: null,
+};
+
+const FILES_ACTION_TYPES = {
+  SET_PASSPORT_PHOTO: 'SET_PASSPORT_PHOTO',
+  SET_EMPLOYMENT: 'SET_EMPLOYMENT',
+  SET_FINANCIALS: 'SET_FINANCIALS',
+  COLLATERAL: 'COLLATERAL',
+};
+
+const fileReducer = (state, action) => {
+  const { type, payload } = action;
+
+  switch (type) {
+    case FILES_ACTION_TYPES.SET_PASSPORT_PHOTO:
+      return { ...state, passportPhoto: payload };
+
+    case FILES_ACTION_TYPES.SET_EMPLOYMENT:
+      return { ...state, employment: payload };
+
+    case FILES_ACTION_TYPES.SET_FINANCIALS:
+      return { ...state, financials: payload };
+
+    case FILES_ACTION_TYPES.COLLATERAL:
+      return { ...state, collateral: payload };
+
+    default:
+      throw new Error(`Unhandled type of ${type} in loanReducer`);
+  }
 };
 
 const LoanForm = () => {
@@ -63,14 +91,14 @@ const LoanForm = () => {
   const currentUser = useSelector(selectCurrentUser);
 
   const [formFields, setFormFields] = useState(defaultFormFields);
-  const [formFileFields, setFormFileFields] = useState(defaultFormFileFields);
+  const [files, dispatchFile] = useReducer(fileReducer, INITIAL_FILES_STATE);
 
   const isLoading = useSelector(selectUploadLoanIsLoading);
   const error = useSelector(selectUploadLoanError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
   const { displayName, email, tel, creditCard, amount } = formFields;
-  const { passportPhoto, employment, financials, collateral } = formFileFields;
+  const { passportPhoto, employment, financials, collateral } = files;
 
   const resetFormField = () => setFormFields(defaultFormFields);
 
@@ -84,12 +112,17 @@ const LoanForm = () => {
 
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
-  const handleFilesChange = event => {
-    const { name, files } = event.target;
-    console.log(formFileFields);
+  const handlePassportPhotoChange = value =>
+    dispatchFile(createAction(FILES_ACTION_TYPES.SET_PASSPORT_PHOTO, value));
 
-    setFormFileFields({ ...formFileFields, [name]: files[0] });
-  };
+  const handleEmploymentChange = value =>
+    dispatchFile(createAction(FILES_ACTION_TYPES.SET_EMPLOYMENT, value));
+
+  const handleFinancialsChange = value =>
+    dispatchFile(createAction(FILES_ACTION_TYPES.SET_FINANCIALS, value));
+
+  const handleCollateralChange = value =>
+    dispatchFile(createAction(FILES_ACTION_TYPES.COLLATERAL, value));
 
   const handleChange = event => {
     const { name, value, formattedValue } = event.target;
@@ -104,14 +137,14 @@ const LoanForm = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    console.log(formFileFields);
+    console.log(files);
 
     if (isLoading) return;
 
     dispatch(
       uploadLoanStart({
         currentUser,
-        formFileFields,
+        files,
         formFields,
         resetFormField,
       })
@@ -193,139 +226,29 @@ const LoanForm = () => {
           }}
         />
 
-        <Button
-          component='label'
-          variant='outlined'
-          size='small'
-          color={`${
-            passportPhoto
-              ? 'success'
-              : !(error && getLoanFormPassportPhotoError(error))
-              ? 'primary'
-              : 'error'
-          }`}
-          startIcon={<UploadFile />}
-          sx={{ marginRight: '10px', fontSize: '12px' }}
-        >
-          Паспорт фото
-          <input
-            type='file'
-            name='passportPhoto'
-            accept='.png, .jpeg, .jpg'
-            hidden
-            onChange={handleFilesChange}
-          />
-        </Button>
-        <ErrorMessage
-          error={
-            error &&
-            !passportPhoto?.name &&
-            getLoanFormPassportPhotoError(error)
-          }
-        >
-          {error && getLoanFormPassportPhotoError(error) && !passportPhoto?.name
-            ? getLoanFormPassportPhotoError(error)
-            : passportPhoto?.name}
-        </ErrorMessage>
+        <MuiFileInputStyled
+          value={passportPhoto}
+          onChange={handlePassportPhotoChange}
+          placeholder='Паспорт фото'
+        />
 
-        <Button
-          size='small'
-          component='label'
-          variant='outlined'
-          color={`${
-            employment
-              ? 'success'
-              : !(error && getLoanFormEmploymentError(error))
-              ? 'primary'
-              : 'error'
-          }`}
-          startIcon={<UploadFile />}
-          sx={{ marginRight: '10px', fontSize: '12px' }}
-        >
-          Трудовая книжка или справка
-          <input
-            type='file'
-            name='employment'
-            onChange={handleFilesChange}
-            accept='.png, .jpeg, .jpg'
-            hidden
-          />
-        </Button>
-        <ErrorMessage
-          error={
-            error && !employment?.name && getLoanFormEmploymentError(error)
-          }
-        >
-          {error && getLoanFormEmploymentError(error) && !employment?.name
-            ? getLoanFormEmploymentError(error)
-            : employment?.name}
-        </ErrorMessage>
+        <MuiFileInputStyled
+          value={employment}
+          onChange={handleEmploymentChange}
+          placeholder='Трудовая книжка или справка'
+        />
 
-        <Button
-          size='small'
-          component='label'
-          variant='outlined'
-          color={`${
-            financials
-              ? 'success'
-              : !(error && getLoanFormFinancialsError(error))
-              ? 'primary'
-              : 'error'
-          }`}
-          startIcon={<UploadFile />}
-          sx={{ marginRight: '10px', fontSize: '12px' }}
-        >
-          Выписка из банковского счета
-          <input
-            type='file'
-            name='financials'
-            onChange={handleFilesChange}
-            accept='.png, .jpeg, .jpg'
-            hidden
-          />
-        </Button>
-        <ErrorMessage
-          error={
-            error && !financials?.name && getLoanFormFinancialsError(error)
-          }
-        >
-          {error && getLoanFormFinancialsError(error) && !financials?.name
-            ? getLoanFormFinancialsError(error)
-            : financials?.name}
-        </ErrorMessage>
+        <MuiFileInputStyled
+          value={financials}
+          onChange={handleFinancialsChange}
+          placeholder='Выписка из банковского счета'
+        />
 
-        <Button
-          size='small'
-          component='label'
-          variant='outlined'
-          color={`${
-            collateral
-              ? 'success'
-              : !(error && getLoanFormCollateralError(error))
-              ? 'primary'
-              : 'error'
-          }`}
-          startIcon={<UploadFile />}
-          sx={{ marginRight: '10px' }}
-        >
-          Документы, связанные с залогом или обеспечением кредита
-          <input
-            type='file'
-            name='collateral'
-            onChange={handleFilesChange}
-            accept='.png, .jpeg, .jpg'
-            hidden
-          />
-        </Button>
-        <ErrorMessage
-          error={
-            error && !collateral?.name && getLoanFormCollateralError(error)
-          }
-        >
-          {error && getLoanFormCollateralError(error) && !collateral?.name
-            ? getLoanFormCollateralError(error)
-            : collateral?.name}
-        </ErrorMessage>
+        <MuiFileInputStyled
+          value={collateral}
+          onChange={handleCollateralChange}
+          placeholder='Документы, связанные с залогом или обеспечением кредита'
+        />
 
         <LoadingButton
           size='medium'

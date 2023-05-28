@@ -316,6 +316,7 @@ export const isAdmin = async userAuth => {
 
 export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
   const userDocRef = doc(db, 'users', userAuth.id);
+  const movementDocRef = doc(userDocRef, 'movements', uuidv4());
   const loanDocRef = doc(userDocRef, 'loans', loan.id);
 
   const loanSnapshot = await getDoc(loanDocRef);
@@ -332,6 +333,13 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
     isAllowed: flag,
     timestamp: serverTimestamp(),
   });
+
+  if (flag) {
+    await setDoc(movementDocRef, {
+      date: serverTimestamp(),
+      value: Math.abs(loan.amount),
+    });
+  }
 };
 
 export const deleteUserAccount = async user => {

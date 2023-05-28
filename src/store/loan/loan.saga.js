@@ -45,7 +45,7 @@ export function* fetchLoansAsync() {
 }
 
 export function* uploadLoan({
-  payload: { currentUser, formFileFields, formFields, resetForm },
+  payload: { currentUser, formFileFields, formFields, resetFormField },
 }) {
   try {
     const {
@@ -128,7 +128,7 @@ export function* uploadLoan({
     const newFormFields = { ...formFields, tel: telFormat };
 
     yield call(uploadInfoForLoan, currentUser, formFileFields, newFormFields);
-    yield call(resetForm);
+    yield call(resetFormField);
     yield put(uploadLoanSuccess());
   } catch (error) {
     yield put(uploadLoanFailed(error));
