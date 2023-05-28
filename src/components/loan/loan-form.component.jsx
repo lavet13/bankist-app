@@ -72,10 +72,7 @@ const LoanForm = () => {
   const { displayName, email, tel, creditCard, amount } = formFields;
   const { passportPhoto, employment, financials, collateral } = formFileFields;
 
-  const resetFormField = () => {
-    setFormFields(defaultFormFields);
-    this.call();
-  };
+  const resetFormField = () => setFormFields(defaultFormFields);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -107,7 +104,6 @@ const LoanForm = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-    const { reset } = event.target;
     console.log(formFileFields);
 
     if (isLoading) return;
@@ -117,9 +113,11 @@ const LoanForm = () => {
         currentUser,
         formFileFields,
         formFields,
-        resetForm: resetFormField.bind(reset),
+        resetFormField,
       })
     );
+
+    event.target.reset();
   };
 
   const hasUnknownError = error =>
@@ -210,7 +208,6 @@ const LoanForm = () => {
           sx={{ marginRight: '10px', fontSize: '12px' }}
         >
           Паспорт фото
-          <span></span>
           <input
             type='file'
             name='passportPhoto'
@@ -219,8 +216,14 @@ const LoanForm = () => {
             onChange={handleFilesChange}
           />
         </Button>
-        <ErrorMessage error={error && getLoanFormPassportPhotoError(error)}>
-          {error && getLoanFormPassportPhotoError(error)
+        <ErrorMessage
+          error={
+            error &&
+            !passportPhoto?.name &&
+            getLoanFormPassportPhotoError(error)
+          }
+        >
+          {error && getLoanFormPassportPhotoError(error) && !passportPhoto?.name
             ? getLoanFormPassportPhotoError(error)
             : passportPhoto?.name}
         </ErrorMessage>
@@ -248,8 +251,12 @@ const LoanForm = () => {
             hidden
           />
         </Button>
-        <ErrorMessage error={error && getLoanFormEmploymentError(error)}>
-          {error && getLoanFormEmploymentError(error)
+        <ErrorMessage
+          error={
+            error && !employment?.name && getLoanFormEmploymentError(error)
+          }
+        >
+          {error && getLoanFormEmploymentError(error) && !employment?.name
             ? getLoanFormEmploymentError(error)
             : employment?.name}
         </ErrorMessage>
@@ -277,8 +284,12 @@ const LoanForm = () => {
             hidden
           />
         </Button>
-        <ErrorMessage error={error && getLoanFormFinancialsError(error)}>
-          {error && getLoanFormFinancialsError(error)
+        <ErrorMessage
+          error={
+            error && !financials?.name && getLoanFormFinancialsError(error)
+          }
+        >
+          {error && getLoanFormFinancialsError(error) && !financials?.name
             ? getLoanFormFinancialsError(error)
             : financials?.name}
         </ErrorMessage>
@@ -306,8 +317,12 @@ const LoanForm = () => {
             hidden
           />
         </Button>
-        <ErrorMessage error={error && getLoanFormCollateralError(error)}>
-          {error && getLoanFormCollateralError(error)
+        <ErrorMessage
+          error={
+            error && !collateral?.name && getLoanFormCollateralError(error)
+          }
+        >
+          {error && getLoanFormCollateralError(error) && !collateral?.name
             ? getLoanFormCollateralError(error)
             : collateral?.name}
         </ErrorMessage>
