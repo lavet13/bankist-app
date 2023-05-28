@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
 import { selectCurrentUser } from '../../store/user/user.selector';
-import InputMask from 'react-input-mask';
 
 import {
   Alert,
@@ -34,6 +33,8 @@ import {
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
+import NumberInput from '../number-input/number-input.component';
+import CreditCardInput from '../credit-card-input/credit-card-input.component';
 
 const defaultFormFields = {
   creditCard: '',
@@ -72,15 +73,12 @@ const Transfer = () => {
 
     if (isLoading) return;
 
-    const creditCardNoSpaces = creditCard
-      .split('')
-      .filter(char => char !== ' ')
-      .join('');
+    console.log(formFields);
 
     dispatch(
       transferStart({
         currentUser,
-        creditCard: creditCardNoSpaces,
+        creditCard,
         amount,
         balance,
         resetFormFields,
@@ -97,39 +95,30 @@ const Transfer = () => {
     <TransferContainer>
       <Title>Перечисление депозита</Title>
       <Form onSubmit={handleSubmit}>
-        <InputMask
-          type='text'
+        <TextField
           label='Кредитная карта'
-          variant='filled'
-          helperText={error && getTransferCreditCardError(error)}
-          mask='9999 9999 9999 9999'
-          error={error && !!getTransferCreditCardError(error)}
-          maskChar={null}
           name='creditCard'
           value={creditCard}
           onChange={handleChange}
-        >
-          {inputProps => <TextField {...inputProps} />}
-        </InputMask>
-
-        <InputMask
-          id='transfer-amount'
-          label='Сумма'
-          InputProps={{
-            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
-          }}
-          mask='999999999'
-          maskChar={null}
           variant='filled'
-          type='text'
-          error={error && !!getTransferAmountError(error)}
-          helperText={error && getTransferAmountError(error)}
+          error={error && !!getTransferCreditCardError(error)}
+          helperText={error && getTransferCreditCardError(error)}
+          InputProps={{ inputComponent: CreditCardInput }}
+        />
+
+        <TextField
+          label='Сумма'
           name='amount'
           value={amount}
           onChange={handleChange}
-        >
-          {inputProps => <TextField {...inputProps}></TextField>}
-        </InputMask>
+          error={error && !!getTransferAmountError(error)}
+          helperText={error && getTransferAmountError(error)}
+          InputProps={{
+            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
+            inputComponent: NumberInput,
+          }}
+          variant='filled'
+        />
 
         <LoadingButton
           size='medium'
@@ -148,7 +137,7 @@ const Transfer = () => {
           autoHideDuration={6000}
           onClose={handleClose}
           TransitionComponent={Grow}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           <Alert onClose={handleClose} severity='success'>
             Транзакция произведена успешно!
