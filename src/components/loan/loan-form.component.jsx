@@ -1,4 +1,3 @@
-import { useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
@@ -24,83 +23,43 @@ import {
   closeUploadLoanErrorMessage,
   uploadLoanStart,
 } from '../../store/loan/loan.action';
-import {
-  getLoanFormAmountError,
-  getLoanFormCollateralError,
-  getLoanFormCreditCardError,
-  getLoanFormDisplayNameError,
-  getLoanFormEmailError,
-  getLoanFormEmploymentError,
-  getLoanFormFinancialsError,
-  getLoanFormPassportPhotoError,
-  getLoanFormTelephoneError,
-} from '../../store/loan/loan.error';
 import { Close, Send } from '@mui/icons-material';
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
-import TelephoneInput from '../telephone-input/telephone-input.component';
-import CreditCardInput from '../credit-card-input/credit-card-input.component';
+import TelephoneInput, {
+  MAX_TEL_SIZE,
+} from '../telephone-input/telephone-input.component';
+import CreditCardInput, {
+  MAX_CREDIT_CARD_SIZE,
+} from '../credit-card-input/credit-card-input.component';
 import NumberInput from '../number-input/number-input.component';
-import { createAction } from '../../utils/reducer/reducer.utils';
+import { Controller, useForm } from 'react-hook-form';
 
-const defaultFormFields = {
+const defaultValues = {
   displayName: '',
   email: '',
   tel: { value: '', formattedValue: '' },
-  creditCard: '',
+  creditCard: { value: '', formattedValue: '' },
   amount: '',
-};
 
-const INITIAL_FILES_STATE = {
-  passportPhoto: null,
-  employment: null,
-  financials: null,
-  collateral: null,
-};
-
-const FILES_ACTION_TYPES = {
-  SET_PASSPORT_PHOTO: 'SET_PASSPORT_PHOTO',
-  SET_EMPLOYMENT: 'SET_EMPLOYMENT',
-  SET_FINANCIALS: 'SET_FINANCIALS',
-  COLLATERAL: 'COLLATERAL',
-};
-
-const fileReducer = (state, action) => {
-  const { type, payload } = action;
-
-  switch (type) {
-    case FILES_ACTION_TYPES.SET_PASSPORT_PHOTO:
-      return { ...state, passportPhoto: payload };
-
-    case FILES_ACTION_TYPES.SET_EMPLOYMENT:
-      return { ...state, employment: payload };
-
-    case FILES_ACTION_TYPES.SET_FINANCIALS:
-      return { ...state, financials: payload };
-
-    case FILES_ACTION_TYPES.COLLATERAL:
-      return { ...state, collateral: payload };
-
-    default:
-      throw new Error(`Unhandled type of ${type} in loanReducer`);
-  }
+  fileFields: {
+    passportPhoto: null,
+    employment: null,
+    financials: null,
+    collateral: null,
+  },
 };
 
 const LoanForm = () => {
+  const { control, handleSubmit, reset } = useForm({
+    defaultValues,
+  });
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
-
-  const [formFields, setFormFields] = useState(defaultFormFields);
-  const [files, dispatchFile] = useReducer(fileReducer, INITIAL_FILES_STATE);
 
   const isLoading = useSelector(selectUploadLoanIsLoading);
   const error = useSelector(selectUploadLoanError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
-
-  const { displayName, email, tel, creditCard, amount } = formFields;
-  const { passportPhoto, employment, financials, collateral } = files;
-
-  const resetFormField = () => setFormFields(defaultFormFields);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -112,142 +71,202 @@ const LoanForm = () => {
 
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
-  const handlePassportPhotoChange = value =>
-    dispatchFile(createAction(FILES_ACTION_TYPES.SET_PASSPORT_PHOTO, value));
-
-  const handleEmploymentChange = value =>
-    dispatchFile(createAction(FILES_ACTION_TYPES.SET_EMPLOYMENT, value));
-
-  const handleFinancialsChange = value =>
-    dispatchFile(createAction(FILES_ACTION_TYPES.SET_FINANCIALS, value));
-
-  const handleCollateralChange = value =>
-    dispatchFile(createAction(FILES_ACTION_TYPES.COLLATERAL, value));
-
-  const handleChange = event => {
-    const { name, value, formattedValue } = event.target;
-
-    if (name === 'tel')
-      setFormFields({
-        ...formFields,
-        [name]: { value, formattedValue },
-      });
-    else setFormFields({ ...formFields, [name]: value });
-  };
-
-  const handleSubmit = async event => {
-    event.preventDefault();
-    console.log(files);
-
+  const onSubmit = data => {
     if (isLoading) return;
+    const { fileFields, ...fields } = data;
 
     dispatch(
       uploadLoanStart({
         currentUser,
-        files,
-        formFields,
-        resetFormField,
+        fields,
+        fileFields,
+        reset,
       })
     );
 
-    event.target.reset();
+    console.log(data);
   };
-
-  const hasUnknownError = error =>
-    getLoanFormTelephoneError(error) ||
-    getLoanFormCreditCardError(error) ||
-    getLoanFormDisplayNameError(error) ||
-    getLoanFormEmailError(error) ||
-    getLoanFormAmountError(error) ||
-    getLoanFormPassportPhotoError(error) ||
-    getLoanFormEmploymentError(error) ||
-    getLoanFormFinancialsError(error) ||
-    getLoanFormCollateralError(error);
 
   return (
     <LoanContainer>
       <Title>Получение кредита</Title>
-      <Form onSubmit={handleSubmit}>
-        <TextField
-          label='ФИО *'
-          error={error && !!getLoanFormDisplayNameError(error)}
-          helperText={error && getLoanFormDisplayNameError(error)}
-          type='text'
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
           name='displayName'
-          value={displayName}
-          onChange={handleChange}
-          variant='filled'
-        />
-
-        <TextField
-          label='E-mail'
-          error={error && !!getLoanFormEmailError(error)}
-          helperText={error && getLoanFormEmailError(error)}
-          name='email'
-          value={email}
-          onChange={handleChange}
-          variant='filled'
-        />
-
-        <TextField
-          label='Номер телефона'
-          error={error && !!getLoanFormTelephoneError(error)}
-          helperText={error && getLoanFormTelephoneError(error)}
-          variant='filled'
-          type='tel'
-          name='tel'
-          value={tel}
-          onChange={handleChange}
-          InputProps={{ inputComponent: TelephoneInput }}
-        />
-
-        <TextField
-          label='Номер карты'
-          error={error && !!getLoanFormCreditCardError(error)}
-          helperText={error && getLoanFormCreditCardError(error)}
-          variant='filled'
-          name='creditCard'
-          value={creditCard}
-          onChange={handleChange}
-          InputProps={{ inputComponent: CreditCardInput }}
-        />
-
-        <TextField
-          label='Сумма'
-          error={error && !!getLoanFormAmountError(error)}
-          helperText={error && getLoanFormAmountError(error)}
-          variant='filled'
-          name='amount'
-          value={amount}
-          onChange={handleChange}
-          InputProps={{
-            inputComponent: NumberInput,
-            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
+          control={control}
+          rules={{
+            validate: {
+              unfilled: v => !!v.length || 'Имя пользователя не заполнено!',
+            },
           }}
+          render={({ field, fieldState: { invalid, error } }) => (
+            <TextField
+              {...field}
+              label='ФИО *'
+              error={invalid}
+              helperText={error?.type === 'unfilled' ? error.message : null}
+              variant='filled'
+            />
+          )}
         />
 
-        <MuiFileInputStyled
-          value={passportPhoto}
-          onChange={handlePassportPhotoChange}
-          placeholder='Паспорт фото'
+        <Controller
+          name='email'
+          control={control}
+          rules={{
+            validate: {
+              emailMatch: v =>
+                v.match(
+                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                ) || 'Неверный формат E-mail',
+            },
+          }}
+          render={({ field, fieldState: { error, invalid } }) => (
+            <TextField
+              {...field}
+              label='E-mail'
+              error={invalid}
+              helperText={error?.type === 'emailMatch' ? error.message : null}
+              variant='filled'
+            />
+          )}
         />
 
-        <MuiFileInputStyled
-          value={employment}
-          onChange={handleEmploymentChange}
-          placeholder='Трудовая книжка или справка'
+        <Controller
+          name='tel'
+          control={control}
+          rules={{
+            validate: {
+              telMatch: ({ value }) =>
+                !(value.length < MAX_TEL_SIZE) || 'Телефон не заполнен!',
+            },
+          }}
+          render={({ field, fieldState: { invalid, error } }) => (
+            <TextField
+              {...field}
+              label='Номер телефона'
+              error={invalid}
+              helperText={error?.type === 'telMatch' ? error.message : null}
+              variant='filled'
+              type='tel'
+              InputProps={{ inputComponent: TelephoneInput }}
+            />
+          )}
         />
 
-        <MuiFileInputStyled
-          value={financials}
-          onChange={handleFinancialsChange}
-          placeholder='Выписка из банковского счета'
+        <Controller
+          name='creditCard'
+          control={control}
+          rules={{
+            validate: ({ value }) =>
+              !(value.length < MAX_CREDIT_CARD_SIZE) ||
+              'Кредитная карта не заполнена!',
+          }}
+          render={({ field, fieldState: { invalid, error } }) => (
+            <TextField
+              {...field}
+              label='Номер карты'
+              error={invalid}
+              helperText={error?.type === 'validate' ? error.message : null}
+              variant='filled'
+              InputProps={{ inputComponent: CreditCardInput }}
+            />
+          )}
         />
 
-        <MuiFileInputStyled
-          value={collateral}
-          onChange={handleCollateralChange}
-          placeholder='Документы, связанные с залогом или обеспечением кредита'
+        <Controller
+          name='amount'
+          control={control}
+          rules={{
+            validate: value => !(value <= 0) || 'Сумма должна быть больше нуля',
+          }}
+          render={({ field, fieldState: { invalid, error } }) => (
+            <TextField
+              {...field}
+              label='Сумма'
+              error={invalid}
+              helperText={error?.type === 'validate' ? error.message : null}
+              variant='filled'
+              InputProps={{
+                inputComponent: NumberInput,
+                startAdornment: (
+                  <InputAdornment position='start'>₽</InputAdornment>
+                ),
+              }}
+            />
+          )}
+        />
+
+        <Controller
+          name='fileFields.passportPhoto'
+          control={control}
+          rules={{ required: 'Не заполнено!' }}
+          render={({
+            field: { ref, ...other },
+            fieldState: { invalid, error },
+          }) => (
+            <MuiFileInputStyled
+              {...other}
+              inputRef={ref}
+              error={invalid}
+              helperText={error?.type === 'required' ? error.message : null}
+              placeholder='Паспорт фото'
+            />
+          )}
+        />
+
+        <Controller
+          name='fileFields.employment'
+          control={control}
+          rules={{ required: 'Не заполнено!' }}
+          render={({
+            field: { ref, ...other },
+            fieldState: { invalid, error },
+          }) => (
+            <MuiFileInputStyled
+              {...other}
+              inputRef={ref}
+              error={invalid}
+              helperText={error?.type === 'required' ? error.message : null}
+              placeholder='Трудовая книжка или справка'
+            />
+          )}
+        />
+
+        <Controller
+          name='fileFields.financials'
+          control={control}
+          rules={{ required: 'Не заполнено!' }}
+          render={({
+            field: { ref, ...other },
+            fieldState: { invalid, error },
+          }) => (
+            <MuiFileInputStyled
+              {...other}
+              inputRef={ref}
+              error={invalid}
+              helperText={error?.type === 'required' ? error.message : null}
+              placeholder='Выписка из банковского счета'
+            />
+          )}
+        />
+
+        <Controller
+          name='fileFields.collateral'
+          control={control}
+          rules={{ required: 'Не заполнено!' }}
+          render={({
+            field: { ref, ...other },
+            fieldState: { invalid, error },
+          }) => (
+            <MuiFileInputStyled
+              {...other}
+              inputRef={ref}
+              error={invalid}
+              helperText={error?.type === 'required' ? error.message : null}
+              placeholder='Документы, связанные с залогом или обеспечением кредита'
+            />
+          )}
         />
 
         <LoadingButton
@@ -262,7 +281,7 @@ const LoanForm = () => {
           <span>Отправить</span>
         </LoadingButton>
 
-        {error && hasUnknownError(error) === null ? (
+        {error && (
           <Alert
             action={
               <IconButton
@@ -280,7 +299,7 @@ const LoanForm = () => {
             <AlertTitle>Ошибка</AlertTitle>
             {getErrorMessage(error)}
           </Alert>
-        ) : null}
+        )}
 
         <Snackbar
           open={snackbarIsOpen}

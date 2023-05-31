@@ -4,7 +4,7 @@ import { PatternFormat } from 'react-number-format';
 export const MAX_TEL_SIZE = 10;
 
 const TelephoneInput = React.forwardRef((props, ref) => {
-  const { onChange, format, name, ...others } = props;
+  const { onChange, ...others } = props;
 
   return (
     <PatternFormat
@@ -12,7 +12,7 @@ const TelephoneInput = React.forwardRef((props, ref) => {
       getInputRef={ref}
       format='+7 (###) ###-##-##'
       onValueChange={({ value, formattedValue }) => {
-        onChange({ target: { name, formattedValue, value } });
+        onChange({ target: { value: { formattedValue, value } } });
       }}
       valueIsNumericString
     />
