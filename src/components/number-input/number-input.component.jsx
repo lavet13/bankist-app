@@ -4,14 +4,14 @@ import { NumericFormat } from 'react-number-format';
 const DECIMAL_LIMIT = 2;
 
 const NumberInput = React.forwardRef((props, ref) => {
-  const { onChange, ...others } = props;
+  const { onChange, name, ...others } = props;
 
   return (
     <NumericFormat
       {...others}
       getInputRef={ref}
       onValueChange={({ value }) => {
-        onChange({ target: { value } });
+        onChange({ target: { name, value } });
       }}
       thousandSeparator
       valueIsNumericString

@@ -34,6 +34,7 @@ import CreditCardInput, {
 } from '../credit-card-input/credit-card-input.component';
 import NumberInput from '../number-input/number-input.component';
 import { Controller, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 
 const defaultValues = {
   displayName: '',
@@ -72,6 +73,7 @@ const LoanForm = () => {
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
   const onSubmit = data => {
+    console.log(data);
     if (isLoading) return;
     const { fileFields, ...fields } = data;
 
@@ -138,20 +140,29 @@ const LoanForm = () => {
           rules={{
             validate: {
               telMatch: ({ value }) =>
-                !(value.length < MAX_TEL_SIZE) || 'Телефон не заполнен!',
+                !(value?.length < MAX_TEL_SIZE) || 'Телефон не заполнен!',
             },
           }}
-          render={({ field, fieldState: { invalid, error } }) => (
-            <TextField
-              {...field}
-              label='Номер телефона'
-              error={invalid}
-              helperText={error?.type === 'telMatch' ? error.message : null}
-              variant='filled'
-              type='tel'
-              InputProps={{ inputComponent: TelephoneInput }}
-            />
-          )}
+          render={({
+            field: {
+              value: { value },
+              ...other
+            },
+            fieldState: { invalid, error },
+          }) => {
+            return (
+              <TextField
+                {...other}
+                value={(value ||= '')}
+                label='Номер телефона'
+                error={invalid}
+                helperText={error?.type === 'telMatch' ? error.message : null}
+                variant='filled'
+                type='tel'
+                InputProps={{ inputComponent: TelephoneInput }}
+              />
+            );
+          }}
         />
 
         <Controller
@@ -159,12 +170,19 @@ const LoanForm = () => {
           control={control}
           rules={{
             validate: ({ value }) =>
-              !(value.length < MAX_CREDIT_CARD_SIZE) ||
+              !(value?.length < MAX_CREDIT_CARD_SIZE) ||
               'Кредитная карта не заполнена!',
           }}
-          render={({ field, fieldState: { invalid, error } }) => (
+          render={({
+            field: {
+              value: { value },
+              ...other
+            },
+            fieldState: { invalid, error },
+          }) => (
             <TextField
-              {...field}
+              {...other}
+              value={(value ||= '')}
               label='Номер карты'
               error={invalid}
               helperText={error?.type === 'validate' ? error.message : null}

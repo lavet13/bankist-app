@@ -45,12 +45,12 @@ export function* uploadLoan({
 }) {
   try {
     const {
-      tel: { formattedValue: telFormat },
+      tel: { formattedValue },
     } = fields;
 
     yield call(uploadInfoForLoan, currentUser, fileFields, {
       ...fields,
-      tel: telFormat,
+      tel: formattedValue,
     });
     yield call(reset, { tel: '', creditCard: '' });
     yield put(uploadLoanSuccess());
