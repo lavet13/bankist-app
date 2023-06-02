@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
@@ -26,32 +26,35 @@ import {
   selectTransferIsLoading,
 } from '../../store/transfer/transfer.selector';
 import { Close, Send } from '@mui/icons-material';
-import {
-  getTransferAmountError,
-  getTransferCreditCardError,
-} from '../../store/transfer/transfer.error';
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
 import NumberInput from '../number-input/number-input.component';
-import CreditCardInput from '../credit-card-input/credit-card-input.component';
-
-const defaultFormFields = {
-  creditCard: '',
-  amount: '',
-};
+import CreditCardInput, {
+  MAX_CREDIT_CARD_SIZE,
+} from '../credit-card-input/credit-card-input.component';
+import { Controller, useForm } from 'react-hook-form';
 
 const Transfer = () => {
+  const {
+    control,
+    handleSubmit,
+    setError,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      creditCard: { value: '', formattedValue: '' },
+      amount: '',
+    },
+  });
   const dispatch = useDispatch();
   const balance = useSelector(selectBalance);
   const currentUser = useSelector(selectCurrentUser);
   const isLoading = useSelector(selectTransferIsLoading);
   const error = useSelector(selectTransferError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
-  const [formFields, setFormFields] = useState(defaultFormFields);
-  const { creditCard, amount } = formFields;
-
-  const resetFormFields = () => setFormFields(defaultFormFields);
 
   const handleClose = (event, reason) => {
     console.log({ event, reason });
@@ -61,63 +64,94 @@ const Transfer = () => {
 
     dispatch(closeSnackbar());
   };
+  const handleErrorMessage = () => dispatch(closeTransferErrorMessage());
 
-  const handleChange = event => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
-
-  const handleSubmit = async event => {
-    event.preventDefault();
-
+  const onSubmit = data => {
     if (isLoading) return;
-
-    console.log(formFields);
 
     dispatch(
       transferStart({
         currentUser,
-        creditCard,
-        amount,
-        balance,
-        resetFormFields,
+        ...data,
+        setError,
+        reset,
       })
     );
   };
 
-  const handleErrorMessage = () => dispatch(closeTransferErrorMessage());
+  useEffect(() => {
+    const subscription = watch((data, { type, name }) =>
+      console.log({ data, type, name })
+    );
 
-  const hasUnknownError = error =>
-    getTransferAmountError(error) || getTransferCreditCardError(error);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [watch]);
 
   return (
     <TransferContainer>
       <Title>Перечисление депозита</Title>
-      <Form onSubmit={handleSubmit}>
-        <TextField
-          label='Кредитная карта'
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
           name='creditCard'
-          value={creditCard}
-          onChange={handleChange}
-          variant='filled'
-          error={error && !!getTransferCreditCardError(error)}
-          helperText={error && getTransferCreditCardError(error)}
-          InputProps={{ inputComponent: CreditCardInput }}
+          control={control}
+          rules={{
+            validate: {
+              required: ({ value }) =>
+                value.length || 'Кредитная карта обязательна к заполнению!',
+              unfilled: ({ value }) =>
+                !(value?.length < MAX_CREDIT_CARD_SIZE) ||
+                'Форма карты не заполнена!',
+            },
+          }}
+          render={({
+            field: {
+              value: { value },
+              ...other
+            },
+            fieldState: { error, invalid },
+          }) => {
+            console.log(errors);
+            console.log(error);
+            return (
+              <TextField
+                {...other}
+                value={(value ||= '')}
+                label='Кредитная карта'
+                variant='filled'
+                error={invalid}
+                helperText={error ? error.message : null}
+                InputProps={{ inputComponent: CreditCardInput }}
+              />
+            );
+          }}
         />
 
-        <TextField
-          label='Сумма'
+        <Controller
           name='amount'
-          value={amount}
-          onChange={handleChange}
-          error={error && !!getTransferAmountError(error)}
-          helperText={error && getTransferAmountError(error)}
-          InputProps={{
-            startAdornment: <InputAdornment position='start'>₽</InputAdornment>,
-            inputComponent: NumberInput,
+          control={control}
+          rules={{
+            required: 'Сумма обязательна к заполнению',
+            validate: value =>
+              !(balance - Math.abs(value) <= 0) ||
+              'Недостаточно средств для перевода!',
           }}
-          variant='filled'
+          render={({ field, fieldState: { error, invalid } }) => (
+            <TextField
+              {...field}
+              label='Сумма'
+              error={invalid}
+              helperText={error ? error.message : null}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>₽</InputAdornment>
+                ),
+                inputComponent: NumberInput,
+              }}
+              variant='filled'
+            />
+          )}
         />
 
         <LoadingButton
@@ -144,7 +178,7 @@ const Transfer = () => {
           </Alert>
         </Snackbar>
 
-        {error && hasUnknownError(error) === null ? (
+        {error && (
           <Alert
             action={
               <IconButton
@@ -162,7 +196,7 @@ const Transfer = () => {
             <AlertTitle>Ошибка</AlertTitle>
             {getErrorMessage(error)}
           </Alert>
-        ) : null}
+        )}
       </Form>
     </TransferContainer>
   );

@@ -34,7 +34,6 @@ import CreditCardInput, {
 } from '../credit-card-input/credit-card-input.component';
 import NumberInput from '../number-input/number-input.component';
 import { Controller, useForm } from 'react-hook-form';
-import { useEffect } from 'react';
 
 const defaultValues = {
   displayName: '',

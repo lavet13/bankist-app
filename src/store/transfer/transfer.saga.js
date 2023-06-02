@@ -1,66 +1,51 @@
 import { all, call, put, takeLatest } from 'redux-saga/effects';
 
 import { TRANSFER_ACTION_TYPES } from './transfer.types';
-import {
-  TRANSFER_ERROR_CODE_TYPES,
-  TRANSFER_ERROR_MESSAGES,
-} from './transfer.error';
 
 import {
   transferSuccess,
   transferFailed,
   showSnackbar,
+  resetErrors,
+  resetLoading,
+  setErrorAction,
 } from './transfer.action';
 import {
   getUserCreditCard,
   transferAmountToUser,
 } from '../../utils/firebase/firebase.utils';
 import { fetchMovementsStart } from '../movement/movement.action';
-import { generateError } from '../../utils/error/error.utils';
-import { MAX_CREDIT_CARD_SIZE } from '../../components/credit-card-input/credit-card-input.component';
 
 export function* fetchTransferAsync({
-  payload: { currentUser, creditCard, amount, balance, resetFormFields },
+  payload: { currentUser, creditCard, amount, setError, reset },
 }) {
   try {
-    const {
-      NOT_ENOUGH_CASH,
-      CREDIT_CARD_NOT_FOUND,
-      CANNOT_TRANSFER_YOURSELF,
-      CREDIT_CARD_UNFILLED,
-    } = TRANSFER_ERROR_CODE_TYPES;
+    const { value: creditCardValue } = creditCard;
 
-    if (creditCard.length < MAX_CREDIT_CARD_SIZE)
-      throw generateError(
-        CREDIT_CARD_UNFILLED,
-        TRANSFER_ERROR_MESSAGES[CREDIT_CARD_UNFILLED]
-      );
+    const querySnapshot = yield call(getUserCreditCard, creditCardValue);
 
-    const querySnapshot = yield call(getUserCreditCard, creditCard);
+    if (!querySnapshot.size) {
+      setError('creditCard', {
+        type: 'notFound',
+        message: 'Пользователя с такой кредитной картой не существует',
+      });
 
-    if (!querySnapshot.size)
-      throw generateError(
-        CREDIT_CARD_NOT_FOUND,
-        TRANSFER_ERROR_MESSAGES[CREDIT_CARD_NOT_FOUND]
-      );
+      return yield call(resetLoadingState);
+    }
 
     const [userToTransfer] = querySnapshot.docs;
 
-    if (userToTransfer.data().creditCard === currentUser.creditCard)
-      throw generateError(
-        CANNOT_TRANSFER_YOURSELF,
-        TRANSFER_ERROR_MESSAGES[CANNOT_TRANSFER_YOURSELF]
-      );
+    if (userToTransfer.data().creditCard === currentUser.creditCard) {
+      setError('creditCard', {
+        type: 'transferYourself',
+        message: 'Вы не можете передать себе деньги',
+      });
 
-    if (balance - Math.abs(amount) <= 0) {
-      throw generateError(
-        NOT_ENOUGH_CASH,
-        TRANSFER_ERROR_MESSAGES[NOT_ENOUGH_CASH]
-      );
+      return yield call(resetLoadingState);
     }
 
     yield call(transferAmountToUser, currentUser, userToTransfer, amount);
-    yield call(resetFormFields);
+    yield call(reset, { creditCard: '' });
     yield put(transferSuccess(currentUser));
   } catch (error) {
     yield put(transferFailed(error));
@@ -70,6 +55,15 @@ export function* fetchTransferAsync({
 export function* updateMovementsAfterTransaction({ payload: currentUser }) {
   yield put(showSnackbar());
   yield put(fetchMovementsStart(currentUser));
+  yield call(resetErrorsState);
+}
+
+export function* resetErrorsState() {
+  yield put(resetErrors());
+}
+
+export function* resetLoadingState() {
+  yield put(resetLoading());
 }
 
 export function* onTransferStart() {
@@ -83,6 +77,22 @@ export function* onTransferSuccess() {
   );
 }
 
+export function* onTransferFailed() {
+  yield takeLatest(TRANSFER_ACTION_TYPES.TRANSFER_FAILED, resetLoadingState);
+}
+
+export function* onResetErrors() {
+  yield takeLatest(
+    TRANSFER_ACTION_TYPES.RESET_TRANSFER_ERROR,
+    resetLoadingState
+  );
+}
+
 export function* transferSagas() {
-  yield all([call(onTransferStart), call(onTransferSuccess)]);
+  yield all([
+    call(onTransferStart),
+    call(onTransferSuccess),
+    call(onTransferFailed),
+    call(onResetErrors),
+  ]);
 }

@@ -10,6 +10,12 @@ export const transferSuccess = userAuth =>
 export const transferFailed = error =>
   createAction(TRANSFER_ACTION_TYPES.TRANSFER_FAILED, error);
 
+export const resetLoading = () =>
+  createAction(TRANSFER_ACTION_TYPES.RESET_TRANSFER_LOADING);
+
+export const resetErrors = () =>
+  createAction(TRANSFER_ACTION_TYPES.RESET_TRANSFER_ERROR);
+
 export const closeTransferErrorMessage = () =>
   createAction(TRANSFER_ACTION_TYPES.CLOSE_TRANSFER_ERROR_MESSAGE);
 

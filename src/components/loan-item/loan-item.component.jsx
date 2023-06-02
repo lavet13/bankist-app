@@ -72,11 +72,7 @@ const LoanItem = ({ loan, isAdmin }) => {
         <b>Имя кредитора:</b> {displayName}
       </p>
       <p>
-        <b>Кредитная карта:</b>{' '}
-        {creditCard
-          .split('')
-          .flatMap((char, id) => ((id + 1) % 4 === 0 ? [char, ' '] : char))
-          .join('')}
+        <b>Кредитная карта:</b> {creditCard}
       </p>
       <p>
         <b>Запрашиваемая сумма: </b> {amount}
