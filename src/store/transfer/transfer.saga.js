@@ -8,7 +8,6 @@ import {
   showSnackbar,
   resetErrors,
   resetLoading,
-  setErrorAction,
 } from './transfer.action';
 import {
   getUserCreditCard,

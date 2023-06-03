@@ -134,7 +134,7 @@ const Transfer = () => {
           rules={{
             required: 'Сумма обязательна к заполнению',
             validate: value =>
-              !(balance - Math.abs(value) <= 0) ||
+              (balance - Math.abs(value) > 0 && Math.abs(value) > 0) ||
               'Недостаточно средств для перевода!',
           }}
           render={({ field, fieldState: { error, invalid } }) => (
