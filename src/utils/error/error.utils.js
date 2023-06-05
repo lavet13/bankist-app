@@ -1,8 +1,5 @@
-export const generateError = (errorCode, errorMessage) => {
-  const error = new Error(errorMessage);
-  error.code = errorCode;
-  return error;
-};
+export const generateError = (errorCode, errorMessage) =>
+  Object.assign(new Error(errorMessage), { code: errorCode });
 
 export const GENERAL_ERROR_CODE_TYPES = {
   NETWORK_REQUEST_FAILED: 'auth/network-request-failed',

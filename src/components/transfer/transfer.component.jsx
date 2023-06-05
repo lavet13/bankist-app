@@ -34,16 +34,13 @@ import CreditCardInput, {
   MAX_CREDIT_CARD_SIZE,
 } from '../credit-card-input/credit-card-input.component';
 import { Controller, useForm } from 'react-hook-form';
+import {
+  TRANSFER_ERROR_MESSAGES,
+  getTransferCreditCardError,
+} from '../../store/transfer/transfer.error';
 
 const Transfer = () => {
-  const {
-    control,
-    handleSubmit,
-    setError,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm({
+  const { control, handleSubmit, setError, reset, watch } = useForm({
     defaultValues: {
       creditCard: { value: '', formattedValue: '' },
       amount: '',
@@ -53,7 +50,7 @@ const Transfer = () => {
   const balance = useSelector(selectBalance);
   const currentUser = useSelector(selectCurrentUser);
   const isLoading = useSelector(selectTransferIsLoading);
-  const error = useSelector(selectTransferError);
+  const transferError = useSelector(selectTransferError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
   const handleClose = (event, reason) => {
@@ -102,7 +99,7 @@ const Transfer = () => {
                 value.length || 'Кредитная карта обязательна к заполнению!',
               unfilled: ({ value }) =>
                 !(value?.length < MAX_CREDIT_CARD_SIZE) ||
-                'Форма карты не заполнена!',
+                'Кредитная карта не заполнена!',
             },
           }}
           render={({
@@ -112,16 +109,21 @@ const Transfer = () => {
             },
             fieldState: { error, invalid },
           }) => {
-            console.log(errors);
-            console.log(error);
             return (
               <TextField
                 {...other}
                 value={(value ||= '')}
                 label='Кредитная карта'
                 variant='filled'
-                error={invalid}
-                helperText={error ? error.message : null}
+                error={
+                  invalid ||
+                  (transferError && !!getTransferCreditCardError(transferError))
+                }
+                helperText={
+                  error
+                    ? error.message
+                    : transferError && getTransferCreditCardError(transferError)
+                }
                 InputProps={{ inputComponent: CreditCardInput }}
               />
             );
@@ -178,7 +180,7 @@ const Transfer = () => {
           </Alert>
         </Snackbar>
 
-        {error && (
+        {transferError && !TRANSFER_ERROR_MESSAGES[transferError.code] && (
           <Alert
             action={
               <IconButton
@@ -194,7 +196,7 @@ const Transfer = () => {
             sx={{ margin: '0 auto', width: '90%' }}
           >
             <AlertTitle>Ошибка</AlertTitle>
-            {getErrorMessage(error)}
+            {getErrorMessage(transferError)}
           </Alert>
         )}
       </Form>
