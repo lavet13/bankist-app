@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
@@ -40,7 +39,7 @@ import {
 } from '../../store/transfer/transfer.error';
 
 const Transfer = () => {
-  const { control, handleSubmit, setError, reset, watch } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       creditCard: { value: '', formattedValue: '' },
       amount: '',
@@ -70,21 +69,10 @@ const Transfer = () => {
       transferStart({
         currentUser,
         ...data,
-        setError,
         reset,
       })
     );
   };
-
-  useEffect(() => {
-    const subscription = watch((data, { type, name }) =>
-      console.log({ data, type, name })
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [watch]);
 
   return (
     <TransferContainer>

@@ -72,7 +72,6 @@ const LoanForm = () => {
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
   const onSubmit = data => {
-    console.log(data);
     if (isLoading) return;
     const { fileFields, ...fields } = data;
 

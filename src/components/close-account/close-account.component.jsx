@@ -20,35 +20,32 @@ import {
 import { LoadingButton } from '@mui/lab';
 import { Close, NoAccounts } from '@mui/icons-material';
 import { Alert, AlertTitle, IconButton, TextField } from '@mui/material';
-import { getCloseAccountPasswordError } from '../../store/user/user.error';
+import {
+  USER_ERROR_MESSAGES,
+  getCloseAccountPasswordError,
+} from '../../store/user/user.error';
 import { getErrorMessage } from '../../utils/error/error.utils';
+import { Controller, useForm } from 'react-hook-form';
 
-const defaultFormFields = {
+const defaultValues = {
   password: '',
 };
 
 const CloseAccount = () => {
+  const { control, handleSubmit, reset } = useForm({ defaultValues });
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
   const closeAccountIsLoading = useSelector(selectCloseAccountIsLoading);
-  const error = useSelector(selectCloseAccountError);
-  const [formFields, setFormFields] = useState(defaultFormFields);
-  const { password } = formFields;
+  const closeAccountError = useSelector(selectCloseAccountError);
 
   const [isProviderPasswordExist, setIsProviderPasswordExist] = useState(false);
   const [providerInfo, setProviderInfo] = useState([]);
 
-  const resetFormFields = () => setFormFields(defaultFormFields);
   const handleErrorMessage = () => dispatch(closeCloseAccountErrorMessage());
 
-  const handleChange = event => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
-
-  const handleSubmit = event => {
-    event.preventDefault();
+  const onSubmit = data => {
+    console.log(data);
+    const { password } = data;
 
     if (closeAccountIsLoading) return;
 
@@ -57,7 +54,7 @@ const CloseAccount = () => {
         closeAccountStart({
           currentUser: auth.currentUser,
           password: isProviderPasswordExist ? password : null,
-          resetFormFields,
+          reset,
         })
       );
     }
@@ -71,21 +68,33 @@ const CloseAccount = () => {
     }
   }, [currentUser]);
 
-  const hasUnknownError = error => getCloseAccountPasswordError(error);
-
   return (
     <CloseAccountContainer>
       <Title>Закрыть аккаунт</Title>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleSubmit(onSubmit)}>
         {isProviderPasswordExist ? (
-          <TextField
-            error={error && !!getCloseAccountPasswordError(error)}
-            helperText={error && getCloseAccountPasswordError(error)}
-            variant='filled'
-            label='Пароль'
+          <Controller
             name='password'
-            value={password}
-            onChange={handleChange}
+            control={control}
+            rules={{ required: 'Заполните пароль!' }}
+            render={({ field, fieldState: { error, invalid } }) => (
+              <TextField
+                {...field}
+                error={
+                  invalid ||
+                  (closeAccountError &&
+                    !!getCloseAccountPasswordError(closeAccountError))
+                }
+                helperText={
+                  error
+                    ? error.message
+                    : closeAccountError &&
+                      getCloseAccountPasswordError(closeAccountError)
+                }
+                variant='filled'
+                label='Пароль'
+              />
+            )}
           />
         ) : null}
 
@@ -118,7 +127,7 @@ const CloseAccount = () => {
               </LoadingButton>
             ))}
 
-        {error && hasUnknownError(error) === null ? (
+        {closeAccountError && !USER_ERROR_MESSAGES[closeAccountError.code] ? (
           <Alert
             action={
               <IconButton
@@ -134,7 +143,7 @@ const CloseAccount = () => {
             sx={{ margin: '0 auto', width: '90%' }}
           >
             <AlertTitle>Ошибка</AlertTitle>
-            {getErrorMessage(error)}
+            {getErrorMessage(closeAccountError)}
           </Alert>
         ) : null}
       </Form>

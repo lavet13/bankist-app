@@ -177,20 +177,13 @@ export function* signOut() {
 }
 
 export function* closeUserAccount({
-  payload: { currentUser, resetFormFields, password = null },
+  payload: { currentUser, reset, password },
 }) {
   try {
-    const { MISSING_PASSWORD } = USER_ERROR_CODE_TYPES;
     // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
     // @REPEATED PROVIDER INFO
 
     if (password !== null) {
-      if (password === '')
-        throw generateError(
-          MISSING_PASSWORD,
-          USER_ERROR_MESSAGES[MISSING_PASSWORD]
-        );
-
       const providerInfo = getProvidersInfo(currentUser).map(profile =>
         profile.providerId === 'password' ? { ...profile, password } : profile
       );
@@ -212,7 +205,7 @@ export function* closeUserAccount({
       yield call(deleteUserAccount, user);
     }
 
-    yield call(resetFormFields);
+    yield call(reset);
     yield put(closeAccountSuccess());
   } catch (error) {
     yield put(closeAccountFailed(error));
