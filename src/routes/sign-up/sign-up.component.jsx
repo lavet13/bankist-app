@@ -4,14 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import Spinner from '../../components/spinner/spinner.component';
 
 import {
-  FormControl,
-  FilledInput,
-  FormHelperText,
   IconButton,
   InputAdornment,
-  InputLabel,
   Alert,
   AlertTitle,
+  TextField,
 } from '@mui/material';
 import { Close, Visibility, VisibilityOff } from '@mui/icons-material';
 
@@ -24,7 +21,7 @@ import {
 } from '../../store/user/user.selector';
 
 import {
-  getSignUpDisplayNameError,
+  USER_ERROR_MESSAGES,
   getSignUpEmailError,
   getSignUpPasswordError,
 } from '../../store/user/user.error';
@@ -37,8 +34,9 @@ import {
 } from '../../store/user/user.action';
 
 import { SignUpContainer } from './sign-up.styles';
+import { Controller, useForm } from 'react-hook-form';
 
-const defaultFormFields = {
+const defaultValues = {
   displayName: '',
   email: '',
   password: '',
@@ -46,13 +44,11 @@ const defaultFormFields = {
 };
 
 const SignUp = () => {
+  const { control, handleSubmit } = useForm({ defaultValues });
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
-  const error = useSelector(selectSignUpError);
-
-  const [formFields, setFormFields] = useState(defaultFormFields);
-  const { displayName, email, password, confirmPassword } = formFields;
+  const signUpError = useSelector(selectSignUpError);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,16 +59,10 @@ const SignUp = () => {
   const handleMouseDownPassword = event => event.preventDefault();
   const handleErrorMessage = () => dispatch(closeSignUpErrorMessage());
 
-  const handleChange = event => {
-    const { name, value } = event.target;
-
-    setFormFields({ ...formFields, [name]: value });
-  };
-
-  const handleSubmit = async event => {
-    event.preventDefault();
-
+  const onSubmit = data => {
     if (emailSignUpIsLoading) return;
+
+    const { email, password, confirmPassword, displayName } = data;
 
     dispatch(
       signUpStart({
@@ -84,118 +74,146 @@ const SignUp = () => {
     );
   };
 
-  const hasUnknownError = error =>
-    getSignUpDisplayNameError(error) ||
-    getSignUpEmailError(error) ||
-    getSignUpPasswordError(error);
-
   return (
     <Fragment>
       {currentUserIsLoading ? (
         <Spinner />
       ) : (
-        <SignUpContainer onSubmit={handleSubmit}>
-          <FormControl
-            sx={{ m: 1, width: '40ch' }}
-            variant='filled'
-            error={error && !!getSignUpDisplayNameError(error)}
-          >
-            <InputLabel htmlFor='filled-display-name'>
-              Имя пользователя
-            </InputLabel>
-            <FilledInput
-              id='filled-display-name'
-              type='text'
-              name='displayName'
-              value={displayName}
-              onChange={handleChange}
-            />
-            {error && (
-              <FormHelperText>
-                {getSignUpDisplayNameError(error)}
-              </FormHelperText>
+        <SignUpContainer onSubmit={handleSubmit(onSubmit)}>
+          <Controller
+            name='displayName'
+            control={control}
+            rules={{ required: 'Имя пользователя не указано!' }}
+            render={({ field, fieldState: { error, invalid } }) => (
+              <TextField
+                {...field}
+                label='Имя пользователя'
+                sx={{ m: 1, width: '40ch' }}
+                variant='filled'
+                error={invalid}
+                helperText={error ? error.message : null}
+              />
             )}
-          </FormControl>
+          />
 
-          <FormControl
-            sx={{ m: 1, width: '40ch' }}
-            variant='filled'
-            error={error && !!getSignUpEmailError(error)}
-          >
-            <InputLabel htmlFor='filled-email'>E-mail</InputLabel>
-            <FilledInput
-              id='filled-email'
-              type='email'
-              name='email'
-              value={email}
-              onChange={handleChange}
-            />
-            {error && (
-              <FormHelperText>{getSignUpEmailError(error)}</FormHelperText>
+          <Controller
+            name='email'
+            control={control}
+            rules={{
+              required: 'Обязательно к заполнению!',
+              pattern: {
+                value:
+                  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                message: 'Неверный формат E-mail',
+              },
+            }}
+            render={({ field, fieldState: { error, invalid } }) => (
+              <TextField
+                {...field}
+                label='E-mail'
+                sx={{ m: 1, width: '40ch' }}
+                variant='filled'
+                error={
+                  invalid || (signUpError && !!getSignUpEmailError(signUpError))
+                }
+                helperText={
+                  error
+                    ? error.message
+                    : signUpError && getSignUpEmailError(signUpError)
+                }
+              />
             )}
-          </FormControl>
+          />
 
-          <FormControl
-            sx={{ m: 1, width: '40ch' }}
-            variant='filled'
-            error={error && !!getSignUpPasswordError(error)}
-          >
-            <InputLabel htmlFor='filled-adornment-password'>Пароль</InputLabel>
-            <FilledInput
-              id='filled-adornment-password'
-              type={showPassword ? 'text' : 'password'}
-              name='password'
-              value={password}
-              onChange={handleChange}
-              endAdornment={
-                <InputAdornment position='end'>
-                  <IconButton
-                    aria-label='toggle password visibility'
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    edge='end'
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-            {error && (
-              <FormHelperText>{getSignUpPasswordError(error)}</FormHelperText>
+          <Controller
+            name='password'
+            control={control}
+            rules={{
+              required: 'Обязательно к заполнению!',
+              validate: value =>
+                value.length >= 6 ||
+                'Пароль должен составлять как минимум 6 символов',
+            }}
+            render={({ field, fieldState: { error, invalid } }) => (
+              <TextField
+                {...field}
+                label='Пароль'
+                sx={{ m: 1, width: '40ch' }}
+                variant='filled'
+                type={showPassword ? 'text' : 'password'}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        aria-label='toggle password visibility'
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge='end'
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                error={
+                  invalid ||
+                  (signUpError && !!getSignUpPasswordError(signUpError))
+                }
+                helperText={
+                  error
+                    ? error.message
+                    : signUpError && getSignUpPasswordError(signUpError)
+                }
+              />
             )}
-          </FormControl>
+          />
 
-          <FormControl
-            sx={{ m: 1, width: '40ch' }}
-            variant='filled'
-            error={error && !!getSignUpPasswordError(error)}
-          >
-            <InputLabel htmlFor='filled-adornment-confirm-password'>
-              Подтвердить пароль
-            </InputLabel>
-            <FilledInput
-              id='filled-adornment-confirm-password'
-              type={showConfirmPassword ? 'text' : 'password'}
-              name='confirmPassword'
-              value={confirmPassword}
-              onChange={handleChange}
-              endAdornment={
-                <InputAdornment position='end'>
-                  <IconButton
-                    aria-label='toggle password visibility'
-                    onClick={handleClickShowConfirmPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    edge='end'
-                  >
-                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            />
-            {error && (
-              <FormHelperText>{getSignUpPasswordError(error)}</FormHelperText>
+          <Controller
+            name='confirmPassword'
+            control={control}
+            rules={{
+              required: 'Обязательно к заполнению!',
+              validate: value =>
+                value.length >= 6 ||
+                'Пароль должен составлять как минимум 6 символов',
+            }}
+            render={({ field, fieldState: { error, invalid } }) => (
+              <TextField
+                {...field}
+                label='Подтвердить пароль'
+                sx={{ m: 1, width: '40ch' }}
+                variant='filled'
+                type={showConfirmPassword ? 'text' : 'password'}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        aria-label='toggle password visibility'
+                        onClick={handleClickShowConfirmPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge='end'
+                      >
+                        {showConfirmPassword ? (
+                          <VisibilityOff />
+                        ) : (
+                          <Visibility />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                error={
+                  invalid ||
+                  (signUpError && !!getSignUpPasswordError(signUpError))
+                }
+                helperText={
+                  error
+                    ? error.message
+                    : signUpError && getSignUpPasswordError(signUpError)
+                }
+              />
             )}
-          </FormControl>
+          />
 
           <LoadingButton
             sx={{ m: 1, width: '40ch' }}
@@ -208,7 +226,7 @@ const SignUp = () => {
             Зарегестрироваться
           </LoadingButton>
 
-          {error && hasUnknownError(error) === null ? (
+          {signUpError && !USER_ERROR_MESSAGES[signUpError.code] && (
             <Alert
               action={
                 <IconButton
@@ -224,9 +242,9 @@ const SignUp = () => {
               sx={{ margin: '0 auto', width: '90%' }}
             >
               <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(error)}
+              {getErrorMessage(signUpError)}
             </Alert>
-          ) : null}
+          )}
         </SignUpContainer>
       )}
     </Fragment>

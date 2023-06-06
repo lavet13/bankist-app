@@ -65,25 +65,6 @@ export function* isUserAuthenticated() {
 
 export function* signInWithEmail({ payload: { email, password } }) {
   try {
-    const { INVALID_EMAIL_VALIDATION, WEAK_PASSWORD_VALIDATION } =
-      USER_ERROR_CODE_TYPES;
-
-    if (
-      !email.match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      )
-    )
-      throw generateError(
-        INVALID_EMAIL_VALIDATION,
-        USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
-      );
-
-    if (password.length < 6)
-      throw generateError(
-        WEAK_PASSWORD_VALIDATION,
-        USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
-      );
-
     const { user } = yield call(
       signInAuthUserWithEmailAndPassword,
       email,
@@ -114,39 +95,11 @@ export function* signUpWithEmail({
   payload: { email, password, confirmPassword, ...additionalDetails },
 }) {
   try {
-    const {
-      DISPLAY_NAME_NOT_FOUND,
-      INVALID_EMAIL_VALIDATION,
-      WRONG_PASSWORD,
-      WEAK_PASSWORD_VALIDATION,
-    } = USER_ERROR_CODE_TYPES;
-    const { displayName } = additionalDetails;
-
-    if (!displayName.length)
-      throw generateError(
-        DISPLAY_NAME_NOT_FOUND,
-        USER_ERROR_MESSAGES[DISPLAY_NAME_NOT_FOUND]
-      );
-
-    if (
-      !email.match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      )
-    )
-      throw generateError(
-        INVALID_EMAIL_VALIDATION,
-        USER_ERROR_MESSAGES[INVALID_EMAIL_VALIDATION]
-      );
+    const { WRONG_PASSWORD } = USER_ERROR_CODE_TYPES;
 
     if (password !== confirmPassword) {
       throw generateError(WRONG_PASSWORD, USER_ERROR_MESSAGES[WRONG_PASSWORD]);
     }
-
-    if (password.length < 6)
-      throw generateError(
-        WEAK_PASSWORD_VALIDATION,
-        USER_ERROR_MESSAGES[WEAK_PASSWORD_VALIDATION]
-      );
 
     const { user } = yield call(
       createAuthUserWithEmailAndPassword,

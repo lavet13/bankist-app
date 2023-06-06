@@ -20,12 +20,9 @@ import Spinner from '../../components/spinner/spinner.component';
 import {
   Alert,
   AlertTitle,
-  FilledInput,
-  FormControl,
-  FormHelperText,
   IconButton,
   InputAdornment,
-  InputLabel,
+  TextField,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Close } from '@mui/icons-material';
@@ -33,49 +30,42 @@ import { LoadingButton } from '@mui/lab';
 
 import { SignInFormContainer } from './sign-in.styles';
 import {
+  USER_ERROR_MESSAGES,
   getSignInEmailError,
   getSignInPasswordError,
   getSignInWarningMessage,
 } from '../../store/user/user.error';
 import { getErrorMessage } from '../../utils/error/error.utils';
+import { useForm, Controller } from 'react-hook-form';
 
-const defaultFormFields = {
+const defaultValues = {
   email: '',
   password: '',
 };
 
 const SignIn = () => {
+  const { control, handleSubmit } = useForm({ defaultValues });
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
   const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
-  const error = useSelector(selectSignInError);
+  const signInError = useSelector(selectSignInError);
   const signOutError = useSelector(selectSignOutError);
 
-  const [formFields, setFormFields] = useState(defaultFormFields);
-  const { email, password } = formFields;
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword(show => !show);
   const handleMouseDownPassword = event => event.preventDefault();
   const handleErrorMessage = () => dispatch(closeSignInErrorMessage());
   const signInWithGoogle = () => dispatch(googleSignInStart());
-  const handleChange = event => {
-    const { name, value } = event.target;
 
-    setFormFields({ ...formFields, [name]: value });
-  };
-  const handleSubmit = async event => {
-    event.preventDefault();
+  const onSubmit = data => {
     if (emailSignInIsLoading || googleSignInIsLoading) return;
+
+    const { email, password } = data;
 
     dispatch(emailSignInStart(email, password));
   };
-
-  const hasUnknownError = error =>
-    getSignInPasswordError(error) ||
-    getSignInEmailError(error) ||
-    getSignInWarningMessage(error);
 
   return (
     <Fragment>
@@ -83,56 +73,79 @@ const SignIn = () => {
         <Spinner />
       ) : (
         <Fragment>
-          <SignInFormContainer onSubmit={handleSubmit}>
-            <FormControl
-              sx={{ m: 1, width: '40ch' }}
-              variant='filled'
-              error={error && !!getSignInEmailError(error)}
-            >
-              <InputLabel htmlFor='filled-email'>E-mail</InputLabel>
-              <FilledInput
-                id='filled-email'
-                type='email'
-                name='email'
-                value={email}
-                onChange={handleChange}
-              />
-              {error && (
-                <FormHelperText>{getSignInEmailError(error)}</FormHelperText>
+          <SignInFormContainer onSubmit={handleSubmit(onSubmit)}>
+            <Controller
+              name='email'
+              control={control}
+              rules={{
+                required: 'Обязательно к заполнению!',
+                pattern: {
+                  value:
+                    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                  message: 'Неверный формат E-mail',
+                },
+              }}
+              render={({ field, fieldState: { error, invalid } }) => (
+                <TextField
+                  {...field}
+                  label='E-mail'
+                  variant='filled'
+                  sx={{ m: 1, width: '40ch' }}
+                  error={
+                    invalid ||
+                    (signInError && !!getSignInEmailError(signInError))
+                  }
+                  helperText={
+                    error
+                      ? error.message
+                      : signInError && getSignInEmailError(signInError)
+                  }
+                />
               )}
-            </FormControl>
+            />
 
-            <FormControl
-              sx={{ m: 1, width: '40ch' }}
-              variant='filled'
-              error={error && !!getSignInPasswordError(error)}
-            >
-              <InputLabel htmlFor='filled-adornment-password'>
-                Пароль
-              </InputLabel>
-              <FilledInput
-                id='filled-adornment-password'
-                type={showPassword ? 'text' : 'password'}
-                name='password'
-                value={password}
-                onChange={handleChange}
-                endAdornment={
-                  <InputAdornment position='end'>
-                    <IconButton
-                      aria-label='toggle password visibility'
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge='end'
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-              {error && (
-                <FormHelperText>{getSignInPasswordError(error)}</FormHelperText>
+            <Controller
+              name='password'
+              control={control}
+              rules={{
+                validate: value =>
+                  value.length >= 6 ||
+                  'Пароль должен составлять как минимум 6 символов',
+                required: 'Обязательно к заполнению!',
+              }}
+              render={({ field, fieldState: { error, invalid } }) => (
+                <TextField
+                  {...field}
+                  label='Пароль'
+                  type={showPassword ? 'text' : 'password'}
+                  variant='filled'
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position='end'>
+                        <IconButton
+                          aria-label='toggle password visibility'
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge='end'
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ m: 1, width: '40ch' }}
+                  error={
+                    invalid ||
+                    (signInError && !!getSignInPasswordError(signInError))
+                  }
+                  helperText={
+                    error
+                      ? error.message
+                      : signInError && getSignInPasswordError(signInError)
+                  }
+                />
               )}
-            </FormControl>
+            />
 
             <LoadingButton
               sx={{ m: 1, width: '30ch' }}
@@ -153,7 +166,8 @@ const SignIn = () => {
             >
               <span>Войти через Google</span>
             </LoadingButton>
-            {error && hasUnknownError(error) === null ? (
+
+            {signInError && !USER_ERROR_MESSAGES[signInError.code] && (
               <Alert
                 action={
                   <IconButton
@@ -169,9 +183,9 @@ const SignIn = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Ошибка</AlertTitle>
-                {getErrorMessage(error)}
+                {getErrorMessage(signInError)}
               </Alert>
-            ) : null}
+            )}
 
             {signOutError && (
               <Alert
@@ -193,7 +207,7 @@ const SignIn = () => {
               </Alert>
             )}
 
-            {error && getSignInWarningMessage(error) && (
+            {signInError && getSignInWarningMessage(signInError) && (
               <Alert
                 action={
                   <IconButton
@@ -209,7 +223,7 @@ const SignIn = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Информация</AlertTitle>
-                {getSignInWarningMessage(error)}
+                {getSignInWarningMessage(signInError)}
               </Alert>
             )}
           </SignInFormContainer>

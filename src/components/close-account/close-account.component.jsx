@@ -44,7 +44,6 @@ const CloseAccount = () => {
   const handleErrorMessage = () => dispatch(closeCloseAccountErrorMessage());
 
   const onSubmit = data => {
-    console.log(data);
     const { password } = data;
 
     if (closeAccountIsLoading) return;
