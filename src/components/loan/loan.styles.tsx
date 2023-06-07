@@ -7,7 +7,11 @@ export const LoanContainer = styled(OperationBase)`
   background-image: linear-gradient(to top left, #39b385, #9be15d);
 `;
 
-export const ErrorMessage = styled.span`
+type ErrorMessageProps = {
+  error?: boolean;
+};
+
+export const ErrorMessage = styled.span<ErrorMessageProps>`
   color: ${({ error }) => (error ? '#d32f2f' : '#000')};
   align-self: center;
   font-size: 14px;

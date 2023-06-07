@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { auth } from '../../utils/firebase/firebase.utils';
+import {
+  auth,
+  getProvidersInfo,
+  hasProviderPassword,
+} from '../../utils/firebase/firebase.utils';
 
 import { CloseAccountContainer } from './close-account.styles';
 
@@ -9,8 +13,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   closeAccountStart,
   closeCloseAccountErrorMessage,
-  getProvidersInfo,
-  hasProviderPassword,
 } from '../../store/user/user.action';
 import {
   selectCloseAccountError,
@@ -25,9 +27,14 @@ import {
   getCloseAccountPasswordError,
 } from '../../store/user/user.error';
 import { getErrorMessage } from '../../utils/error/error.utils';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { ProvidersInfo } from '../../utils/firebase/firebase.types';
 
-const defaultValues = {
+export type CloseAccountDefaultValues = {
+  password: string;
+};
+
+const defaultValues: CloseAccountDefaultValues = {
   password: '',
 };
 
@@ -39,11 +46,11 @@ const CloseAccount = () => {
   const closeAccountError = useSelector(selectCloseAccountError);
 
   const [isProviderPasswordExist, setIsProviderPasswordExist] = useState(false);
-  const [providerInfo, setProviderInfo] = useState([]);
+  const [providerInfo, setProviderInfo] = useState<ProvidersInfo[]>([]);
 
   const handleErrorMessage = () => dispatch(closeCloseAccountErrorMessage());
 
-  const onSubmit = data => {
+  const onSubmit: SubmitHandler<CloseAccountDefaultValues> = data => {
     const { password } = data;
 
     if (closeAccountIsLoading) return;
@@ -60,7 +67,7 @@ const CloseAccount = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
+    if (auth.currentUser) {
       const providerInfo = getProvidersInfo(auth.currentUser);
       setIsProviderPasswordExist(hasProviderPassword(providerInfo));
       setProviderInfo(providerInfo);

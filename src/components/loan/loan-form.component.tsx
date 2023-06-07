@@ -33,9 +33,10 @@ import CreditCardInput, {
   MAX_CREDIT_CARD_SIZE,
 } from '../credit-card-input/credit-card-input.component';
 import NumberInput from '../number-input/number-input.component';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SyntheticEvent } from 'react';
 
-const defaultValues = {
+const defaultValues: DefaultValues = {
   displayName: '',
   email: '',
   tel: { value: '', formattedValue: '' },
@@ -50,8 +51,25 @@ const defaultValues = {
   },
 };
 
+export type FileFields = {
+  passportPhoto?: File | null;
+  employment?: File | null;
+  financials?: File | null;
+  collateral?: File | null;
+};
+
+export type FormFields = {
+  displayName: string;
+  email: string;
+  tel: { value: string; formattedValue: string };
+  creditCard: { value: string; formattedValue: string };
+  amount: string;
+};
+
+type DefaultValues = FormFields & { fileFields: FileFields };
+
 const LoanForm = () => {
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset } = useForm<DefaultValues>({
     defaultValues,
   });
   const dispatch = useDispatch();
@@ -61,7 +79,7 @@ const LoanForm = () => {
   const error = useSelector(selectUploadLoanError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
-  const handleClose = (event, reason) => {
+  const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
@@ -71,7 +89,7 @@ const LoanForm = () => {
 
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
-  const onSubmit = data => {
+  const onSubmit: SubmitHandler<DefaultValues> = data => {
     if (isLoading) return;
     const { fileFields, ...fields } = data;
 
@@ -157,7 +175,7 @@ const LoanForm = () => {
                 helperText={error?.type === 'telMatch' ? error.message : null}
                 variant='filled'
                 type='tel'
-                InputProps={{ inputComponent: TelephoneInput }}
+                InputProps={{ inputComponent: TelephoneInput as any }}
               />
             );
           }}
@@ -185,7 +203,7 @@ const LoanForm = () => {
               error={invalid}
               helperText={error?.type === 'validate' ? error.message : null}
               variant='filled'
-              InputProps={{ inputComponent: CreditCardInput }}
+              InputProps={{ inputComponent: CreditCardInput as any }}
             />
           )}
         />
@@ -194,7 +212,8 @@ const LoanForm = () => {
           name='amount'
           control={control}
           rules={{
-            validate: value => !(value <= 0) || 'Сумма должна быть больше нуля',
+            validate: value =>
+              !(+value <= 0) || 'Сумма должна быть больше нуля',
           }}
           render={({ field, fieldState: { invalid, error } }) => (
             <TextField
@@ -204,7 +223,7 @@ const LoanForm = () => {
               helperText={error?.type === 'validate' ? error.message : null}
               variant='filled'
               InputProps={{
-                inputComponent: NumberInput,
+                inputComponent: NumberInput as any,
                 startAdornment: (
                   <InputAdornment position='start'>₽</InputAdornment>
                 ),

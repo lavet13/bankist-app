@@ -13,6 +13,9 @@ import {
   deleteUser,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  UserCredential,
+  User,
+  NextOrObserver,
 } from 'firebase/auth';
 
 import {
@@ -32,6 +35,9 @@ import {
   serverTimestamp,
   orderBy,
   updateDoc,
+  DocumentSnapshot,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
 } from 'firebase/firestore';
 
 import {
@@ -42,7 +48,23 @@ import {
   list,
   listAll,
   deleteObject,
+  StorageReference,
+  ListResult,
 } from 'firebase/storage';
+import {
+  AdditionalInformation,
+  Movement,
+  ObjectToAdd,
+  ProvidersInfo,
+  ProvidersInfoPassword,
+  UserCreation,
+  UserData,
+} from './firebase.types';
+import {
+  FileFields,
+  FormFields,
+} from '../../components/loan/loan-form.component';
+import { Loan } from '../../components/loan-item/loan-item.component';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDjVb89yW2JjQPvMjxSb3PiPRc73ttErGY',
@@ -74,18 +96,33 @@ export const db = getFirestore();
 
 export const storage = getStorage();
 
+type UploadInfoResult = {
+  folderName: string;
+  images: string[];
+  timestamp: Timestamp;
+};
+
 export const uploadInfoForLoan = async (
-  userAuth,
-  formFileFields,
-  formFields
+  userAuth: UserData,
+  formFileFields: FileFields,
+  formFields: FormFields
 ) => {
   if (!userAuth) return;
   const regExp = /(?:\.([^.]+))?$/;
   const names = Object.keys(formFileFields);
-  const fileNames = Object.values(formFileFields).map(
-    ({ name }, idx) => `${names[idx]}.${regExp.exec(name)[1]}`
+  const fileNames = Object.values(formFileFields).map((file, idx) => {
+    if (!file) return '';
+
+    const ext = regExp.exec(file.name);
+
+    if (!ext) return '';
+
+    return `${names[idx]}.${ext[1]}`;
+  });
+
+  const files = Object.values(formFileFields).filter((file): file is File =>
+    Boolean(file)
   );
-  const files = Object.values(formFileFields);
 
   const userRef = ref(storage, `users/${userAuth.id}`);
 
@@ -110,7 +147,7 @@ export const uploadInfoForLoan = async (
     async snapshot => await getDownloadURL(snapshot.ref)
   );
 
-  const result = {
+  const result: UploadInfoResult = {
     folderName,
     images: await Promise.all(downloadURLs),
     timestamp,
@@ -120,7 +157,10 @@ export const uploadInfoForLoan = async (
   return await createUserLoanDocument(userAuth, result);
 };
 
-export const createUserLoanDocument = async (userAuth, data) => {
+export const createUserLoanDocument = async (
+  userAuth: UserData,
+  data: UploadInfoResult
+) => {
   if (!userAuth) return;
 
   const { folderName, images, timestamp, ...formFields } = data;
@@ -142,7 +182,10 @@ export const createUserLoanDocument = async (userAuth, data) => {
   return folderSnapshot;
 };
 
-export const addMovementsToUser = async (objectsToAdd, userAuth) => {
+export const addMovementsToUser = async (
+  objectsToAdd: ObjectToAdd[],
+  userAuth: UserData
+) => {
   const usersCollectionRef = collection(db, 'users');
   const batch = writeBatch(db);
 
@@ -155,22 +198,24 @@ export const addMovementsToUser = async (objectsToAdd, userAuth) => {
   console.log('done');
 };
 
-export const getMovements = async userAuth => {
-  const querySnapshot = await new Promise((resolve, reject) => {
-    const q = query(
-      collection(db, 'users', userAuth.id, 'movements'),
-      orderBy('date', 'desc')
-    );
+export const getMovements = async (userAuth: UserData) => {
+  const querySnapshot: QuerySnapshot<Movement> = await new Promise(
+    (resolve, reject) => {
+      const q = query(
+        collection(db, 'users', userAuth.id, 'movements'),
+        orderBy('date', 'desc')
+      );
 
-    const unsubscribe = onSnapshot(
-      q,
-      querySnapshot => {
-        unsubscribe();
-        resolve(querySnapshot);
-      },
-      reject
-    );
-  });
+      const unsubscribe = onSnapshot(
+        q,
+        querySnapshot => {
+          unsubscribe();
+          resolve(querySnapshot as QuerySnapshot<Movement>);
+        },
+        reject
+      );
+    }
+  );
 
   const movementItems = querySnapshot.docs.map(docSnapshot =>
     docSnapshot.data()
@@ -179,21 +224,21 @@ export const getMovements = async userAuth => {
   return movementItems;
 };
 
-export const getUserCreditCard = async creditCard => {
+export const getUserCreditCard = async (creditCard: string) => {
   const q = query(
     collection(db, 'users'),
     where('creditCard', '==', creditCard)
   );
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = (await getDocs(q)) as QuerySnapshot<UserData>;
 
   return querySnapshot;
 };
 
 export const transferAmountToUser = async (
-  userAuth,
-  userToTransfer,
-  amount
+  userAuth: UserData,
+  userToTransfer: QueryDocumentSnapshot<UserData>,
+  amount: number
 ) => {
   const collectionUsersRef = collection(db, 'users');
 
@@ -222,14 +267,18 @@ export const getAllUserLoans = async () => {
   const q = query(collection(db, 'users'));
   const querySnapshot = await getDocs(q);
 
-  const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const loanSnapshots = users.map(async user => await getUserLoans(user));
+  const users = querySnapshot.docs.map(
+    doc => ({ id: doc.id, ...doc.data() } as UserData)
+  );
+  const loanSnapshots = users.map(
+    async (user: UserData) => await getUserLoans(user)
+  );
   const result = await Promise.all(loanSnapshots);
 
   return result.filter(loans => loans.length !== 0);
 };
 
-export const getUserLoans = async userAuth => {
+export const getUserLoans = async (userAuth: UserData) => {
   const userDocRef = doc(db, 'users', userAuth.id);
   const q = query(
     collection(userDocRef, 'loans'),
@@ -247,9 +296,9 @@ export const getUserLoans = async userAuth => {
 // const generator = require('../credit-card-generator/credit-card-generator.utils');
 
 export const createUserDocumentFromAuth = async (
-  userAuth,
-  additionalInformation = {}
-) => {
+  userAuth: User,
+  additionalInformation?: AdditionalInformation
+): Promise<DocumentSnapshot<UserCreation> | void> => {
   if (!userAuth) return;
 
   const userDocRef = doc(db, 'users', userAuth.uid);
@@ -269,33 +318,39 @@ export const createUserDocumentFromAuth = async (
         ...additionalInformation,
       });
 
-      return await getDoc(userDocRef);
-    } catch (error) {
+      return (await getDoc(userDocRef)) as DocumentSnapshot<UserCreation>;
+    } catch (error: any) {
       console.log('error creating the user', error.message);
     }
   }
 
-  return userSnapshot;
+  return userSnapshot as DocumentSnapshot<UserCreation>;
 };
 
-export const createAuthUserWithEmailAndPassword = async (email, password) => {
+export const createAuthUserWithEmailAndPassword = async (
+  email: string,
+  password: string
+) => {
   if (!email || !password) return;
 
   return await createUserWithEmailAndPassword(auth, email, password);
 };
 
-export const signInAuthUserWithEmailAndPassword = async (email, password) => {
+export const signInAuthUserWithEmailAndPassword = async (
+  email: string,
+  password: string
+) => {
   if (!email || !password) return;
 
   return await signInWithEmailAndPassword(auth, email, password);
 };
 
-export const onAuthStateChangedListener = callback =>
+export const onAuthStateChangedListener = (callback: NextOrObserver<User>) =>
   onAuthStateChanged(auth, callback);
 
 export const signOutUser = async () => await signOut(auth);
 
-export const getCurrentUser = () =>
+export const getCurrentUser = (): Promise<User | null> =>
   new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -307,25 +362,32 @@ export const getCurrentUser = () =>
     );
   });
 
-export const isAdmin = async userAuth => {
+export const isAdmin = async (userAuth: User) => {
   const adminDocRef = doc(db, 'admins', userAuth.uid);
   const adminSnapshot = await getDoc(adminDocRef);
 
   return { admin: adminSnapshot.exists() };
 };
 
-export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
+export const updatePermissionCreditLoan = async (
+  userAuth: UserData,
+  loan: Loan,
+  flag: boolean
+) => {
   const userDocRef = doc(db, 'users', userAuth.id);
   const movementDocRef = doc(userDocRef, 'movements', uuidv4());
   const loanDocRef = doc(userDocRef, 'loans', loan.id);
 
-  const loanSnapshot = await getDoc(loanDocRef);
+  const loanSnapshot = (await getDoc(loanDocRef)) as DocumentSnapshot<Loan>;
+
+  if (!loanSnapshot.exists()) return;
+
   const { creditCard } = loanSnapshot.data();
 
   await updateDoc(userDocRef, {
     creditCard: creditCard
       .split('')
-      .filter(char => char !== ' ')
+      .filter((char: string) => char !== ' ')
       .join(''),
   });
 
@@ -342,8 +404,10 @@ export const updatePermissionCreditLoan = async (userAuth, loan, flag) => {
   }
 };
 
-export const deleteUserAccount = async user => {
+export const deleteUserAccount = async (user: User | null) => {
   try {
+    if (!user || !auth.currentUser) return;
+
     const userDocRef = doc(db, 'users', user.uid);
     const loanCollectionRef = collection(userDocRef, 'loans');
     const movementsCollectionRef = collection(userDocRef, 'movements');
@@ -392,50 +456,76 @@ export const deleteUserAccount = async user => {
   }
 };
 
-export const getListOfFilesFromLoan = async id => {
+type Files = {
+  [name: string]: string[];
+};
+
+export const getListOfFilesFromLoan = async (id: string) => {
   // @RECURSIVE FUNCTION: INCOMPLETE
   const listRef = ref(storage, `users/${id}`);
   // const fetchFolders = await list(listRef, { maxResults: 10 });
   const fetchFolders = await list(listRef);
 
-  const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
-    const filesRef = await listAll(folderRef);
-    const fetchFiles = filesRef.items.map(async itemRef => {
-      return await getDownloadURL(itemRef);
-    });
-    const files = await Promise.all(fetchFiles);
-    return [...(await acc), { [folderRef.name]: files }];
-  }, []);
+  const folderNames = fetchFolders.prefixes.map(
+    (folderRef: StorageReference) => folderRef.name
+  );
+
+  const folderPromises = await Promise.all(
+    fetchFolders.prefixes.map(
+      async (folderRef: StorageReference) => await listAll(folderRef)
+    )
+  );
+
+  const fetchedFiles: Promise<string[]>[] = folderPromises.map(
+    (filesRef: ListResult) =>
+      Promise.all(
+        filesRef.items.map(async itemRef => await getDownloadURL(itemRef))
+      )
+  );
+
+  const result: Promise<Files>[] = fetchedFiles.map(async (files, index) => ({
+    [folderNames[index]]: await files,
+  }));
 
   return result;
 };
 
-export const deleteListOfFilesFromLoan = async id => {
+export const deleteListOfFilesFromLoan = async (id: string) => {
   const listRef = ref(storage, `users/${id}`);
   const fetchFolders = await list(listRef);
 
-  const result = fetchFolders.prefixes.reduce(async (acc, folderRef) => {
-    const filesRef = await listAll(folderRef);
-    const fetchFiles = filesRef.items.map(async itemRef => {
-      await deleteObject(itemRef);
-      return itemRef.fullPath;
-    });
-    const files = await Promise.all(fetchFiles);
-    return [...(await acc), { [folderRef.name]: files }];
-  }, []);
+  const result = fetchFolders.prefixes.reduce(
+    async (acc: any, folderRef: StorageReference) => {
+      const filesRef = await listAll(folderRef);
+      const fetchFiles = filesRef.items.map(async itemRef => {
+        await deleteObject(itemRef);
+        return itemRef.fullPath;
+      });
+      const files = await Promise.all(fetchFiles);
+      return [...(await acc), { [folderRef.name]: files }];
+    },
+    []
+  );
 
   return result;
 };
 
-export const reauthenticateUserWithCredential = async providers => {
+export const reauthenticateUserWithCredential = async (
+  providers: ProvidersInfo[] | ProvidersInfoPassword[]
+): Promise<UserCredential | void> => {
   try {
-    const promptForCredentials = async () => {
-      if (providers.some(profile => profile.providerId === 'password')) {
-        const { email, password } = providers.find(
-          profile => profile.providerId === 'password'
-        );
+    if (!auth.currentUser) return;
 
-        return EmailAuthProvider.credential(email, password);
+    const promptForCredentials = async () => {
+      if (hasProviderPassword(providers)) {
+        const provider = providers.find(
+          profile => profile.providerId === 'password'
+        ) as ProvidersInfoPassword;
+
+        return EmailAuthProvider.credential(
+          provider.email as string,
+          provider.password
+        );
       }
 
       if (providers.some(profile => profile.providerId === 'google.com')) {
@@ -447,14 +537,32 @@ export const reauthenticateUserWithCredential = async providers => {
 
     const credential = await promptForCredentials();
 
+    if (!credential) return;
+
     const response = await reauthenticateWithCredential(
       auth.currentUser,
       credential
     );
+
     console.log(response);
 
     return response;
   } catch (error) {
     throw error;
   }
+};
+
+export const getProvidersInfo = (currentUser: User) => {
+  return currentUser.providerData.map(
+    (profile): ProvidersInfo => ({
+      providerId: profile.providerId,
+      email: profile.email,
+    })
+  );
+};
+
+export const hasProviderPassword = (
+  providerInfo: ProvidersInfo[] | ProvidersInfoPassword[]
+): providerInfo is ProvidersInfoPassword[] => {
+  return providerInfo.some(({ providerId }) => providerId === 'password');
 };
