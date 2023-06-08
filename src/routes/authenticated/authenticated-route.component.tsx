@@ -1,8 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
+import { FC, ReactNode } from 'react';
 
-const AuthenticatedRoute = ({ children }) => {
+type AuthenticatedRouteProps = {
+  children?: ReactNode;
+};
+
+const AuthenticatedRoute: FC<AuthenticatedRouteProps> = ({ children }) => {
   const { pathname, search } = useLocation();
   const currentUser = useSelector(selectCurrentUser);
 

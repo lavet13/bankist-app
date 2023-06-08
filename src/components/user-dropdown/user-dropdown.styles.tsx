@@ -44,7 +44,11 @@ export const UserDropdownContainer = styled.div`
   }
 `;
 
-export const UserDropdownButton = styled(ArrowBase)`
+type UserDropdownButtonProps = {
+  signOut?: boolean;
+};
+
+export const UserDropdownButton = styled(ArrowBase)<UserDropdownButtonProps>`
   padding: 10px 0;
 
   &:hover {

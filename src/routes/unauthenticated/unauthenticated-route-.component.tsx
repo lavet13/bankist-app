@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
-const queryString = (name, url = window.location.href) => {
+const queryString = (name: string, url = window.location.href) => {
   const parsedName = name.replace(/[[]]/g, '\\$&');
   const regex = new RegExp(`[?&]${parsedName}(=([^&#]*)|&|#|$)`, 'i');
   const results = regex.exec(url);
@@ -15,7 +15,7 @@ const queryString = (name, url = window.location.href) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 };
 
-const UnauthenticatedRoute = props => {
+const UnauthenticatedRoute = (props?: any) => {
   const currentUser = useSelector(selectCurrentUser);
   const { children } = props;
   const redirect = queryString('redirect');

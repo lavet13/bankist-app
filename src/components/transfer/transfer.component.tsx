@@ -26,9 +26,8 @@ import {
 } from '../../store/transfer/transfer.selector';
 import { Close, Send } from '@mui/icons-material';
 import {
-  GenerateError,
   getErrorMessage,
-  isGenerateError,
+  isErrorWithCode,
 } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
@@ -38,11 +37,11 @@ import CreditCardInput, {
 } from '../credit-card-input/credit-card-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
-  TRANSFER_ERROR_CODE_TYPES,
   TRANSFER_ERROR_MESSAGES,
   getTransferCreditCardError,
 } from '../../store/transfer/transfer.error';
 import { SyntheticEvent } from 'react';
+import { AuthError } from 'firebase/auth';
 
 export type TransferDefaultValues = {
   creditCard: { value: string; formattedValue: string };
@@ -183,7 +182,7 @@ const Transfer = () => {
         </Snackbar>
 
         {transferError &&
-          isGenerateError(transferError) &&
+          isErrorWithCode(transferError) &&
           !TRANSFER_ERROR_MESSAGES[transferError.code] && (
             <Alert
               action={
@@ -200,7 +199,7 @@ const Transfer = () => {
               sx={{ margin: '0 auto', width: '90%' }}
             >
               <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(transferError)}
+              {getErrorMessage(transferError as AuthError)}
             </Alert>
           )}
       </Form>

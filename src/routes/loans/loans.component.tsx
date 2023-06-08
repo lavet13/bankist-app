@@ -12,11 +12,11 @@ import Loan from '../loan/loan.component';
 const Loans = () => {
   const dispatch = useDispatch();
   const currentUser = useSelector(selectCurrentUser);
-  const { admin: isAdmin } = currentUser;
 
   useEffect(() => {
-    if (currentUser && !isAdmin) dispatch(fetchLoanStart(currentUser));
-    else if (currentUser && isAdmin) dispatch(fetchLoansStart());
+    if (currentUser && !currentUser.admin)
+      dispatch(fetchLoanStart(currentUser));
+    else if (currentUser && currentUser.admin) dispatch(fetchLoansStart());
   }, [currentUser]);
 
   return (

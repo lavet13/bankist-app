@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ReactComponent as Logo } from '../../assets/logo.svg';
 
 export const Title = styled.h1`

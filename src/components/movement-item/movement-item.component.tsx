@@ -10,13 +10,19 @@ import {
   MovementItemContainer,
   MovementValue,
 } from './movement-item.styles';
+import { Movement } from '../../utils/firebase/firebase.types';
+import { FC } from 'react';
 
 const translateToRussian = {
   withdrawal: 'Расход',
   deposit: 'Приход',
 };
 
-const MovementItem = ({ movement }) => {
+type MovementItemProps = {
+  movement: Movement;
+};
+
+const MovementItem: FC<MovementItemProps> = ({ movement }) => {
   const { date, value } = movement;
   const type = value < 0 ? 'withdrawal' : 'deposit';
   moment.updateLocale('ru', [ruLocale]);

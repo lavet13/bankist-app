@@ -20,7 +20,7 @@ export type ProvidersInfo = {
 export type ProvidersInfoPassword = ProvidersInfo & { password: string };
 
 export type Movement = {
-  date: Date;
+  date: Timestamp;
   value: number;
 };
 

@@ -13,11 +13,12 @@ import Spinner from '../../components/spinner/spinner.component';
 
 import './loans-preview.styles';
 import moment from 'moment';
+import { Loan } from '../../utils/firebase/firebase.types';
 
 const LoansPreview = () => {
   const userLoans = useSelector(selectLoanArray);
   const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
-  const { admin: isAdmin } = useSelector(selectCurrentUser);
+  const currentUser = useSelector(selectCurrentUser);
 
   return (
     <Fragment>
@@ -25,13 +26,13 @@ const LoansPreview = () => {
         <Spinner />
       ) : (
         <Fragment>
-          {!isAdmin
-            ? userLoans.map(loan => (
+          {currentUser && !currentUser.admin
+            ? (userLoans as Loan[]).map(loan => (
                 <Link key={loan.id} to={loan.id}>
                   <p>{moment(loan.timestamp.toDate()).calendar()}</p>
                 </Link>
               ))
-            : userLoans.flatMap(loanArray =>
+            : (userLoans as Loan[][]).flatMap(loanArray =>
                 loanArray.map(loan => (
                   <Link key={loan.id} to={loan.id}>
                     <p>{moment(loan.timestamp.toDate()).calendar()}</p>

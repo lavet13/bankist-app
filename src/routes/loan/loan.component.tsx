@@ -10,19 +10,20 @@ import {
 import LoanItem from '../../components/loan-item/loan-item.component';
 import Spinner from '../../components/spinner/spinner.component';
 import { selectCurrentUser } from '../../store/user/user.selector';
+import { Loan } from '../../utils/firebase/firebase.types';
 
 const Loan = () => {
   const { id } = useParams();
-  const [loan, setLoan] = useState(null);
+  const [loan, setLoan] = useState<Loan | null | undefined>(null);
   const loanArray = useSelector(selectLoanArray);
   const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
-  const { admin: isAdmin } = useSelector(selectCurrentUser);
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
-    if (!loanArrayIsLoading) {
-      const loan = !isAdmin
-        ? loanArray.find(loan => loan.id === id)
-        : loanArray
+    if (!loanArrayIsLoading && currentUser) {
+      const loan = !currentUser.admin
+        ? (loanArray as Loan[]).find(loan => loan.id === id)
+        : (loanArray as Loan[][])
             .find(loanArray => loanArray.find(loan => loan.id === id))
             ?.find(loan => loan.id === id);
 
@@ -35,7 +36,7 @@ const Loan = () => {
       {loanArrayIsLoading ? (
         <Spinner />
       ) : loan ? (
-        <LoanItem loan={loan} isAdmin={isAdmin} />
+        <LoanItem loan={loan} isAdmin={!!currentUser && currentUser.admin} />
       ) : (
         <p style={{ color: 'red', fontWeight: 'bold', textAlign: 'center' }}>
           Такой записи не существует

@@ -26,7 +26,10 @@ import {
   getSignUpPasswordError,
 } from '../../store/user/user.error';
 
-import { getErrorMessage } from '../../utils/error/error.utils';
+import {
+  getErrorMessage,
+  isErrorWithCode,
+} from '../../utils/error/error.utils';
 
 import {
   closeSignUpErrorMessage,
@@ -34,7 +37,15 @@ import {
 } from '../../store/user/user.action';
 
 import { SignUpContainer } from './sign-up.styles';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { AuthError } from 'firebase/auth';
+
+export type SignUpDefaultValues = {
+  displayName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 const defaultValues = {
   displayName: '',
@@ -44,7 +55,9 @@ const defaultValues = {
 };
 
 const SignUp = () => {
-  const { control, handleSubmit } = useForm({ defaultValues });
+  const { control, handleSubmit } = useForm<SignUpDefaultValues>({
+    defaultValues,
+  });
   const dispatch = useDispatch();
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
@@ -56,10 +69,12 @@ const SignUp = () => {
   const handleClickShowPassword = () => setShowPassword(show => !show);
   const handleClickShowConfirmPassword = () =>
     setShowConfirmPassword(show => !show);
-  const handleMouseDownPassword = event => event.preventDefault();
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => event.preventDefault();
   const handleErrorMessage = () => dispatch(closeSignUpErrorMessage());
 
-  const onSubmit = data => {
+  const onSubmit: SubmitHandler<SignUpDefaultValues> = data => {
     if (emailSignUpIsLoading) return;
 
     const { email, password, confirmPassword, displayName } = data;
@@ -114,12 +129,17 @@ const SignUp = () => {
                 sx={{ m: 1, width: '40ch' }}
                 variant='filled'
                 error={
-                  invalid || (signUpError && !!getSignUpEmailError(signUpError))
+                  invalid ||
+                  (!!signUpError &&
+                    isErrorWithCode(signUpError) &&
+                    !!getSignUpEmailError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : signUpError && getSignUpEmailError(signUpError)
+                    : !!signUpError &&
+                      isErrorWithCode(signUpError) &&
+                      getSignUpEmailError(signUpError)
                 }
               />
             )}
@@ -157,12 +177,16 @@ const SignUp = () => {
                 }}
                 error={
                   invalid ||
-                  (signUpError && !!getSignUpPasswordError(signUpError))
+                  (!!signUpError &&
+                    isErrorWithCode(signUpError) &&
+                    !!getSignUpPasswordError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : signUpError && getSignUpPasswordError(signUpError)
+                    : !!signUpError &&
+                      isErrorWithCode(signUpError) &&
+                      getSignUpPasswordError(signUpError)
                 }
               />
             )}
@@ -204,12 +228,16 @@ const SignUp = () => {
                 }}
                 error={
                   invalid ||
-                  (signUpError && !!getSignUpPasswordError(signUpError))
+                  (!!signUpError &&
+                    isErrorWithCode(signUpError) &&
+                    !!getSignUpPasswordError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : signUpError && getSignUpPasswordError(signUpError)
+                    : !!signUpError &&
+                      isErrorWithCode(signUpError) &&
+                      getSignUpPasswordError(signUpError)
                 }
               />
             )}
@@ -226,7 +254,27 @@ const SignUp = () => {
             Зарегестрироваться
           </LoadingButton>
 
-          {signUpError && !USER_ERROR_MESSAGES[signUpError.code] && (
+          {signUpError && isErrorWithCode(signUpError) ? (
+            !USER_ERROR_MESSAGES[signUpError.code] && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='error'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Ошибка</AlertTitle>
+                {getErrorMessage(signUpError as AuthError)}
+              </Alert>
+            )
+          ) : (
             <Alert
               action={
                 <IconButton
@@ -242,7 +290,7 @@ const SignUp = () => {
               sx={{ margin: '0 auto', width: '90%' }}
             >
               <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(signUpError)}
+              {(signUpError as Error).message}
             </Alert>
           )}
         </SignUpContainer>
