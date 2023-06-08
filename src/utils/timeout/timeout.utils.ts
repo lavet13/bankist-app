@@ -1,4 +1,7 @@
-export const onTimeoutInvoke = (callback, seconds) =>
+export const onTimeoutInvoke = (
+  callback: Function,
+  seconds: number
+): Promise<void> =>
   new Promise(resolve =>
     setTimeout(async () => {
       await callback();

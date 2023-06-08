@@ -25,25 +25,38 @@ import {
   selectTransferIsLoading,
 } from '../../store/transfer/transfer.selector';
 import { Close, Send } from '@mui/icons-material';
-import { getErrorMessage } from '../../utils/error/error.utils';
+import {
+  GenerateError,
+  getErrorMessage,
+  isGenerateError,
+} from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
 import NumberInput from '../number-input/number-input.component';
 import CreditCardInput, {
   MAX_CREDIT_CARD_SIZE,
 } from '../credit-card-input/credit-card-input.component';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
+  TRANSFER_ERROR_CODE_TYPES,
   TRANSFER_ERROR_MESSAGES,
   getTransferCreditCardError,
 } from '../../store/transfer/transfer.error';
+import { SyntheticEvent } from 'react';
+
+export type TransferDefaultValues = {
+  creditCard: { value: string; formattedValue: string };
+  amount: string;
+};
+
+const defaultValues: TransferDefaultValues = {
+  creditCard: { value: '', formattedValue: '' },
+  amount: '',
+};
 
 const Transfer = () => {
   const { control, handleSubmit, reset } = useForm({
-    defaultValues: {
-      creditCard: { value: '', formattedValue: '' },
-      amount: '',
-    },
+    defaultValues,
   });
   const dispatch = useDispatch();
   const balance = useSelector(selectBalance);
@@ -52,7 +65,7 @@ const Transfer = () => {
   const transferError = useSelector(selectTransferError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
-  const handleClose = (event, reason) => {
+  const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
     console.log({ event, reason });
     if (reason === 'clickaway') {
       return;
@@ -62,7 +75,7 @@ const Transfer = () => {
   };
   const handleErrorMessage = () => dispatch(closeTransferErrorMessage());
 
-  const onSubmit = data => {
+  const onSubmit: SubmitHandler<TransferDefaultValues> = data => {
     if (isLoading) return;
 
     dispatch(
@@ -84,7 +97,7 @@ const Transfer = () => {
           rules={{
             validate: {
               required: ({ value }) =>
-                value.length || 'Кредитная карта обязательна к заполнению!',
+                !!value.length || 'Кредитная карта обязательна к заполнению!',
               unfilled: ({ value }) =>
                 !(value?.length < MAX_CREDIT_CARD_SIZE) ||
                 'Кредитная карта не заполнена!',
@@ -105,14 +118,15 @@ const Transfer = () => {
                 variant='filled'
                 error={
                   invalid ||
-                  (transferError && !!getTransferCreditCardError(transferError))
+                  (!!transferError &&
+                    !!getTransferCreditCardError(transferError))
                 }
                 helperText={
                   error
                     ? error.message
                     : transferError && getTransferCreditCardError(transferError)
                 }
-                InputProps={{ inputComponent: CreditCardInput }}
+                InputProps={{ inputComponent: CreditCardInput as any }}
               />
             );
           }}
@@ -124,7 +138,7 @@ const Transfer = () => {
           rules={{
             required: 'Сумма обязательна к заполнению',
             validate: value =>
-              (balance - Math.abs(value) > 0 && Math.abs(value) > 0) ||
+              (balance - Math.abs(+value) > 0 && Math.abs(+value) > 0) ||
               'Недостаточно средств для перевода!',
           }}
           render={({ field, fieldState: { error, invalid } }) => (
@@ -137,7 +151,7 @@ const Transfer = () => {
                 startAdornment: (
                   <InputAdornment position='start'>₽</InputAdornment>
                 ),
-                inputComponent: NumberInput,
+                inputComponent: NumberInput as any,
               }}
               variant='filled'
             />
@@ -168,25 +182,27 @@ const Transfer = () => {
           </Alert>
         </Snackbar>
 
-        {transferError && !TRANSFER_ERROR_MESSAGES[transferError.code] && (
-          <Alert
-            action={
-              <IconButton
-                aria-label='close'
-                color='inherit'
-                size='small'
-                onClick={handleErrorMessage}
-              >
-                <Close fontSize='inherit' />
-              </IconButton>
-            }
-            severity='error'
-            sx={{ margin: '0 auto', width: '90%' }}
-          >
-            <AlertTitle>Ошибка</AlertTitle>
-            {getErrorMessage(transferError)}
-          </Alert>
-        )}
+        {transferError &&
+          isGenerateError(transferError) &&
+          !TRANSFER_ERROR_MESSAGES[transferError.code] && (
+            <Alert
+              action={
+                <IconButton
+                  aria-label='close'
+                  color='inherit'
+                  size='small'
+                  onClick={handleErrorMessage}
+                >
+                  <Close fontSize='inherit' />
+                </IconButton>
+              }
+              severity='error'
+              sx={{ margin: '0 auto', width: '90%' }}
+            >
+              <AlertTitle>Ошибка</AlertTitle>
+              {getErrorMessage(transferError)}
+            </Alert>
+          )}
       </Form>
     </TransferContainer>
   );

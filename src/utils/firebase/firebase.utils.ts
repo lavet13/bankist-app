@@ -238,7 +238,7 @@ export const getUserCreditCard = async (creditCard: string) => {
 export const transferAmountToUser = async (
   userAuth: UserData,
   userToTransfer: QueryDocumentSnapshot<UserData>,
-  amount: number
+  amount: string
 ) => {
   const collectionUsersRef = collection(db, 'users');
 
@@ -252,12 +252,12 @@ export const transferAmountToUser = async (
     await transaction.get(userTransferToDocRef);
 
     transaction.set(movementDepositRef, {
-      value: amount,
+      value: Number(amount),
       date: serverTimestamp(),
     });
 
     transaction.set(movementWithdrawalRef, {
-      value: -amount,
+      value: -Number(amount),
       date: serverTimestamp(),
     });
   });

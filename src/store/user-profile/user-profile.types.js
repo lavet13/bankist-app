@@ -1,3 +1,0 @@
-export const USER_PROFILE_ACTION_TYPES = {
-  SET_USER_DROPDOWN_IS_OPEN: 'user-profile/SET_USER_DROPDOWN_IS_OPEN',
-};

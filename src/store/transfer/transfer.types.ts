@@ -1,3 +1,7 @@
+import { UseFormReset } from 'react-hook-form';
+import { TransferDefaultValues } from '../../components/transfer/transfer.component';
+import { UserData } from '../../utils/firebase/firebase.types';
+
 export enum TRANSFER_ACTION_TYPES {
   TRANSFER_START = 'transfer/TRANSFER_START',
   TRANSFER_SUCCESS = 'transfer/TRANSFER_SUCCESS',
@@ -8,3 +12,8 @@ export enum TRANSFER_ACTION_TYPES {
   CLOSE_SNACKBAR = 'transfer/CLOSE_SNACKBAR',
   CLOSE_TRANSFER_ERROR_MESSAGE = 'transfer/CLOSE_TRANSFER_ERROR_MESSAGE',
 }
+
+export type TransferStartPayload = {
+  currentUser: UserData | null;
+  reset: UseFormReset<TransferDefaultValues>;
+} & TransferDefaultValues;

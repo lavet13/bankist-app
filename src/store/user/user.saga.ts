@@ -10,7 +10,7 @@ import {
   reauthenticateUserWithCredential,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
-import { generateError } from '../../utils/error/error.utils';
+import { GenerateError, generateError } from '../../utils/error/error.utils';
 
 import {
   signInSuccess,
@@ -184,7 +184,7 @@ export function* closeUserAccount({
     yield* call(reset);
     yield* put(closeAccountSuccess());
   } catch (error) {
-    yield* put(closeAccountFailed(error as Error));
+    yield* put(closeAccountFailed(error as Error | GenerateError));
   }
 }
 

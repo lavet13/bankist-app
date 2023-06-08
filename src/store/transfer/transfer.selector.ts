@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
+import { RootState } from '../store';
 
-const selectTransferReducer = state => state.transfer;
+const selectTransferReducer = (state: RootState) => state.transfer;
 
 export const selectTransferIsLoading = createSelector(
   [selectTransferReducer],

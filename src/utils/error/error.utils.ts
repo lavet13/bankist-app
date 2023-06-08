@@ -1,5 +1,13 @@
-export const generateError = (errorCode, errorMessage) =>
-  Object.assign(new Error(errorMessage), { code: errorCode });
+export type GenerateError = Error & { code: string };
+
+export const generateError = (
+  errorCode: string,
+  errorMessage: string
+): GenerateError => Object.assign(new Error(errorMessage), { code: errorCode });
+
+export const isGenerateError = (
+  error: Error | GenerateError
+): error is GenerateError => (error as GenerateError).code !== undefined;
 
 export const GENERAL_ERROR_CODE_TYPES = {
   NETWORK_REQUEST_FAILED: 'auth/network-request-failed',
@@ -15,7 +23,7 @@ export const GENERAL_ERROR_MESSAGES = {
     'Аккаунт временно заблокирован. Слишком много запросов.',
 };
 
-export const getErrorMessage = error => {
+export const getErrorMessage = (error: any) => {
   const { NETWORK_REQUEST_FAILED, POPUP_BLOCKED, TOO_MANY_REQUESTS } =
     GENERAL_ERROR_CODE_TYPES;
 

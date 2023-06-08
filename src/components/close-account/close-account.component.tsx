@@ -26,7 +26,10 @@ import {
   USER_ERROR_MESSAGES,
   getCloseAccountPasswordError,
 } from '../../store/user/user.error';
-import { getErrorMessage } from '../../utils/error/error.utils';
+import {
+  getErrorMessage,
+  isGenerateError,
+} from '../../utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { ProvidersInfo } from '../../utils/firebase/firebase.types';
 
@@ -88,7 +91,7 @@ const CloseAccount = () => {
                 {...field}
                 error={
                   invalid ||
-                  (closeAccountError &&
+                  (!!closeAccountError &&
                     !!getCloseAccountPasswordError(closeAccountError))
                 }
                 helperText={
@@ -133,7 +136,9 @@ const CloseAccount = () => {
               </LoadingButton>
             ))}
 
-        {closeAccountError && !USER_ERROR_MESSAGES[closeAccountError.code] ? (
+        {closeAccountError &&
+        isGenerateError(closeAccountError) &&
+        !USER_ERROR_MESSAGES[closeAccountError.code] ? (
           <Alert
             action={
               <IconButton
