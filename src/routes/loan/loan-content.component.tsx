@@ -12,7 +12,7 @@ import Spinner from '../../components/spinner/spinner.component';
 import { selectCurrentUser } from '../../store/user/user.selector';
 import { Loan } from '../../utils/firebase/firebase.types';
 
-const Loan = () => {
+const LoanContent = () => {
   const { id } = useParams();
   const [loan, setLoan] = useState<Loan | null | undefined>(null);
   const loanArray = useSelector(selectLoanArray);
@@ -46,4 +46,4 @@ const Loan = () => {
   );
 };
 
-export default Loan;
+export default LoanContent;

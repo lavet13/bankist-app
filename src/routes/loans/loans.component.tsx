@@ -7,7 +7,7 @@ import { fetchLoanStart, fetchLoansStart } from '../../store/loan/loan.action';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
 import LoansPreview from '../loans-preview/loans-preview.component';
-import Loan from '../loan/loan.component';
+import LoanContent from '../loan/loan-content.component';
 
 const Loans = () => {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const Loans = () => {
   return (
     <Routes>
       <Route index element={<LoansPreview />} />
-      <Route path=':id' element={<Loan />} />
+      <Route path=':id' element={<LoanContent />} />
     </Routes>
   );
 };

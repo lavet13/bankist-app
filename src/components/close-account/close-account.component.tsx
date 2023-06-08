@@ -142,7 +142,8 @@ const CloseAccount = () => {
               </LoadingButton>
             ))}
 
-        {closeAccountError && isErrorWithCode(closeAccountError) ? (
+        {closeAccountError &&
+          isErrorWithCode(closeAccountError) &&
           !USER_ERROR_MESSAGES[closeAccountError.code] && (
             <Alert
               action={
@@ -161,26 +162,7 @@ const CloseAccount = () => {
               <AlertTitle>Ошибка</AlertTitle>
               {getErrorMessage(closeAccountError as AuthError)}
             </Alert>
-          )
-        ) : (
-          <Alert
-            action={
-              <IconButton
-                aria-label='close'
-                color='inherit'
-                size='small'
-                onClick={handleErrorMessage}
-              >
-                <Close fontSize='inherit' />
-              </IconButton>
-            }
-            severity='error'
-            sx={{ margin: '0 auto', width: '90%' }}
-          >
-            <AlertTitle>Ошибка</AlertTitle>
-            {(closeAccountError as Error).message}
-          </Alert>
-        )}
+          )}
       </Form>
     </CloseAccountContainer>
   );

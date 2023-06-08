@@ -31,6 +31,8 @@ export const getErrorMessage = (error: AuthError): string => {
       return 'Вышел с аккаунта!';
 
     default:
-      return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
+      return `Код ошибки: ${
+        error.code ? error.code : 'Отсутствует'
+      }, Сообщение: ${error.message}`;
   }
 };
