@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
+import { RootState } from '../store';
 
-const selectLoanReducer = state => state.loan;
+const selectLoanReducer = (state: RootState) => state.loan;
 
 export const selectLoanArray = createSelector(
   [selectLoanReducer],

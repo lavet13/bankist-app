@@ -1,4 +1,4 @@
-import { FieldValue } from 'firebase/firestore';
+import { FieldValue, Timestamp } from 'firebase/firestore';
 
 export type AdditionalInformation = {
   displayName?: string;
@@ -10,13 +10,10 @@ export type UserCreation = {
   creditCard: number | null;
 } & AdditionalInformation;
 
-export type UserData = {
+export type UserData = UserCreation & {
   id: string;
-  email: string;
-  createdAt: Date;
-  creditCard: number | null;
   admin: boolean;
-} & AdditionalInformation;
+};
 
 export type ProvidersInfo = {
   providerId: string;
@@ -28,6 +25,19 @@ export type ProvidersInfoPassword = ProvidersInfo & { password: string };
 export type Movement = {
   date: Date;
   value: number;
+};
+
+export type Loan = {
+  id: string;
+  creditCard: string;
+  displayName: string;
+  email: string;
+  images: string[];
+  amount: number;
+  isAllowed: boolean;
+  tel: string;
+  timestamp: Timestamp;
+  userAuth: UserData;
 };
 
 export type ObjectToAdd = {

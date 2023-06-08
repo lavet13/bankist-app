@@ -53,6 +53,7 @@ import {
 } from 'firebase/storage';
 import {
   AdditionalInformation,
+  Loan,
   Movement,
   ObjectToAdd,
   ProvidersInfo,
@@ -64,7 +65,7 @@ import {
   FileFields,
   FormFields,
 } from '../../components/loan/loan-form.component';
-import { Loan } from '../../components/loan-item/loan-item.component';
+import { newFormFields } from '../../store/loan/loan.saga';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDjVb89yW2JjQPvMjxSb3PiPRc73ttErGY',
@@ -105,7 +106,7 @@ type UploadInfoResult = {
 export const uploadInfoForLoan = async (
   userAuth: UserData,
   formFileFields: FileFields,
-  formFields: FormFields
+  formFields: newFormFields
 ) => {
   if (!userAuth) return;
   const regExp = /(?:\.([^.]+))?$/;
@@ -278,17 +279,17 @@ export const getAllUserLoans = async () => {
   return result.filter(loans => loans.length !== 0);
 };
 
-export const getUserLoans = async (userAuth: UserData) => {
+export const getUserLoans = async (userAuth: UserData): Promise<Loan[]> => {
   const userDocRef = doc(db, 'users', userAuth.id);
   const q = query(
     collection(userDocRef, 'loans'),
     orderBy('timestamp', 'desc')
   );
 
-  const loanSnapshot = await getDocs(q);
+  const loanSnapshot = (await getDocs(q)) as QuerySnapshot<Loan>;
   return loanSnapshot.docs.map(loanDoc => ({
-    id: loanDoc.id,
     ...loanDoc.data(),
+    id: loanDoc.id,
     userAuth,
   }));
 };

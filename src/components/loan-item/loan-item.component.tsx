@@ -21,21 +21,7 @@ import {
 } from './loan-item.styles';
 
 import { updatePermissionCreditLoan } from '../../utils/firebase/firebase.utils';
-import { Timestamp } from 'firebase/firestore';
-import { UserData } from '../../utils/firebase/firebase.types';
-
-export type Loan = {
-  id: string;
-  creditCard: string;
-  displayName: string;
-  email: string;
-  images: string[];
-  isAllowed: boolean;
-  amount: number;
-  tel: string;
-  timestamp: Timestamp;
-  userAuth: UserData;
-};
+import { Loan } from '../../utils/firebase/firebase.types';
 
 const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
   const dispatch = useDispatch();

@@ -36,21 +36,6 @@ import NumberInput from '../number-input/number-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { SyntheticEvent } from 'react';
 
-const defaultValues: DefaultValues = {
-  displayName: '',
-  email: '',
-  tel: { value: '', formattedValue: '' },
-  creditCard: { value: '', formattedValue: '' },
-  amount: '',
-
-  fileFields: {
-    passportPhoto: null,
-    employment: null,
-    financials: null,
-    collateral: null,
-  },
-};
-
 export type FileFields = {
   passportPhoto?: File | null;
   employment?: File | null;
@@ -66,10 +51,25 @@ export type FormFields = {
   amount: string;
 };
 
-type DefaultValues = FormFields & { fileFields: FileFields };
+export type LoanDefaultValues = FormFields & { fileFields: FileFields };
+
+const defaultValues: LoanDefaultValues = {
+  displayName: '',
+  email: '',
+  tel: { value: '', formattedValue: '' },
+  creditCard: { value: '', formattedValue: '' },
+  amount: '',
+
+  fileFields: {
+    passportPhoto: null,
+    employment: null,
+    financials: null,
+    collateral: null,
+  },
+};
 
 const LoanForm = () => {
-  const { control, handleSubmit, reset } = useForm<DefaultValues>({
+  const { control, handleSubmit, reset } = useForm<LoanDefaultValues>({
     defaultValues,
   });
   const dispatch = useDispatch();
@@ -89,8 +89,8 @@ const LoanForm = () => {
 
   const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
 
-  const onSubmit: SubmitHandler<DefaultValues> = data => {
-    if (isLoading) return;
+  const onSubmit: SubmitHandler<LoanDefaultValues> = data => {
+    if (isLoading || !currentUser) return;
     const { fileFields, ...fields } = data;
 
     dispatch(
