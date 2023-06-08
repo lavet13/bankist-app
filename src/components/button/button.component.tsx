@@ -1,3 +1,5 @@
+import { FC, ButtonHTMLAttributes } from 'react';
+
 import {
   ArrowBase,
   ArrowButton,
@@ -9,17 +11,17 @@ import {
   WhiteButton,
 } from './button.styles';
 
-export const BUTTON_TYPE_CLASSES = {
-  base: 'button/base',
-  arrow: 'button/arrow',
-  arrowSort: 'button/arrowSort',
-  arrowSubmit: 'button/arrowSubmit',
-  google: 'button/google',
-  black: 'button/black',
-  white: 'button/white',
-};
+export enum BUTTON_TYPE_CLASSES {
+  base = 'button/base',
+  arrow = 'button/arrow',
+  arrowSort = 'button/arrowSort',
+  arrowSubmit = 'button/arrowSubmit',
+  google = 'button/google',
+  black = 'button/black',
+  white = 'button/white',
+}
 
-const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
+const getButton = (buttonType = BUTTON_TYPE_CLASSES.base): typeof ArrowBase =>
   ({
     [BUTTON_TYPE_CLASSES.base]: ArrowBase,
     [BUTTON_TYPE_CLASSES.arrow]: ArrowButton,
@@ -30,7 +32,18 @@ const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) =>
     [BUTTON_TYPE_CLASSES.white]: WhiteButton,
   }[buttonType]);
 
-const Button = ({ buttonType, type, isLoading, children, ...otherProps }) => {
+type ButtonProps = {
+  buttonType?: BUTTON_TYPE_CLASSES;
+  isLoading?: boolean;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
+
+const Button: FC<ButtonProps> = ({
+  buttonType,
+  type,
+  isLoading,
+  children,
+  ...otherProps
+}) => {
   const CustomButton = getButton(buttonType);
   return (
     <CustomButton disabled={isLoading} type={type || 'button'} {...otherProps}>

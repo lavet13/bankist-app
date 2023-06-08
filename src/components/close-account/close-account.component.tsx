@@ -27,11 +27,13 @@ import {
   getCloseAccountPasswordError,
 } from '../../store/user/user.error';
 import {
+  GenerateError,
   getErrorMessage,
-  isGenerateError,
+  isErrorWithCode,
 } from '../../utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { ProvidersInfo } from '../../utils/firebase/firebase.types';
+import { AuthError } from 'firebase/auth';
 
 export type CloseAccountDefaultValues = {
   password: string;
@@ -92,13 +94,17 @@ const CloseAccount = () => {
                 error={
                   invalid ||
                   (!!closeAccountError &&
-                    !!getCloseAccountPasswordError(closeAccountError))
+                    !!getCloseAccountPasswordError(
+                      closeAccountError as GenerateError | AuthError
+                    ))
                 }
                 helperText={
                   error
                     ? error.message
                     : closeAccountError &&
-                      getCloseAccountPasswordError(closeAccountError)
+                      getCloseAccountPasswordError(
+                        closeAccountError as GenerateError | AuthError
+                      )
                 }
                 variant='filled'
                 label='Пароль'
@@ -136,9 +142,27 @@ const CloseAccount = () => {
               </LoadingButton>
             ))}
 
-        {closeAccountError &&
-        isGenerateError(closeAccountError) &&
-        !USER_ERROR_MESSAGES[closeAccountError.code] ? (
+        {closeAccountError && isErrorWithCode(closeAccountError) ? (
+          !USER_ERROR_MESSAGES[closeAccountError.code] && (
+            <Alert
+              action={
+                <IconButton
+                  aria-label='close'
+                  color='inherit'
+                  size='small'
+                  onClick={handleErrorMessage}
+                >
+                  <Close fontSize='inherit' />
+                </IconButton>
+              }
+              severity='error'
+              sx={{ margin: '0 auto', width: '90%' }}
+            >
+              <AlertTitle>Ошибка</AlertTitle>
+              {getErrorMessage(closeAccountError as AuthError)}
+            </Alert>
+          )
+        ) : (
           <Alert
             action={
               <IconButton
@@ -154,9 +178,9 @@ const CloseAccount = () => {
             sx={{ margin: '0 auto', width: '90%' }}
           >
             <AlertTitle>Ошибка</AlertTitle>
-            {getErrorMessage(closeAccountError)}
+            {(closeAccountError as Error).message}
           </Alert>
-        ) : null}
+        )}
       </Form>
     </CloseAccountContainer>
   );

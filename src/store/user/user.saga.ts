@@ -1,7 +1,7 @@
 import { call, all, put, takeLatest } from 'typed-redux-saga/macro';
 
 import { USER_ACTION_TYPES } from './user.types';
-import { USER_ERROR_CODE_TYPES, USER_ERROR_MESSAGES } from './user.error';
+import { USER_ERROR_MESSAGES } from './user.error';
 import {
   deleteUserAccount,
   getCurrentUser,
@@ -10,7 +10,7 @@ import {
   reauthenticateUserWithCredential,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
-import { GenerateError, generateError } from '../../utils/error/error.utils';
+import { generateError } from '../../utils/error/error.utils';
 
 import {
   signInSuccess,
@@ -40,7 +40,7 @@ import {
   AdditionalInformation,
   ProvidersInfoPassword,
 } from '../../utils/firebase/firebase.types';
-import { User } from 'firebase/auth';
+import { AuthErrorCodes, User } from 'firebase/auth';
 
 export function* getSnapshotFromUserAuth(
   user: User,
@@ -112,10 +112,13 @@ export function* signUpWithEmail({
   payload: { email, password, confirmPassword, ...additionalDetails },
 }: SignUpStart) {
   try {
-    const { WRONG_PASSWORD } = USER_ERROR_CODE_TYPES;
+    const { INVALID_PASSWORD } = AuthErrorCodes;
 
     if (password !== confirmPassword) {
-      throw generateError(WRONG_PASSWORD, USER_ERROR_MESSAGES[WRONG_PASSWORD]);
+      throw generateError(
+        INVALID_PASSWORD,
+        USER_ERROR_MESSAGES[INVALID_PASSWORD]
+      );
     }
 
     const userCredential = yield* call(
@@ -184,7 +187,7 @@ export function* closeUserAccount({
     yield* call(reset);
     yield* put(closeAccountSuccess());
   } catch (error) {
-    yield* put(closeAccountFailed(error as Error | GenerateError));
+    yield* put(closeAccountFailed(error as Error));
   }
 }
 

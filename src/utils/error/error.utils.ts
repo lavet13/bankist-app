@@ -1,3 +1,5 @@
+import { AuthError, AuthErrorCodes } from 'firebase/auth';
+
 export type GenerateError = Error & { code: string };
 
 export const generateError = (
@@ -5,35 +7,29 @@ export const generateError = (
   errorMessage: string
 ): GenerateError => Object.assign(new Error(errorMessage), { code: errorCode });
 
-export const isGenerateError = (
-  error: Error | GenerateError
-): error is GenerateError => (error as GenerateError).code !== undefined;
+export const isErrorWithCode = (
+  error: Error | GenerateError | AuthError
+): error is GenerateError | AuthError =>
+  (error as GenerateError | AuthError).code !== undefined;
 
-export const GENERAL_ERROR_CODE_TYPES = {
-  NETWORK_REQUEST_FAILED: 'auth/network-request-failed',
-  POPUP_BLOCKED: 'auth/popup-blocked',
-  TOO_MANY_REQUESTS: 'auth/too-many-requests',
-};
-
-export const GENERAL_ERROR_MESSAGES = {
-  [GENERAL_ERROR_CODE_TYPES.NETWORK_REQUEST_FAILED]:
-    'Ошибка сети! Это все что могу сказать!',
-  [GENERAL_ERROR_CODE_TYPES.POPUP_BLOCKED]: 'Заблокирован сервером Firebase!',
-  [GENERAL_ERROR_CODE_TYPES.TOO_MANY_REQUESTS]:
-    'Аккаунт временно заблокирован. Слишком много запросов.',
-};
-
-export const getErrorMessage = (error: any) => {
-  const { NETWORK_REQUEST_FAILED, POPUP_BLOCKED, TOO_MANY_REQUESTS } =
-    GENERAL_ERROR_CODE_TYPES;
+export const getErrorMessage = (error: AuthError): string => {
+  const {
+    NETWORK_REQUEST_FAILED,
+    POPUP_BLOCKED,
+    TOO_MANY_ATTEMPTS_TRY_LATER,
+    USER_SIGNED_OUT,
+  } = AuthErrorCodes;
 
   switch (error.code) {
     case NETWORK_REQUEST_FAILED:
-      return GENERAL_ERROR_MESSAGES[NETWORK_REQUEST_FAILED];
+      return 'Ошибка сети! Это все что могу сказать!';
     case POPUP_BLOCKED:
-      return GENERAL_ERROR_MESSAGES[POPUP_BLOCKED];
-    case TOO_MANY_REQUESTS:
-      return GENERAL_ERROR_MESSAGES[TOO_MANY_REQUESTS];
+      return 'Заблокирован сервером Firebase!';
+    case TOO_MANY_ATTEMPTS_TRY_LATER:
+      return 'Аккаунт временно заблокирован. Слишком много запросов.';
+    case USER_SIGNED_OUT:
+      return 'Вышел с аккаунта!';
+
     default:
       return `Код ошибки: ${error.code}, Сообщение: ${error.message}`;
   }
