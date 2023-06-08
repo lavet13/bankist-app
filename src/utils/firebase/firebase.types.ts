@@ -4,16 +4,13 @@ export type AdditionalInformation = {
   displayName?: string;
 };
 
-export type UserCreation = {
+export type UserData = {
+  id: string;
+  admin: boolean;
   email: string;
   createdAt: Date;
   creditCard: number | null;
 } & AdditionalInformation;
-
-export type UserData = UserCreation & {
-  id: string;
-  admin: boolean;
-};
 
 export type ProvidersInfo = {
   providerId: string;

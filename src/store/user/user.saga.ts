@@ -57,7 +57,7 @@ export function* getSnapshotFromUserAuth(
 
     if (userSnapshot && userSnapshot.exists()) {
       yield* put(
-        signInSuccess({ id: userSnapshot.id, ...userSnapshot.data(), ...admin })
+        signInSuccess({ ...userSnapshot.data(), id: userSnapshot.id, ...admin })
       );
     }
   } catch (error) {

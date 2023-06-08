@@ -58,13 +58,9 @@ import {
   ObjectToAdd,
   ProvidersInfo,
   ProvidersInfoPassword,
-  UserCreation,
   UserData,
 } from './firebase.types';
-import {
-  FileFields,
-  FormFields,
-} from '../../components/loan/loan-form.component';
+import { FileFields } from '../../components/loan/loan-form.component';
 import { newFormFields } from '../../store/loan/loan.saga';
 
 const firebaseConfig = {
@@ -299,7 +295,7 @@ export const getUserLoans = async (userAuth: UserData): Promise<Loan[]> => {
 export const createUserDocumentFromAuth = async (
   userAuth: User,
   additionalInformation?: AdditionalInformation
-): Promise<DocumentSnapshot<UserCreation> | void> => {
+): Promise<DocumentSnapshot<UserData> | void> => {
   if (!userAuth) return;
 
   const userDocRef = doc(db, 'users', userAuth.uid);
@@ -319,13 +315,13 @@ export const createUserDocumentFromAuth = async (
         ...additionalInformation,
       });
 
-      return (await getDoc(userDocRef)) as DocumentSnapshot<UserCreation>;
+      return (await getDoc(userDocRef)) as DocumentSnapshot<UserData>;
     } catch (error: any) {
       console.log('error creating the user', error.message);
     }
   }
 
-  return userSnapshot as DocumentSnapshot<UserCreation>;
+  return userSnapshot as DocumentSnapshot<UserData>;
 };
 
 export const createAuthUserWithEmailAndPassword = async (
