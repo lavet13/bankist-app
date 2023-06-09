@@ -16,12 +16,14 @@ import {
   uploadLoanFailed,
   uploadLoanStart,
 } from './loan.action';
+import { GenerateError } from '../../utils/error/error.utils';
+import { AuthError } from 'firebase/auth';
 
 export type LoanState = {
   readonly loanItems: Loan[] | Loan[][];
   readonly isLoading: boolean;
   readonly error: Error | null;
-  readonly uploadLoanError: Error | null;
+  readonly uploadLoanError: GenerateError | AuthError | null;
   readonly uploadLoanIsLoading: boolean;
   readonly snackbarIsOpen: boolean;
 };

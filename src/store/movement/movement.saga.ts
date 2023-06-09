@@ -15,8 +15,8 @@ export function* fetchMovementsAsync({
     const movementItems = yield* call(getMovements, user);
 
     yield* put(fetchMovementsSuccess(movementItems));
-  } catch (error) {
-    yield* put(fetchMovementsFailed(error as Error));
+  } catch (error: any) {
+    yield* put(fetchMovementsFailed(error));
   }
 }
 

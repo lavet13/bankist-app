@@ -26,14 +26,9 @@ import {
   USER_ERROR_MESSAGES,
   getCloseAccountPasswordError,
 } from '../../store/user/user.error';
-import {
-  GenerateError,
-  getErrorMessage,
-  isErrorWithCode,
-} from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { ProvidersInfo } from '../../utils/firebase/firebase.types';
-import { AuthError } from 'firebase/auth';
 
 export type CloseAccountDefaultValues = {
   password: string;
@@ -93,18 +88,14 @@ const CloseAccount = () => {
                 {...field}
                 error={
                   invalid ||
-                  (!!closeAccountError &&
-                    !!getCloseAccountPasswordError(
-                      closeAccountError as GenerateError | AuthError
-                    ))
+                  (!!closeAccountError?.code &&
+                    !!getCloseAccountPasswordError(closeAccountError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : closeAccountError &&
-                      getCloseAccountPasswordError(
-                        closeAccountError as GenerateError | AuthError
-                      )
+                    : closeAccountError?.code &&
+                      getCloseAccountPasswordError(closeAccountError)
                 }
                 variant='filled'
                 label='Пароль'
@@ -143,8 +134,9 @@ const CloseAccount = () => {
             ))}
 
         {closeAccountError &&
-          isErrorWithCode(closeAccountError) &&
-          !USER_ERROR_MESSAGES[closeAccountError.code] && (
+          !USER_ERROR_MESSAGES[
+            closeAccountError.code ? closeAccountError.code : ''
+          ] && (
             <Alert
               action={
                 <IconButton
@@ -160,7 +152,9 @@ const CloseAccount = () => {
               sx={{ margin: '0 auto', width: '90%' }}
             >
               <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(closeAccountError as AuthError)}
+              {closeAccountError.code
+                ? getErrorMessage(closeAccountError)
+                : closeAccountError.message}
             </Alert>
           )}
       </Form>

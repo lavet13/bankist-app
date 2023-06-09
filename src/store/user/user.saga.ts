@@ -60,8 +60,8 @@ export function* getSnapshotFromUserAuth(
         signInSuccess({ ...userSnapshot.data(), id: userSnapshot.id, ...admin })
       );
     }
-  } catch (error) {
-    yield* put(signInFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signInFailed(error));
   }
 }
 
@@ -72,8 +72,8 @@ export function* isUserAuthenticated() {
     if (!userAuth) return yield* put(signInSuccess(null));
 
     yield* call(getSnapshotFromUserAuth, userAuth);
-  } catch (error) {
-    yield* put(signInFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signInFailed(error));
   }
 }
 
@@ -89,8 +89,8 @@ export function* signInWithEmail({
     if (!userCredential) return;
 
     yield* call(getSnapshotFromUserAuth, userCredential.user);
-  } catch (error) {
-    yield* put(signInFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signInFailed(error));
   }
 }
 
@@ -99,8 +99,8 @@ export function* signInWithGoogle() {
     const { user } = yield* call(signInWithGooglePopup);
 
     yield* call(getSnapshotFromUserAuth, user);
-  } catch (error) {
-    yield* put(signInFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signInFailed(error));
   }
 }
 
@@ -130,8 +130,8 @@ export function* signUpWithEmail({
     if (!userCredential) return;
 
     yield* put(signUpSuccess(userCredential.user, additionalDetails));
-  } catch (error) {
-    yield* put(signUpFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signUpFailed(error));
   }
 }
 
@@ -146,8 +146,8 @@ export function* signOut() {
     yield* call(signOutUser);
 
     yield* put(signOutSuccess());
-  } catch (error) {
-    yield* put(signOutFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signOutFailed(error));
   }
 }
 
@@ -186,8 +186,8 @@ export function* closeUserAccount({
 
     yield* call(reset);
     yield* put(closeAccountSuccess());
-  } catch (error) {
-    yield* put(closeAccountFailed(error as Error));
+  } catch (error: any) {
+    yield* put(closeAccountFailed(error));
   }
 }
 
@@ -197,8 +197,8 @@ export function* signOutAfterDeletedUser() {
     yield* call(resetErrorsState);
 
     yield* put(signOutSuccess());
-  } catch (error) {
-    yield* put(signOutFailed(error as Error));
+  } catch (error: any) {
+    yield* put(signOutFailed(error));
   }
 }
 

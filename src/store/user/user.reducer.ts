@@ -19,6 +19,8 @@ import {
   signUpFailed,
   signUpStart,
 } from './user.action';
+import { GenerateError } from '../../utils/error/error.utils';
+import { AuthError } from 'firebase/auth';
 
 export type UserState = {
   readonly currentUser: UserData | null;
@@ -27,10 +29,10 @@ export type UserState = {
   readonly googleSignInIsLoading: boolean;
   readonly emailSignUpIsLoading: boolean;
   readonly closeAccountIsLoading: boolean;
-  readonly signInError: Error | null;
-  readonly signUpError: Error | null;
-  readonly signOutError: Error | null;
-  readonly closeAccountError: Error | null;
+  readonly signInError: GenerateError | AuthError | null;
+  readonly signUpError: GenerateError | AuthError | null;
+  readonly signOutError: GenerateError | AuthError | null;
+  readonly closeAccountError: GenerateError | AuthError | null;
 };
 
 export const USER_INITIAL_STATE: UserState = {

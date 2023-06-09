@@ -24,10 +24,7 @@ import {
   uploadLoanStart,
 } from '../../store/loan/loan.action';
 import { Close, Send } from '@mui/icons-material';
-import {
-  getErrorMessage,
-  isErrorWithCode,
-} from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import TelephoneInput, {
   MAX_TEL_SIZE,
@@ -38,7 +35,6 @@ import CreditCardInput, {
 import NumberInput from '../number-input/number-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { SyntheticEvent } from 'react';
-import { AuthError } from 'firebase/auth';
 
 export type FileFields = {
   passportPhoto?: File | null;
@@ -80,7 +76,7 @@ const LoanForm = () => {
   const currentUser = useSelector(selectCurrentUser);
 
   const isLoading = useSelector(selectUploadLoanIsLoading);
-  const error = useSelector(selectUploadLoanError);
+  const loanFormError = useSelector(selectUploadLoanError);
   const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
 
   const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
@@ -320,7 +316,7 @@ const LoanForm = () => {
           <span>Отправить</span>
         </LoadingButton>
 
-        {error && isErrorWithCode(error) && (
+        {loanFormError && (
           <Alert
             action={
               <IconButton
@@ -336,9 +332,9 @@ const LoanForm = () => {
             sx={{ margin: '0 auto', width: '90%' }}
           >
             <AlertTitle>Ошибка</AlertTitle>
-            {isErrorWithCode(error)
-              ? getErrorMessage(error as AuthError)
-              : (error as Error).message}
+            {loanFormError.code
+              ? getErrorMessage(loanFormError)
+              : loanFormError.message}
           </Alert>
         )}
 

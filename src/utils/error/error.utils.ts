@@ -1,18 +1,13 @@
 import { AuthError, AuthErrorCodes } from 'firebase/auth';
 
-export type GenerateError = Error & { code: string };
+export type GenerateError = Error & { code?: string };
 
 export const generateError = (
   errorCode: string,
   errorMessage: string
 ): GenerateError => Object.assign(new Error(errorMessage), { code: errorCode });
 
-export const isErrorWithCode = (
-  error: Error | GenerateError | AuthError
-): error is GenerateError | AuthError =>
-  (error as GenerateError | AuthError).code !== undefined;
-
-export const getErrorMessage = (error: AuthError): string => {
+export const getErrorMessage = (error: AuthError | GenerateError): string => {
   const {
     NETWORK_REQUEST_FAILED,
     POPUP_BLOCKED,

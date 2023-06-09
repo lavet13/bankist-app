@@ -25,10 +25,7 @@ import {
   selectTransferIsLoading,
 } from '../../store/transfer/transfer.selector';
 import { Close, Send } from '@mui/icons-material';
-import {
-  getErrorMessage,
-  isErrorWithCode,
-} from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
 import NumberInput from '../number-input/number-input.component';
@@ -41,7 +38,6 @@ import {
   getTransferCreditCardError,
 } from '../../store/transfer/transfer.error';
 import { SyntheticEvent } from 'react';
-import { AuthError } from 'firebase/auth';
 
 export type TransferDefaultValues = {
   creditCard: { value: string; formattedValue: string };
@@ -117,13 +113,14 @@ const Transfer = () => {
                 variant='filled'
                 error={
                   invalid ||
-                  (!!transferError &&
+                  (!!transferError?.code &&
                     !!getTransferCreditCardError(transferError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : transferError && getTransferCreditCardError(transferError)
+                    : transferError?.code &&
+                      getTransferCreditCardError(transferError)
                 }
                 InputProps={{ inputComponent: CreditCardInput as any }}
               />
@@ -182,8 +179,9 @@ const Transfer = () => {
         </Snackbar>
 
         {transferError &&
-          isErrorWithCode(transferError) &&
-          !TRANSFER_ERROR_MESSAGES[transferError.code] && (
+          !TRANSFER_ERROR_MESSAGES[
+            transferError.code ? transferError.code : ''
+          ] && (
             <Alert
               action={
                 <IconButton
@@ -199,7 +197,9 @@ const Transfer = () => {
               sx={{ margin: '0 auto', width: '90%' }}
             >
               <AlertTitle>Ошибка</AlertTitle>
-              {getErrorMessage(transferError as AuthError)}
+              {transferError.code
+                ? getErrorMessage(transferError)
+                : transferError.message}
             </Alert>
           )}
       </Form>

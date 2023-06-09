@@ -16,7 +16,7 @@ import {
   transferAmountToUser,
 } from '../../utils/firebase/firebase.utils';
 import { fetchMovementsStart } from '../movement/movement.action';
-import { GenerateError, generateError } from '../../utils/error/error.utils';
+import { generateError } from '../../utils/error/error.utils';
 import {
   TRANSFER_ERROR_CODE_TYPES,
   TRANSFER_ERROR_MESSAGES,
@@ -51,8 +51,8 @@ export function* fetchTransferAsync({
     yield* call(transferAmountToUser, currentUser, userToTransfer, amount);
     yield* call(reset, { creditCard: { value: '', formattedValue: '' } });
     yield* put(transferSuccess(currentUser));
-  } catch (error) {
-    yield* put(transferFailed(error as Error | GenerateError));
+  } catch (error: any) {
+    yield* put(transferFailed(error));
   }
 }
 

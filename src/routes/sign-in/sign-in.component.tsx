@@ -35,12 +35,8 @@ import {
   getSignInPasswordError,
   getSignInWarningMessage,
 } from '../../store/user/user.error';
-import {
-  getErrorMessage,
-  isErrorWithCode,
-} from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../utils/error/error.utils';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { AuthError } from 'firebase/auth';
 
 export type SignInDefaultValues = {
   email: string;
@@ -106,16 +102,12 @@ const SignIn = () => {
                   sx={{ m: 1, width: '40ch' }}
                   error={
                     invalid ||
-                    (!!signInError &&
-                      isErrorWithCode(signInError) &&
-                      !!getSignInEmailError(signInError))
+                    (!!signInError?.code && !!getSignInEmailError(signInError))
                   }
                   helperText={
                     error
                       ? error.message
-                      : !!signInError &&
-                        isErrorWithCode(signInError) &&
-                        getSignInEmailError(signInError)
+                      : !!signInError?.code && getSignInEmailError(signInError)
                   }
                 />
               )}
@@ -153,15 +145,13 @@ const SignIn = () => {
                   sx={{ m: 1, width: '40ch' }}
                   error={
                     invalid ||
-                    (!!signInError &&
-                      isErrorWithCode(signInError) &&
+                    (!!signInError?.code &&
                       !!getSignInPasswordError(signInError))
                   }
                   helperText={
                     error
                       ? error.message
-                      : !!signInError &&
-                        isErrorWithCode(signInError) &&
+                      : !!signInError?.code &&
                         getSignInPasswordError(signInError)
                   }
                 />
@@ -188,8 +178,10 @@ const SignIn = () => {
               <span>Войти через Google</span>
             </LoadingButton>
 
-            {signInError && isErrorWithCode(signInError) ? (
-              !USER_ERROR_MESSAGES[signInError.code] && (
+            {signInError &&
+              !USER_ERROR_MESSAGES[
+                signInError.code ? signInError.code : ''
+              ] && (
                 <Alert
                   action={
                     <IconButton
@@ -205,28 +197,11 @@ const SignIn = () => {
                   sx={{ margin: '0 auto', width: '90%' }}
                 >
                   <AlertTitle>Ошибка</AlertTitle>
-                  {getErrorMessage(signInError as AuthError)}
+                  {signInError.code
+                    ? getErrorMessage(signInError)
+                    : signInError.message}
                 </Alert>
-              )
-            ) : (
-              <Alert
-                action={
-                  <IconButton
-                    aria-label='close'
-                    color='inherit'
-                    size='small'
-                    onClick={handleErrorMessage}
-                  >
-                    <Close fontSize='inherit' />
-                  </IconButton>
-                }
-                severity='error'
-                sx={{ margin: '0 auto', width: '90%' }}
-              >
-                <AlertTitle>Ошибка</AlertTitle>
-                {(signInError as Error).message}
-              </Alert>
-            )}
+              )}
 
             {signOutError && (
               <Alert
@@ -244,31 +219,31 @@ const SignIn = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Ошибка</AlertTitle>
-                {getErrorMessage(signOutError as AuthError)}
+                {signOutError.code
+                  ? getErrorMessage(signOutError)
+                  : signOutError.message}
               </Alert>
             )}
 
-            {signInError &&
-              isErrorWithCode(signInError) &&
-              getSignInWarningMessage(signInError) && (
-                <Alert
-                  action={
-                    <IconButton
-                      aria-label='close'
-                      color='inherit'
-                      size='small'
-                      onClick={handleErrorMessage}
-                    >
-                      <Close fontSize='inherit' />
-                    </IconButton>
-                  }
-                  severity='info'
-                  sx={{ margin: '0 auto', width: '90%' }}
-                >
-                  <AlertTitle>Информация</AlertTitle>
-                  {getSignInWarningMessage(signInError)}
-                </Alert>
-              )}
+            {signInError?.code && getSignInWarningMessage(signInError) && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='info'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Информация</AlertTitle>
+                {getSignInWarningMessage(signInError)}
+              </Alert>
+            )}
           </SignInFormContainer>
         </Fragment>
       )}

@@ -5,11 +5,13 @@ import {
   fetchMovementsStart,
   fetchMovementsSuccess,
 } from './movement.action';
+import { AuthError } from 'firebase/auth';
+import { GenerateError } from '../../utils/error/error.utils';
 
 export type MovementState = {
   readonly movementsItems: Movement[];
   readonly isLoading: boolean;
-  readonly error: Error | null;
+  readonly error: GenerateError | AuthError | null;
 };
 
 export const MOVEMENTS_INITIAL_STATE: MovementState = {

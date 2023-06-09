@@ -29,8 +29,8 @@ export function* fetchLoanAsync({ payload: user }: FetchLoanStart) {
   try {
     const userLoans = yield* call(getUserLoans, user);
     yield* put(fetchLoanSuccess(userLoans));
-  } catch (error) {
-    yield* put(fetchLoanFailed(error as Error));
+  } catch (error: any) {
+    yield* put(fetchLoanFailed(error));
   }
 }
 
@@ -38,8 +38,8 @@ export function* fetchLoansAsync() {
   try {
     const userLoans = yield* call(getAllUserLoans);
     yield* put(fetchLoansSuccess(userLoans));
-  } catch (error) {
-    yield* put(fetchLoansFailed(error as Error));
+  } catch (error: any) {
+    yield* put(fetchLoansFailed(error));
   }
 }
 
@@ -70,8 +70,8 @@ export function* uploadLoan({
       creditCard: { value: '', formattedValue: '' },
     });
     yield* put(uploadLoanSuccess());
-  } catch (error) {
-    yield* put(uploadLoanFailed(error as Error));
+  } catch (error: any) {
+    yield* put(uploadLoanFailed(error));
   }
 }
 

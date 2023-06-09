@@ -17,6 +17,7 @@ import { LoadingButton } from '@mui/lab';
 import {
   selectCurrentUserIsLoading,
   selectEmailSignUpIsLoading,
+  selectSignInError,
   selectSignUpError,
 } from '../../store/user/user.selector';
 
@@ -26,19 +27,16 @@ import {
   getSignUpPasswordError,
 } from '../../store/user/user.error';
 
-import {
-  getErrorMessage,
-  isErrorWithCode,
-} from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../utils/error/error.utils';
 
 import {
+  closeSignInErrorMessage,
   closeSignUpErrorMessage,
   signUpStart,
 } from '../../store/user/user.action';
 
 import { SignUpContainer } from './sign-up.styles';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { AuthError } from 'firebase/auth';
 
 export type SignUpDefaultValues = {
   displayName: string;
@@ -62,6 +60,7 @@ const SignUp = () => {
   const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
   const signUpError = useSelector(selectSignUpError);
+  const signInError = useSelector(selectSignInError);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -72,7 +71,8 @@ const SignUp = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeSignUpErrorMessage());
+  const handleSignUpErrorMessage = () => dispatch(closeSignUpErrorMessage());
+  const handleSignInErrorMessage = () => dispatch(closeSignInErrorMessage());
 
   const onSubmit: SubmitHandler<SignUpDefaultValues> = data => {
     if (emailSignUpIsLoading) return;
@@ -130,16 +130,12 @@ const SignUp = () => {
                 variant='filled'
                 error={
                   invalid ||
-                  (!!signUpError &&
-                    isErrorWithCode(signUpError) &&
-                    !!getSignUpEmailError(signUpError))
+                  (!!signUpError?.code && !!getSignUpEmailError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : !!signUpError &&
-                      isErrorWithCode(signUpError) &&
-                      getSignUpEmailError(signUpError)
+                    : !!signUpError?.code && getSignUpEmailError(signUpError)
                 }
               />
             )}
@@ -177,16 +173,12 @@ const SignUp = () => {
                 }}
                 error={
                   invalid ||
-                  (!!signUpError &&
-                    isErrorWithCode(signUpError) &&
-                    !!getSignUpPasswordError(signUpError))
+                  (!!signUpError?.code && !!getSignUpPasswordError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : !!signUpError &&
-                      isErrorWithCode(signUpError) &&
-                      getSignUpPasswordError(signUpError)
+                    : !!signUpError?.code && getSignUpPasswordError(signUpError)
                 }
               />
             )}
@@ -228,16 +220,12 @@ const SignUp = () => {
                 }}
                 error={
                   invalid ||
-                  (!!signUpError &&
-                    isErrorWithCode(signUpError) &&
-                    !!getSignUpPasswordError(signUpError))
+                  (!!signUpError?.code && !!getSignUpPasswordError(signUpError))
                 }
                 helperText={
                   error
                     ? error.message
-                    : !!signUpError &&
-                      isErrorWithCode(signUpError) &&
-                      getSignUpPasswordError(signUpError)
+                    : !!signUpError?.code && getSignUpPasswordError(signUpError)
                 }
               />
             )}
@@ -254,15 +242,15 @@ const SignUp = () => {
             Зарегестрироваться
           </LoadingButton>
 
-          {signUpError && isErrorWithCode(signUpError) ? (
-            !USER_ERROR_MESSAGES[signUpError.code] && (
+          {signUpError &&
+            !USER_ERROR_MESSAGES[signUpError.code ? signUpError.code : ''] && (
               <Alert
                 action={
                   <IconButton
                     aria-label='close'
                     color='inherit'
                     size='small'
-                    onClick={handleErrorMessage}
+                    onClick={handleSignUpErrorMessage}
                   >
                     <Close fontSize='inherit' />
                   </IconButton>
@@ -271,28 +259,34 @@ const SignUp = () => {
                 sx={{ margin: '0 auto', width: '90%' }}
               >
                 <AlertTitle>Ошибка</AlertTitle>
-                {getErrorMessage(signUpError as AuthError)}
+                {signUpError.code
+                  ? getErrorMessage(signUpError)
+                  : signUpError.message}
               </Alert>
-            )
-          ) : (
-            <Alert
-              action={
-                <IconButton
-                  aria-label='close'
-                  color='inherit'
-                  size='small'
-                  onClick={handleErrorMessage}
-                >
-                  <Close fontSize='inherit' />
-                </IconButton>
-              }
-              severity='error'
-              sx={{ margin: '0 auto', width: '90%' }}
-            >
-              <AlertTitle>Ошибка</AlertTitle>
-              {(signUpError as Error).message}
-            </Alert>
-          )}
+            )}
+
+          {signInError &&
+            !USER_ERROR_MESSAGES[signInError.code ? signInError.code : ''] && (
+              <Alert
+                action={
+                  <IconButton
+                    aria-label='close'
+                    color='inherit'
+                    size='small'
+                    onClick={handleSignInErrorMessage}
+                  >
+                    <Close fontSize='inherit' />
+                  </IconButton>
+                }
+                severity='error'
+                sx={{ margin: '0 auto', width: '90%' }}
+              >
+                <AlertTitle>Ошибка</AlertTitle>
+                {signInError.code
+                  ? getErrorMessage(signInError)
+                  : signInError.message}
+              </Alert>
+            )}
         </SignUpContainer>
       )}
     </Fragment>

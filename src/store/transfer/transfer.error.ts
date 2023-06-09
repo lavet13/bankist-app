@@ -1,3 +1,6 @@
+import { AuthError } from 'firebase/auth';
+import { GenerateError } from '../../utils/error/error.utils';
+
 export enum TRANSFER_ERROR_CODE_TYPES {
   CREDIT_CARD_NOT_FOUND = 'transfer/credit-card-not-found',
   CANNOT_TRANSFER_YOURSELF = 'transfer/cannot-transfer-yourself',
@@ -12,7 +15,9 @@ export const TRANSFER_ERROR_MESSAGES: TransferErrorMessages = {
     'Вы не можете передать себе деньги',
 };
 
-export const getTransferCreditCardError = (error: any) => {
+export const getTransferCreditCardError = (
+  error: GenerateError | AuthError
+) => {
   const { CREDIT_CARD_NOT_FOUND, CANNOT_TRANSFER_YOURSELF } =
     TRANSFER_ERROR_CODE_TYPES;
 

@@ -1,3 +1,4 @@
+import { AuthError } from 'firebase/auth';
 import { GenerateError } from '../../utils/error/error.utils';
 import {
   closeSnackbar,
@@ -12,7 +13,7 @@ import { AnyAction } from 'redux';
 
 export type TransferState = {
   readonly transferIsLoading: boolean;
-  readonly transferError: Error | GenerateError | null;
+  readonly transferError: GenerateError | AuthError | null;
   readonly snackbarIsOpen: boolean;
 };
 
