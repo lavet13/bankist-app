@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -15,9 +15,9 @@ import { Loan } from '../../utils/firebase/firebase.types';
 const LoanContent = () => {
   const { id } = useParams();
   const [loan, setLoan] = useState<Loan | null | undefined>(null);
-  const loanArray = useSelector(selectLoanArray);
-  const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
-  const currentUser = useSelector(selectCurrentUser);
+  const loanArray = useAppSelector(selectLoanArray);
+  const loanArrayIsLoading = useAppSelector(selectLoanArrayIsLoading);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   useEffect(() => {
     if (!loanArrayIsLoading && currentUser) {

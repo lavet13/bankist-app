@@ -27,13 +27,21 @@ const MovementItem: FC<MovementItemProps> = ({ movement }) => {
   const type = value < 0 ? 'withdrawal' : 'deposit';
   moment.updateLocale('ru', [ruLocale]);
 
+  const dateValue = typeof date === 'string' ? JSON.parse(date) : date;
+
+  const serializedDate = new Date(
+    dateValue.seconds * 1000 + dateValue.nanoseconds / 1000000
+  );
+
   return (
     <MovementItemContainer>
       <MovementType type={MOVEMENT_TYPES[type]}>
         {translateToRussian[type]}
       </MovementType>
       <MovementDate>
-        {moment(date.toDate()).startOf('minute').fromNow()}
+        {moment(typeof date === 'string' ? serializedDate : dateValue.toDate())
+          .startOf('minute')
+          .fromNow()}
       </MovementDate>
       <MovementValue>
         {Intl.NumberFormat('ru-RU', {

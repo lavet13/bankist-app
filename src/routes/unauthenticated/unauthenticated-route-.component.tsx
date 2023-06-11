@@ -1,6 +1,6 @@
 import { cloneElement } from 'react';
+import { useAppSelector } from '../../store/store';
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
 const queryString = (name: string, url = window.location.href) => {
@@ -16,7 +16,7 @@ const queryString = (name: string, url = window.location.href) => {
 };
 
 const UnauthenticatedRoute = (props?: any) => {
-  const currentUser = useSelector(selectCurrentUser);
+  const currentUser = useAppSelector(selectCurrentUser);
   const { children } = props;
   const redirect = queryString('redirect');
 

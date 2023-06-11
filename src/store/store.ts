@@ -1,11 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import {
-  compose,
-  legacy_createStore as createStore,
-  applyMiddleware,
-  Middleware,
-} from 'redux';
-import { persistStore, persistReducer, PersistConfig } from 'redux-persist';
+  persistStore,
+  persistReducer,
+  PersistConfig,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
 import logger from 'redux-logger';
@@ -14,6 +18,7 @@ import { rootReducer } from './root-reducer';
 import { rootSaga } from './root-saga';
 
 import createSagaMiddleware from 'redux-saga';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -31,37 +36,14 @@ const persistConfig: ExtendedPersistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
-  }
-}
-
-const middleWares = [
-  process.env.NODE_ENV !== 'production' && logger,
-  sagaMiddleware,
-].filter((middleware): middleware is Middleware => Boolean(middleware));
-
-const composeEnhancer =
-  (process.env.NODE_ENV !== 'production' &&
-    window &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
-  compose;
-
-const composedEnhancers = composeEnhancer(applyMiddleware(...middleWares));
-
-// export const store = createStore(
-//   persistedReducer,
-//   undefined,
-//   composedEnhancers
-// );
-
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: getDefaultMiddleware => {
     const middleware = getDefaultMiddleware({
       thunk: false,
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
     }).concat(sagaMiddleware);
 
     if (process.env.NODE_ENV !== 'production') {
@@ -76,3 +58,5 @@ export const store = configureStore({
 sagaMiddleware.run(rootSaga);
 
 export const persistor = persistStore(store);
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

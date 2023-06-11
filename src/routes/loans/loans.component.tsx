@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { fetchLoanStart, fetchLoansStart } from '../../store/loan/loan.action';
 
@@ -8,10 +8,11 @@ import { selectCurrentUser } from '../../store/user/user.selector';
 
 import LoansPreview from '../loans-preview/loans-preview.component';
 import LoanContent from '../loan/loan-content.component';
+import { useAppSelector } from '../../store/store';
 
 const Loans = () => {
   const dispatch = useDispatch();
-  const currentUser = useSelector(selectCurrentUser);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   useEffect(() => {
     if (currentUser && !currentUser.admin)

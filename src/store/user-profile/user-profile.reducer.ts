@@ -1,3 +1,4 @@
+import { createSlice } from '@reduxjs/toolkit';
 import { AnyAction } from 'redux';
 import { toggleUserDropdown } from './user-profile.action';
 
@@ -8,6 +9,10 @@ export type UserProfileState = {
 export const USER_PROFILE_INITIAL_STATE: UserProfileState = {
   isUserDropdownOpen: false,
 };
+
+// const userProfileSlice = createSlice({
+
+// });
 
 export const userProfileReducer = (
   state = USER_PROFILE_INITIAL_STATE,

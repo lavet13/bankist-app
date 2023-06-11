@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
+import { useDispatch } from 'react-redux';
 
 import Spinner from '../../components/spinner/spinner.component';
 
@@ -57,10 +58,10 @@ const SignUp = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
-  const signUpError = useSelector(selectSignUpError);
-  const signInError = useSelector(selectSignInError);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
+  const emailSignUpIsLoading = useAppSelector(selectEmailSignUpIsLoading);
+  const signUpError = useAppSelector(selectSignUpError);
+  const signInError = useAppSelector(selectSignInError);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

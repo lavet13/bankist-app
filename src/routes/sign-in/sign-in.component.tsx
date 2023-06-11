@@ -1,5 +1,6 @@
 import { useState, Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
+import { useDispatch } from 'react-redux';
 
 import {
   googleSignInStart,
@@ -53,11 +54,11 @@ const SignIn = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
-  const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
-  const signInError = useSelector(selectSignInError);
-  const signOutError = useSelector(selectSignOutError);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
+  const emailSignInIsLoading = useAppSelector(selectEmailSignInIsLoading);
+  const googleSignInIsLoading = useAppSelector(selectGoogleSignInIsLoading);
+  const signInError = useAppSelector(selectSignInError);
+  const signOutError = useAppSelector(selectSignOutError);
 
   const [showPassword, setShowPassword] = useState(false);
 

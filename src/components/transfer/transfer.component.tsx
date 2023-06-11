@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
 import { selectCurrentUser } from '../../store/user/user.selector';
@@ -38,6 +38,7 @@ import {
   getTransferCreditCardError,
 } from '../../store/transfer/transfer.error';
 import { SyntheticEvent } from 'react';
+import { useAppSelector } from '../../store/store';
 
 export type TransferDefaultValues = {
   creditCard: { value: string; formattedValue: string };
@@ -54,11 +55,11 @@ const Transfer = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const balance = useSelector(selectBalance);
-  const currentUser = useSelector(selectCurrentUser);
-  const isLoading = useSelector(selectTransferIsLoading);
-  const transferError = useSelector(selectTransferError);
-  const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
+  const balance = useAppSelector(selectBalance);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const isLoading = useAppSelector(selectTransferIsLoading);
+  const transferError = useAppSelector(selectTransferError);
+  const snackbarIsOpen = useAppSelector(selectSnackbarIsOpen);
 
   const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
     console.log({ event, reason });

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
 
 import { selectCurrentUserIsLoading } from '../../store/user/user.selector';
 
@@ -24,7 +24,7 @@ import {
 import { BUTTON_TYPE_CLASSES } from '../../components/button/button.component';
 
 const Home = () => {
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
 
   return (
     <Fragment>
