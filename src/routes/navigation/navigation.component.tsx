@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -23,9 +23,9 @@ import { Button } from '@mui/material';
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const currentUser = useSelector(selectCurrentUser);
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const isUserDropdownOpen = useSelector(selectUserDropdownIsOpen);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
+  const isUserDropdownOpen = useAppSelector(selectUserDropdownIsOpen);
 
   const navigateToSignInHandler = () => navigate('/sign-in');
   const navigateToSignUpHandler = () => navigate('/sign-up');

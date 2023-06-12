@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { selectCurrentUser } from '../../store/user/user.selector';
 
 import { LoanContainer, MuiFileInputStyled } from './loan.styles';
@@ -35,6 +35,7 @@ import CreditCardInput, {
 import NumberInput from '../number-input/number-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { SyntheticEvent } from 'react';
+import { useAppSelector } from '../../store/store';
 
 export type FileFields = {
   passportPhoto?: File | null;
@@ -73,11 +74,11 @@ const LoanForm = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const currentUser = useSelector(selectCurrentUser);
+  const currentUser = useAppSelector(selectCurrentUser);
 
-  const isLoading = useSelector(selectUploadLoanIsLoading);
-  const loanFormError = useSelector(selectUploadLoanError);
-  const snackbarIsOpen = useSelector(selectSnackbarIsOpen);
+  const isLoading = useAppSelector(selectUploadLoanIsLoading);
+  const loanFormError = useAppSelector(selectUploadLoanError);
+  const snackbarIsOpen = useAppSelector(selectSnackbarIsOpen);
 
   const handleClose = (event?: SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {

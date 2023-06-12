@@ -9,11 +9,11 @@ import {
 import { CloseAccountContainer } from './close-account.styles';
 
 import { Title, Form } from '../transfer/transfer.styles';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
-  closeAccountStart,
-  closeCloseAccountErrorMessage,
-} from '../../store/user/user.action';
+  closeAccountStarted,
+  closeAccountErrorMessageClosed,
+} from '../../store/user/user.reducer';
 import {
   selectCloseAccountError,
   selectCloseAccountIsLoading,
@@ -29,6 +29,7 @@ import {
 import { getErrorMessage } from '../../utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { ProvidersInfo } from '../../utils/firebase/firebase.types';
+import { useAppSelector } from '../../store/store';
 
 export type CloseAccountDefaultValues = {
   password: string;
@@ -41,14 +42,14 @@ const defaultValues: CloseAccountDefaultValues = {
 const CloseAccount = () => {
   const { control, handleSubmit, reset } = useForm({ defaultValues });
   const dispatch = useDispatch();
-  const currentUser = useSelector(selectCurrentUser);
-  const closeAccountIsLoading = useSelector(selectCloseAccountIsLoading);
-  const closeAccountError = useSelector(selectCloseAccountError);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const closeAccountIsLoading = useAppSelector(selectCloseAccountIsLoading);
+  const closeAccountError = useAppSelector(selectCloseAccountError);
 
   const [isProviderPasswordExist, setIsProviderPasswordExist] = useState(false);
   const [providerInfo, setProviderInfo] = useState<ProvidersInfo[]>([]);
 
-  const handleErrorMessage = () => dispatch(closeCloseAccountErrorMessage());
+  const handleErrorMessage = () => dispatch(closeAccountErrorMessageClosed());
 
   const onSubmit: SubmitHandler<CloseAccountDefaultValues> = data => {
     const { password } = data;
@@ -57,7 +58,7 @@ const CloseAccount = () => {
 
     if (auth.currentUser) {
       dispatch(
-        closeAccountStart({
+        closeAccountStarted({
           currentUser: auth.currentUser,
           password: isProviderPasswordExist ? password : null,
           reset,

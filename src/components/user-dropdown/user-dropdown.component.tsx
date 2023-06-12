@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
-import { signOutStart } from '../../store/user/user.action';
+import { signOutStarted } from '../../store/user/user.reducer';
 
 import {
   UserDropdownContainer,
@@ -15,7 +15,7 @@ const UserDropdown = () => {
   const navigateToSettings = () => navigate('settings');
   const navigateToWork = () => navigate('work');
   const navigateToLoans = () => navigate('loans');
-  const signOutUser = () => dispatch(signOutStart());
+  const signOutUser = () => dispatch(signOutStarted());
 
   return (
     <UserDropdownContainer>

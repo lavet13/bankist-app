@@ -1,26 +1,12 @@
-import { AnyAction } from 'redux';
 import { UserData } from '../../utils/firebase/firebase.types';
-import {
-  checkUserSession,
-  closeAccountFailed,
-  closeAccountStart,
-  closeCloseAccountErrorMessage,
-  closeSignInErrorMessage,
-  closeSignUpErrorMessage,
-  emailSignInStart,
-  googleSignInStart,
-  resetErrors,
-  resetUserLoading,
-  signInFailed,
-  signInSuccess,
-  signOutFailed,
-  signOutStart,
-  signOutSuccess,
-  signUpFailed,
-  signUpStart,
-} from './user.action';
 import { GenerateError } from '../../utils/error/error.utils';
 import { AuthError } from 'firebase/auth';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import {
+  CloseAccountStartPayload,
+  EmailSignInStartPayload,
+  SignUpStartPayload,
+} from './user.types';
 
 export type UserState = {
   readonly currentUser: UserData | null;
@@ -35,7 +21,7 @@ export type UserState = {
   readonly closeAccountError: GenerateError | AuthError | null;
 };
 
-export const USER_INITIAL_STATE: UserState = {
+export const initialState: UserState = {
   currentUser: null,
   isLoading: true,
   emailSignInIsLoading: false,
@@ -48,86 +34,104 @@ export const USER_INITIAL_STATE: UserState = {
   closeAccountError: null,
 };
 
-export const userReducer = (
-  state = USER_INITIAL_STATE,
-  action: AnyAction
-): UserState => {
-  if (emailSignInStart.match(action)) {
-    return { ...state, emailSignInIsLoading: true };
-  }
+export const userSlice = createSlice({
+  name: 'user',
+  initialState,
+  reducers: {
+    emailSignInStarted(state, _: PayloadAction<EmailSignInStartPayload>) {
+      state.emailSignInIsLoading = true;
+    },
 
-  if (googleSignInStart.match(action)) {
-    return { ...state, googleSignInIsLoading: true };
-  }
+    googleSignInStarted(state, _: PayloadAction<void>) {
+      state.googleSignInIsLoading = true;
+    },
 
-  if (signUpStart.match(action)) {
-    return { ...state, emailSignUpIsLoading: true };
-  }
+    signUpStarted(state, _: PayloadAction<SignUpStartPayload>) {
+      state.emailSignUpIsLoading = true;
+    },
 
-  if (closeAccountStart.match(action)) {
-    return { ...state, closeAccountIsLoading: true };
-  }
+    closeAccountStarted(state, _: PayloadAction<CloseAccountStartPayload>) {
+      state.closeAccountIsLoading = true;
+    },
 
-  if (checkUserSession.match(action) || signOutStart.match(action)) {
-    return { ...state, isLoading: true };
-  }
+    userSessionChecked(state, _: PayloadAction<void>) {
+      state.isLoading = true;
+    },
 
-  if (signInSuccess.match(action)) {
-    return { ...state, currentUser: action.payload };
-  }
+    signOutStarted(state, _: PayloadAction<void>) {
+      state.isLoading = true;
+    },
 
-  if (signOutSuccess.match(action)) {
-    return { ...state, currentUser: null };
-  }
+    signInSucceeded(state, action: PayloadAction<UserData | null>) {
+      state.currentUser = action.payload;
+    },
 
-  if (signOutFailed.match(action)) {
-    return { ...state, signOutError: action.payload };
-  }
+    signOutSucceeded(state, _: PayloadAction<void>) {
+      state.currentUser = null;
+    },
 
-  if (signUpFailed.match(action)) {
-    return { ...state, signUpError: action.payload };
-  }
+    signOutFailed(state, action: PayloadAction<Error>) {
+      state.signOutError = action.payload;
+    },
 
-  if (signInFailed.match(action)) {
-    return { ...state, signInError: action.payload };
-  }
+    signUpFailed(state, action: PayloadAction<Error>) {
+      state.signUpError = action.payload;
+    },
 
-  if (closeAccountFailed.match(action)) {
-    return { ...state, closeAccountError: action.payload };
-  }
+    signInFailed(state, action: PayloadAction<Error>) {
+      state.signInError = action.payload;
+    },
 
-  if (closeSignInErrorMessage.match(action)) {
-    return { ...state, signInError: null };
-  }
+    closeAccountFailed(state, action: PayloadAction<Error>) {
+      state.closeAccountError = action.payload;
+    },
 
-  if (closeSignUpErrorMessage.match(action)) {
-    return { ...state, signUpError: null };
-  }
+    signInErrorMessageClosed(state, _: PayloadAction<void>) {
+      state.signInError = null;
+    },
 
-  if (closeCloseAccountErrorMessage.match(action)) {
-    return { ...state, closeAccountError: null };
-  }
+    signUpErrorMessageClosed(state, _: PayloadAction<void>) {
+      state.signUpError = null;
+    },
 
-  if (resetErrors.match(action)) {
-    return {
-      ...state,
-      signInError: null,
-      signUpError: null,
-      closeAccountError: null,
-      signOutError: null,
-    };
-  }
+    closeAccountErrorMessageClosed(state, _: PayloadAction<void>) {
+      state.closeAccountError = null;
+    },
 
-  if (resetUserLoading.match(action)) {
-    return {
-      ...state,
-      isLoading: false,
-      emailSignInIsLoading: false,
-      emailSignUpIsLoading: false,
-      googleSignInIsLoading: false,
-      closeAccountIsLoading: false,
-    };
-  }
+    userErrorsReset(state, _: PayloadAction<void>) {
+      state.signInError = null;
+      state.signUpError = null;
+      state.closeAccountError = null;
+      state.signOutError = null;
+    },
 
-  return state;
-};
+    userLoadingReset(state, _: PayloadAction<void>) {
+      state.isLoading = false;
+      state.emailSignInIsLoading = false;
+      state.emailSignUpIsLoading = false;
+      state.googleSignInIsLoading = false;
+      state.closeAccountIsLoading = false;
+    },
+  },
+});
+
+export default userSlice.reducer;
+export const {
+  emailSignInStarted,
+  closeAccountErrorMessageClosed,
+  closeAccountFailed,
+  closeAccountStarted,
+  googleSignInStarted,
+  signInErrorMessageClosed,
+  signInFailed,
+  signInSucceeded,
+  signOutFailed,
+  signOutStarted,
+  signOutSucceeded,
+  signUpErrorMessageClosed,
+  signUpFailed,
+  signUpStarted,
+  userErrorsReset,
+  userLoadingReset,
+  userSessionChecked,
+} = userSlice.actions;

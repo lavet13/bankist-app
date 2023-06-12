@@ -8,7 +8,7 @@ export type UserData = {
   id: string;
   admin: boolean;
   email: string;
-  createdAt: Date;
+  createdAt: Date | Timestamp | string;
   creditCard: number | null;
 } & AdditionalInformation;
 
@@ -20,7 +20,7 @@ export type ProvidersInfo = {
 export type ProvidersInfoPassword = ProvidersInfo & { password: string };
 
 export type Movement = {
-  date: Timestamp;
+  date: Timestamp | string;
   value: number;
 };
 

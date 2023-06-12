@@ -214,9 +214,11 @@ export const getMovements = async (userAuth: UserData) => {
     }
   );
 
-  const movementItems = querySnapshot.docs.map(docSnapshot =>
-    docSnapshot.data()
-  );
+  const movementItems = querySnapshot.docs.map(docSnapshot => {
+    const { date, ...docSnapshotData } = docSnapshot.data();
+
+    return { date: JSON.stringify(date), ...docSnapshotData };
+  });
 
   return movementItems;
 };

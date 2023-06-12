@@ -1,11 +1,12 @@
 import { useState, Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
+import { useDispatch } from 'react-redux';
 
 import {
-  googleSignInStart,
-  emailSignInStart,
-  closeSignInErrorMessage,
-} from '../../store/user/user.action';
+  googleSignInStarted,
+  emailSignInStarted,
+  signInErrorMessageClosed,
+} from '../../store/user/user.reducer';
 
 import {
   selectCurrentUserIsLoading,
@@ -53,11 +54,11 @@ const SignIn = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const emailSignInIsLoading = useSelector(selectEmailSignInIsLoading);
-  const googleSignInIsLoading = useSelector(selectGoogleSignInIsLoading);
-  const signInError = useSelector(selectSignInError);
-  const signOutError = useSelector(selectSignOutError);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
+  const emailSignInIsLoading = useAppSelector(selectEmailSignInIsLoading);
+  const googleSignInIsLoading = useAppSelector(selectGoogleSignInIsLoading);
+  const signInError = useAppSelector(selectSignInError);
+  const signOutError = useAppSelector(selectSignOutError);
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -65,15 +66,15 @@ const SignIn = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeSignInErrorMessage());
-  const signInWithGoogle = () => dispatch(googleSignInStart());
+  const handleErrorMessage = () => dispatch(signInErrorMessageClosed());
+  const signInWithGoogle = () => dispatch(googleSignInStarted());
 
   const onSubmit: SubmitHandler<SignInDefaultValues> = data => {
     if (emailSignInIsLoading || googleSignInIsLoading) return;
 
     const { email, password } = data;
 
-    dispatch(emailSignInStart(email, password));
+    dispatch(emailSignInStarted({ email, password }));
   };
 
   return (

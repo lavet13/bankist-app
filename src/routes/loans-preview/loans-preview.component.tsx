@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
 
 import {
   selectLoanArrayIsLoading,
@@ -16,9 +16,9 @@ import moment from 'moment';
 import { Loan } from '../../utils/firebase/firebase.types';
 
 const LoansPreview = () => {
-  const userLoans = useSelector(selectLoanArray);
-  const loanArrayIsLoading = useSelector(selectLoanArrayIsLoading);
-  const currentUser = useSelector(selectCurrentUser);
+  const userLoans = useAppSelector(selectLoanArray);
+  const loanArrayIsLoading = useAppSelector(selectLoanArrayIsLoading);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   return (
     <Fragment>

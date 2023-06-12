@@ -13,12 +13,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './store/store';
+import Spinner from './components/spinner/spinner.component';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>
   <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
+    <PersistGate loading={<Spinner />} persistor={persistor}>
       <BrowserRouter>
         <App />
       </BrowserRouter>

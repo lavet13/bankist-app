@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -13,12 +12,13 @@ import MovementItem from '../movement-item/movement-item.component';
 
 import { selectCurrentUser } from '../../store/user/user.selector';
 import Spinner from '../spinner/spinner.component';
+import { useAppSelector } from '../../store/store';
 
 const Movements = () => {
   const dispatch = useDispatch();
-  const movementsItems = useSelector(selectMovementsItems);
-  const currentUser = useSelector(selectCurrentUser);
-  const movementsIsLoading = useSelector(selectMovementsIsLoading);
+  const movementsItems = useAppSelector(selectMovementsItems);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const movementsIsLoading = useAppSelector(selectMovementsIsLoading);
 
   useEffect(() => {
     if (currentUser) {

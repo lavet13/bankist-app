@@ -1,5 +1,4 @@
 import { Fragment } from 'react';
-import { useSelector } from 'react-redux';
 
 import { selectBalance } from '../../store/movement/movement.selector';
 import { selectMovementsIsLoading } from '../../store/movement/movement.selector';
@@ -11,10 +10,11 @@ import {
   BalanceLabel,
   BalanceValue,
 } from './balance.styles';
+import { useAppSelector } from '../../store/store';
 
 const Balance = () => {
-  const balance = useSelector(selectBalance);
-  const movementsIsLoading = useSelector(selectMovementsIsLoading);
+  const balance = useAppSelector(selectBalance);
+  const movementsIsLoading = useAppSelector(selectMovementsIsLoading);
 
   return (
     <BalanceContainer>

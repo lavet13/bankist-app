@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/store';
+import { useDispatch } from 'react-redux';
 
 import Spinner from '../../components/spinner/spinner.component';
 
@@ -30,10 +31,10 @@ import {
 import { getErrorMessage } from '../../utils/error/error.utils';
 
 import {
-  closeSignInErrorMessage,
-  closeSignUpErrorMessage,
-  signUpStart,
-} from '../../store/user/user.action';
+  signUpStarted,
+  signInErrorMessageClosed,
+  signUpErrorMessageClosed,
+} from '../../store/user/user.reducer';
 
 import { SignUpContainer } from './sign-up.styles';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -57,10 +58,10 @@ const SignUp = () => {
     defaultValues,
   });
   const dispatch = useDispatch();
-  const currentUserIsLoading = useSelector(selectCurrentUserIsLoading);
-  const emailSignUpIsLoading = useSelector(selectEmailSignUpIsLoading);
-  const signUpError = useSelector(selectSignUpError);
-  const signInError = useSelector(selectSignInError);
+  const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
+  const emailSignUpIsLoading = useAppSelector(selectEmailSignUpIsLoading);
+  const signUpError = useAppSelector(selectSignUpError);
+  const signInError = useAppSelector(selectSignInError);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,8 +72,8 @@ const SignUp = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => event.preventDefault();
-  const handleSignUpErrorMessage = () => dispatch(closeSignUpErrorMessage());
-  const handleSignInErrorMessage = () => dispatch(closeSignInErrorMessage());
+  const handleSignUpErrorMessage = () => dispatch(signUpErrorMessageClosed());
+  const handleSignInErrorMessage = () => dispatch(signInErrorMessageClosed());
 
   const onSubmit: SubmitHandler<SignUpDefaultValues> = data => {
     if (emailSignUpIsLoading) return;
@@ -80,7 +81,7 @@ const SignUp = () => {
     const { email, password, confirmPassword, displayName } = data;
 
     dispatch(
-      signUpStart({
+      signUpStarted({
         email,
         password,
         confirmPassword,

@@ -1,21 +1,22 @@
-import { AnyAction } from 'redux';
-import { toggleUserDropdown } from './user-profile.action';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export type UserProfileState = {
   readonly isUserDropdownOpen: boolean;
 };
 
-export const USER_PROFILE_INITIAL_STATE: UserProfileState = {
+export const initialState: UserProfileState = {
   isUserDropdownOpen: false,
 };
 
-export const userProfileReducer = (
-  state = USER_PROFILE_INITIAL_STATE,
-  action: AnyAction
-): UserProfileState => {
-  if (toggleUserDropdown.match(action)) {
-    return { ...state, isUserDropdownOpen: action.payload };
-  }
+export const userProfileSlice = createSlice({
+  name: 'userProfile',
+  initialState,
+  reducers: {
+    userProfileToggled(state, action: PayloadAction<boolean>) {
+      state.isUserDropdownOpen = action.payload;
+    },
+  },
+});
 
-  return state;
-};
+export const { userProfileToggled } = userProfileSlice.actions;
+export default userProfileSlice.reducer;
