@@ -1,16 +1,16 @@
 import { Fragment, useState, useEffect } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 import { useParams } from 'react-router-dom';
 
 import {
   selectLoanArray,
   selectLoanArrayIsLoading,
-} from '../../store/loan/loan.selector';
+} from '../../features/loan/loan.selector';
 
 import LoanItem from '../../components/loan-item/loan-item.component';
 import Spinner from '../../components/spinner/spinner.component';
-import { selectCurrentUser } from '../../store/user/user.selector';
-import { Loan } from '../../utils/firebase/firebase.types';
+import { selectCurrentUser } from '../../features/user/user.selector';
+import { Loan } from '../../common/utils/firebase/firebase.types';
 
 const LoanContent = () => {
   const { id } = useParams();

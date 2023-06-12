@@ -1,13 +1,13 @@
 import { Fragment } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 import { useNavigate } from 'react-router-dom';
 
 import {
   selectCurrentUser,
   selectCurrentUserIsLoading,
-} from '../../store/user/user.selector';
-import { selectUserDropdownIsOpen } from '../../store/user-profile/user-profile.selector';
+} from '../../features/user/user.selector';
+import { selectUserDropdownIsOpen } from '../../features/user-profile/user-profile.selector';
 
 import UserIcon from '../../components/user-icon/user-icon.component';
 import UserDropdown from '../../components/user-dropdown/user-dropdown.component';

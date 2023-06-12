@@ -1,10 +1,10 @@
 import { useDispatch } from 'react-redux';
 
-import { userProfileToggled } from '../../store/user-profile/user-profile.reducer';
-import { selectUserDropdownIsOpen } from '../../store/user-profile/user-profile.selector';
+import { userProfileToggled } from '../../features/user-profile/user-profile.slice';
+import { selectUserDropdownIsOpen } from '../../features/user-profile/user-profile.selector';
 
 import { UserProfileIcon, UserIconContainer } from './user-icon.styles';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 const UserIcon = () => {
   const dispatch = useDispatch();

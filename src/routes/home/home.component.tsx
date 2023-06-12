@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
-import { selectCurrentUserIsLoading } from '../../store/user/user.selector';
+import { selectCurrentUserIsLoading } from '../../features/user/user.selector';
 
 import Spinner from '../../components/spinner/spinner.component';
 import BrowserImageSrc from '../../assets/browser.png';

@@ -2,13 +2,16 @@ import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
-import { fetchLoanStart, fetchLoansStart } from '../../store/loan/loan.action';
+import {
+  fetchLoanStarted,
+  fetchLoansStarted,
+} from '../../features/loan/loan.slice';
 
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 
 import LoansPreview from '../loans-preview/loans-preview.component';
 import LoanContent from '../loan/loan-content.component';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 const Loans = () => {
   const dispatch = useDispatch();
@@ -16,8 +19,8 @@ const Loans = () => {
 
   useEffect(() => {
     if (currentUser && !currentUser.admin)
-      dispatch(fetchLoanStart(currentUser));
-    else if (currentUser && currentUser.admin) dispatch(fetchLoansStart());
+      dispatch(fetchLoanStarted(currentUser));
+    else if (currentUser && currentUser.admin) dispatch(fetchLoansStarted());
   }, [currentUser]);
 
   return (

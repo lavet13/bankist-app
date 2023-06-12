@@ -4,15 +4,15 @@ import { useDispatch } from 'react-redux';
 import {
   selectMovementsIsLoading,
   selectMovementsItems,
-} from '../../store/movement/movement.selector';
-import { fetchMovementsStart } from '../../store/movement/movement.action';
+} from '../../features/movement/movement.selector';
+import { fetchMovementStarted } from '../../features/movement/movement.slice';
 
 import { MovementsContainer } from './movements.styles';
 import MovementItem from '../movement-item/movement-item.component';
 
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 import Spinner from '../spinner/spinner.component';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 const Movements = () => {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const Movements = () => {
 
   useEffect(() => {
     if (currentUser) {
-      dispatch(fetchMovementsStart(currentUser));
+      dispatch(fetchMovementStarted(currentUser));
     }
   }, [currentUser]);
 

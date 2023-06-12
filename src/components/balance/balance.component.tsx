@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 
-import { selectBalance } from '../../store/movement/movement.selector';
-import { selectMovementsIsLoading } from '../../store/movement/movement.selector';
+import { selectBalance } from '../../features/movement/movement.selector';
+import { selectMovementsIsLoading } from '../../features/movement/movement.selector';
 
 import {
   BalanceContainer,
@@ -10,7 +10,7 @@ import {
   BalanceLabel,
   BalanceValue,
 } from './balance.styles';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 const Balance = () => {
   const balance = useAppSelector(selectBalance);

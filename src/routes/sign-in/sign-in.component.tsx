@@ -1,12 +1,12 @@
 import { useState, Fragment } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 import { useDispatch } from 'react-redux';
 
 import {
   googleSignInStarted,
   emailSignInStarted,
   signInErrorMessageClosed,
-} from '../../store/user/user.reducer';
+} from '../../features/user/user.slice';
 
 import {
   selectCurrentUserIsLoading,
@@ -14,7 +14,7 @@ import {
   selectGoogleSignInIsLoading,
   selectSignInError,
   selectSignOutError,
-} from '../../store/user/user.selector';
+} from '../../features/user/user.selector';
 
 import Spinner from '../../components/spinner/spinner.component';
 
@@ -35,8 +35,8 @@ import {
   getSignInEmailError,
   getSignInPasswordError,
   getSignInWarningMessage,
-} from '../../store/user/user.error';
-import { getErrorMessage } from '../../utils/error/error.utils';
+} from '../../features/user/user.error';
+import { getErrorMessage } from '../../common/utils/error/error.utils';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 
 export type SignInDefaultValues = {
