@@ -11,14 +11,14 @@ import UnauthenticatedRoute from './routes/unauthenticated/unauthenticated-route
 import AuthenticatedRoute from './routes/authenticated/authenticated-route.component';
 import Settings from './routes/settings/settings.component';
 
-import { checkUserSession } from './store/user/user.action';
 import Loans from './routes/loans/loans.component';
+import { userSessionChecked } from './store/user/user.reducer';
 
 const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(checkUserSession());
+    dispatch(userSessionChecked());
   }, []);
 
   return (

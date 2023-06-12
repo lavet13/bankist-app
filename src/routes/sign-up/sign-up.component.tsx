@@ -31,10 +31,10 @@ import {
 import { getErrorMessage } from '../../utils/error/error.utils';
 
 import {
-  closeSignInErrorMessage,
-  closeSignUpErrorMessage,
-  signUpStart,
-} from '../../store/user/user.action';
+  signUpStarted,
+  signInErrorMessageClosed,
+  signUpErrorMessageClosed,
+} from '../../store/user/user.reducer';
 
 import { SignUpContainer } from './sign-up.styles';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -72,8 +72,8 @@ const SignUp = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => event.preventDefault();
-  const handleSignUpErrorMessage = () => dispatch(closeSignUpErrorMessage());
-  const handleSignInErrorMessage = () => dispatch(closeSignInErrorMessage());
+  const handleSignUpErrorMessage = () => dispatch(signUpErrorMessageClosed());
+  const handleSignInErrorMessage = () => dispatch(signInErrorMessageClosed());
 
   const onSubmit: SubmitHandler<SignUpDefaultValues> = data => {
     if (emailSignUpIsLoading) return;
@@ -81,7 +81,7 @@ const SignUp = () => {
     const { email, password, confirmPassword, displayName } = data;
 
     dispatch(
-      signUpStart({
+      signUpStarted({
         email,
         password,
         confirmPassword,

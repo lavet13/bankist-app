@@ -47,7 +47,9 @@ export const store = configureStore({
     }).concat(sagaMiddleware);
 
     if (process.env.NODE_ENV !== 'production') {
-      return middleware.concat(logger);
+      return middleware
+        .concat(logger)
+        .concat(require('redux-immutable-state-invariant').default());
     }
 
     return middleware;

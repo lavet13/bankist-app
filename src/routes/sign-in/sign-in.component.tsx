@@ -3,10 +3,10 @@ import { useAppSelector } from '../../store/store';
 import { useDispatch } from 'react-redux';
 
 import {
-  googleSignInStart,
-  emailSignInStart,
-  closeSignInErrorMessage,
-} from '../../store/user/user.action';
+  googleSignInStarted,
+  emailSignInStarted,
+  signInErrorMessageClosed,
+} from '../../store/user/user.reducer';
 
 import {
   selectCurrentUserIsLoading,
@@ -66,15 +66,15 @@ const SignIn = () => {
   const handleMouseDownPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => event.preventDefault();
-  const handleErrorMessage = () => dispatch(closeSignInErrorMessage());
-  const signInWithGoogle = () => dispatch(googleSignInStart());
+  const handleErrorMessage = () => dispatch(signInErrorMessageClosed());
+  const signInWithGoogle = () => dispatch(googleSignInStarted());
 
   const onSubmit: SubmitHandler<SignInDefaultValues> = data => {
     if (emailSignInIsLoading || googleSignInIsLoading) return;
 
     const { email, password } = data;
 
-    dispatch(emailSignInStart(email, password));
+    dispatch(emailSignInStarted({ email, password }));
   };
 
   return (

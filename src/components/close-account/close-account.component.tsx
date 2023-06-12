@@ -11,9 +11,9 @@ import { CloseAccountContainer } from './close-account.styles';
 import { Title, Form } from '../transfer/transfer.styles';
 import { useDispatch } from 'react-redux';
 import {
-  closeAccountStart,
-  closeCloseAccountErrorMessage,
-} from '../../store/user/user.action';
+  closeAccountStarted,
+  closeAccountErrorMessageClosed,
+} from '../../store/user/user.reducer';
 import {
   selectCloseAccountError,
   selectCloseAccountIsLoading,
@@ -49,7 +49,7 @@ const CloseAccount = () => {
   const [isProviderPasswordExist, setIsProviderPasswordExist] = useState(false);
   const [providerInfo, setProviderInfo] = useState<ProvidersInfo[]>([]);
 
-  const handleErrorMessage = () => dispatch(closeCloseAccountErrorMessage());
+  const handleErrorMessage = () => dispatch(closeAccountErrorMessageClosed());
 
   const onSubmit: SubmitHandler<CloseAccountDefaultValues> = data => {
     const { password } = data;
@@ -58,7 +58,7 @@ const CloseAccount = () => {
 
     if (auth.currentUser) {
       dispatch(
-        closeAccountStart({
+        closeAccountStarted({
           currentUser: auth.currentUser,
           password: isProviderPasswordExist ? password : null,
           reset,

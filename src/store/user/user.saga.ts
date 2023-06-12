@@ -1,6 +1,13 @@
+import { createAction } from '@reduxjs/toolkit';
+
 import { call, all, put, takeLatest } from 'typed-redux-saga/macro';
 
-import { USER_ACTION_TYPES } from './user.types';
+import {
+  CloseAccountStartPayload,
+  EmailSignInStartPayload,
+  SignUpStartPayload,
+  SignUpSuccessPayload,
+} from './user.types';
 import { USER_ERROR_MESSAGES } from './user.error';
 import {
   deleteUserAccount,
@@ -10,37 +17,52 @@ import {
   reauthenticateUserWithCredential,
   signInWithGooglePopup,
 } from '../../utils/firebase/firebase.utils';
+
 import { generateError } from '../../utils/error/error.utils';
 
-import {
-  signInSuccess,
-  signInFailed,
-  signOutSuccess,
-  signOutFailed,
-  signUpFailed,
-  signUpSuccess,
-  closeAccountFailed,
-  closeAccountSuccess,
-  resetErrors,
-  resetUserLoading,
-  SignUpStart,
-  SignUpSuccess,
-  CloseAccountStart,
-  EmailSignInStart,
-} from './user.action';
 import {
   createUserDocumentFromAuth,
   signInAuthUserWithEmailAndPassword,
   createAuthUserWithEmailAndPassword,
   signOutUser,
 } from '../../utils/firebase/firebase.utils';
+
 import { clearLoans } from '../loan/loan.action';
+
 import { onTimeoutInvoke } from '../../utils/timeout/timeout.utils';
+
 import {
   AdditionalInformation,
   ProvidersInfoPassword,
 } from '../../utils/firebase/firebase.types';
+
 import { AuthErrorCodes, User } from 'firebase/auth';
+
+import {
+  userLoadingReset,
+  signInSucceeded,
+  signInFailed,
+  userErrorsReset,
+  signUpFailed,
+  signOutSucceeded,
+  signOutFailed,
+  closeAccountFailed,
+  userSessionChecked,
+  emailSignInStarted,
+  googleSignInStarted,
+  signOutStarted,
+  signUpStarted,
+  closeAccountStarted,
+  userSlice,
+} from './user.reducer';
+
+export const closeAccountSucceeded = createAction(
+  `${userSlice.name}/closeAccountSucceeded`
+);
+
+export const signUpSucceeded = createAction<SignUpSuccessPayload>(
+  `${userSlice.name}/signUpSucceeded`
+);
 
 export function* getSnapshotFromUserAuth(
   user: User,
@@ -58,7 +80,7 @@ export function* getSnapshotFromUserAuth(
     if (userSnapshot && userSnapshot.exists()) {
       const { createdAt, ...userSnapshotData } = userSnapshot.data();
       yield* put(
-        signInSuccess({
+        signInSucceeded({
           ...userSnapshotData,
           createdAt: JSON.stringify(createdAt),
           id: userSnapshot.id,
@@ -75,7 +97,7 @@ export function* isUserAuthenticated() {
   try {
     const userAuth = yield* call(getCurrentUser);
 
-    if (!userAuth) return yield* put(signInSuccess(null));
+    if (!userAuth) return yield* put(signInSucceeded(null));
 
     yield* call(getSnapshotFromUserAuth, userAuth);
   } catch (error: any) {
@@ -83,15 +105,18 @@ export function* isUserAuthenticated() {
   }
 }
 
-export function* signInWithEmail({
-  payload: { email, password },
-}: EmailSignInStart) {
+export function* signInWithEmail(
+  action: { payload: EmailSignInStartPayload } & { type: string }
+) {
   try {
+    const { email, password } = action.payload;
+
     const userCredential = yield* call(
       signInAuthUserWithEmailAndPassword,
       email,
       password
     );
+
     if (!userCredential) return;
 
     yield* call(getSnapshotFromUserAuth, userCredential.user);
@@ -111,13 +136,16 @@ export function* signInWithGoogle() {
 }
 
 export function* resetErrorsState() {
-  yield* put(resetErrors());
+  yield* put(userErrorsReset());
 }
 
-export function* signUpWithEmail({
-  payload: { email, password, confirmPassword, ...additionalDetails },
-}: SignUpStart) {
+export function* signUpWithEmail(
+  action: { payload: SignUpStartPayload } & { type: string }
+) {
   try {
+    const { email, password, confirmPassword, ...additionalDetails } =
+      action.payload;
+
     const { INVALID_PASSWORD } = AuthErrorCodes;
 
     if (password !== confirmPassword) {
@@ -135,15 +163,18 @@ export function* signUpWithEmail({
 
     if (!userCredential) return;
 
-    yield* put(signUpSuccess(userCredential.user, additionalDetails));
+    yield* put(
+      signUpSucceeded({ user: userCredential.user, ...additionalDetails })
+    );
   } catch (error: any) {
     yield* put(signUpFailed(error));
   }
 }
 
-export function* signInAfterSignUp({
-  payload: { user, ...additionalDetails },
-}: SignUpSuccess) {
+export function* signInAfterSignUp(
+  action: { payload: SignUpSuccessPayload } & { type: string }
+) {
+  const { user, ...additionalDetails } = action.payload;
   yield* call(getSnapshotFromUserAuth, user, additionalDetails);
 }
 
@@ -151,18 +182,21 @@ export function* signOut() {
   try {
     yield* call(signOutUser);
 
-    yield* put(signOutSuccess());
+    yield* put(signOutSucceeded());
   } catch (error: any) {
     yield* put(signOutFailed(error));
   }
 }
 
-export function* closeUserAccount({
-  payload: { currentUser, reset, password },
-}: CloseAccountStart) {
+export function* closeUserAccount(
+  action: {
+    payload: CloseAccountStartPayload;
+  } & { type: string }
+) {
   try {
     // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
     // @REPEATED PROVIDER INFO
+    const { currentUser, password, reset } = action.payload;
 
     if (password !== null) {
       const providerInfo = getProvidersInfo(currentUser).map(profile =>
@@ -191,7 +225,7 @@ export function* closeUserAccount({
     }
 
     yield* call(reset);
-    yield* put(closeAccountSuccess());
+    yield* put(closeAccountSucceeded());
   } catch (error: any) {
     yield* put(closeAccountFailed(error));
   }
@@ -202,14 +236,14 @@ export function* signOutAfterDeletedUser() {
     yield* call(onTimeoutInvoke, signOutUser, 2);
     yield* call(resetErrorsState);
 
-    yield* put(signOutSuccess());
+    yield* put(signOutSucceeded());
   } catch (error: any) {
     yield* put(signOutFailed(error));
   }
 }
 
 export function* resetLoadingState() {
-  yield* put(resetUserLoading());
+  yield* put(userLoadingReset());
 }
 
 export function* clearUserLoans() {
@@ -218,66 +252,63 @@ export function* clearUserLoans() {
 }
 
 export function* onCheckUserSession() {
-  yield* takeLatest(USER_ACTION_TYPES.CHECK_USER_SESSION, isUserAuthenticated);
+  yield* takeLatest(userSessionChecked.type, isUserAuthenticated);
 }
 
 export function* onEmailSignInStart() {
-  yield* takeLatest(USER_ACTION_TYPES.EMAIL_SIGN_IN_START, signInWithEmail);
+  yield* takeLatest(emailSignInStarted.type, signInWithEmail);
 }
 
 export function* onGoogleSignInStart() {
-  yield* takeLatest(USER_ACTION_TYPES.GOOGLE_SIGN_IN_START, signInWithGoogle);
+  yield* takeLatest(googleSignInStarted.type, signInWithGoogle);
 }
 
 export function* onSignUpStart() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_UP_START, signUpWithEmail);
+  yield* takeLatest(signUpStarted.type, signUpWithEmail);
 }
 
 export function* onSignUpSuccess() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_UP_SUCCESS, signInAfterSignUp);
+  yield* takeLatest(signUpSucceeded.type, signInAfterSignUp);
 }
 
 export function* onSignOutStart() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_OUT_START, signOut);
+  yield* takeLatest(signOutStarted.type, signOut);
 }
 
 export function* onSignOutSuccess() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_OUT_SUCCESS, clearUserLoans);
+  yield* takeLatest(signOutSucceeded.type, clearUserLoans);
 }
 
 export function* onSignOutFailed() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_OUT_FAILED, resetLoadingState);
+  yield* takeLatest(signOutFailed.type, resetLoadingState);
 }
 
 export function* onCloseAccountStart() {
-  yield* takeLatest(USER_ACTION_TYPES.CLOSE_ACCOUNT_START, closeUserAccount);
+  yield* takeLatest(closeAccountStarted.type, closeUserAccount);
 }
 
 export function* onCloseAccountSuccess() {
-  yield* takeLatest(
-    USER_ACTION_TYPES.CLOSE_ACCOUNT_SUCCESS,
-    signOutAfterDeletedUser
-  );
+  yield* takeLatest(closeAccountSucceeded.type, signOutAfterDeletedUser);
 }
 
 export function* onCloseAccountFailed() {
-  yield* takeLatest(USER_ACTION_TYPES.CLOSE_ACCOUNT_FAILED, resetLoadingState);
+  yield* takeLatest(closeAccountFailed.type, resetLoadingState);
 }
 
 export function* onSignInSuccess() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_IN_SUCCESS, resetErrorsState);
+  yield* takeLatest(signInSucceeded.type, resetErrorsState);
 }
 
 export function* onSignInFailed() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_IN_FAILED, resetLoadingState);
+  yield* takeLatest(signInFailed.type, resetLoadingState);
 }
 
 export function* onResetErrors() {
-  yield* takeLatest(USER_ACTION_TYPES.RESET_USER_ERRORS, resetLoadingState);
+  yield* takeLatest(userErrorsReset.type, resetLoadingState);
 }
 
 export function* onSignUpFailed() {
-  yield* takeLatest(USER_ACTION_TYPES.SIGN_UP_FAILED, resetLoadingState);
+  yield* takeLatest(signUpFailed.type, resetLoadingState);
 }
 
 export function* userSagas() {
