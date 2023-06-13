@@ -1,19 +1,19 @@
 import { Fragment } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 import {
   selectLoanArrayIsLoading,
   selectLoanArray,
-} from '../../store/loan/loan.selector';
+} from '../../features/loan/loan.selector';
 
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 
 import { Link } from 'react-router-dom';
 import Spinner from '../../components/spinner/spinner.component';
 
 import './loans-preview.styles';
 import moment from 'moment';
-import { Loan } from '../../utils/firebase/firebase.types';
+import { Loan } from '../../common/utils/firebase/firebase.types';
 
 const LoansPreview = () => {
   const userLoans = useAppSelector(selectLoanArray);

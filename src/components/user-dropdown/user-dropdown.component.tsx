@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
-import { signOutStarted } from '../../store/user/user.reducer';
+import { signOutStarted } from '../../features/user/user.slice';
 
 import {
   UserDropdownContainer,

@@ -4,7 +4,7 @@ import {
   auth,
   getProvidersInfo,
   hasProviderPassword,
-} from '../../utils/firebase/firebase.utils';
+} from '../../common/utils/firebase/firebase.utils';
 
 import { CloseAccountContainer } from './close-account.styles';
 
@@ -13,23 +13,23 @@ import { useDispatch } from 'react-redux';
 import {
   closeAccountStarted,
   closeAccountErrorMessageClosed,
-} from '../../store/user/user.reducer';
+} from '../../features/user/user.slice';
 import {
   selectCloseAccountError,
   selectCloseAccountIsLoading,
   selectCurrentUser,
-} from '../../store/user/user.selector';
+} from '../../features/user/user.selector';
 import { LoadingButton } from '@mui/lab';
 import { Close, NoAccounts } from '@mui/icons-material';
 import { Alert, AlertTitle, IconButton, TextField } from '@mui/material';
 import {
   USER_ERROR_MESSAGES,
   getCloseAccountPasswordError,
-} from '../../store/user/user.error';
-import { getErrorMessage } from '../../utils/error/error.utils';
+} from '../../features/user/user.error';
+import { getErrorMessage } from '../../common/utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { ProvidersInfo } from '../../utils/firebase/firebase.types';
-import { useAppSelector } from '../../store/store';
+import { ProvidersInfo } from '../../common/utils/firebase/firebase.types';
+import { useAppSelector } from '../../app/store';
 
 export type CloseAccountDefaultValues = {
   password: string;

@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux';
 
-import { selectBalance } from '../../store/movement/movement.selector';
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectBalance } from '../../features/movement/movement.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 
 import {
   Alert,
@@ -15,17 +15,17 @@ import {
 import { TransferContainer, Title, Form } from './transfer.styles';
 
 import {
-  closeSnackbar,
-  closeTransferErrorMessage,
-  transferStart,
-} from '../../store/transfer/transfer.action';
+  snackbarClosed,
+  transferErrorMessageClosed,
+  transferStarted,
+} from '../../features/transfer/transfer.slice';
 import {
   selectSnackbarIsOpen,
   selectTransferError,
   selectTransferIsLoading,
-} from '../../store/transfer/transfer.selector';
+} from '../../features/transfer/transfer.selector';
 import { Close, Send } from '@mui/icons-material';
-import { getErrorMessage } from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../common/utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import { Grow } from '@mui/material';
 import NumberInput from '../number-input/number-input.component';
@@ -36,9 +36,9 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
   TRANSFER_ERROR_MESSAGES,
   getTransferCreditCardError,
-} from '../../store/transfer/transfer.error';
+} from '../../features/transfer/transfer.error';
 import { SyntheticEvent } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 export type TransferDefaultValues = {
   creditCard: { value: string; formattedValue: string };
@@ -67,15 +67,15 @@ const Transfer = () => {
       return;
     }
 
-    dispatch(closeSnackbar());
+    dispatch(snackbarClosed());
   };
-  const handleErrorMessage = () => dispatch(closeTransferErrorMessage());
+  const handleErrorMessage = () => dispatch(transferErrorMessageClosed());
 
   const onSubmit: SubmitHandler<TransferDefaultValues> = data => {
     if (isLoading) return;
 
     dispatch(
-      transferStart({
+      transferStarted({
         currentUser,
         ...data,
         reset,

@@ -10,7 +10,7 @@ import {
   MovementItemContainer,
   MovementValue,
 } from './movement-item.styles';
-import { Movement } from '../../utils/firebase/firebase.types';
+import { Movement } from '../../common/utils/firebase/firebase.types';
 import { FC } from 'react';
 
 const translateToRussian = {

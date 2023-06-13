@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 import { FC, ReactNode } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 type AuthenticatedRouteProps = {
   children?: ReactNode;

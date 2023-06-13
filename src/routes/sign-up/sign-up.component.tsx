@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 import { useDispatch } from 'react-redux';
 
 import Spinner from '../../components/spinner/spinner.component';
@@ -20,21 +20,21 @@ import {
   selectEmailSignUpIsLoading,
   selectSignInError,
   selectSignUpError,
-} from '../../store/user/user.selector';
+} from '../../features/user/user.selector';
 
 import {
   USER_ERROR_MESSAGES,
   getSignUpEmailError,
   getSignUpPasswordError,
-} from '../../store/user/user.error';
+} from '../../features/user/user.error';
 
-import { getErrorMessage } from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../common/utils/error/error.utils';
 
 import {
   signUpStarted,
   signInErrorMessageClosed,
   signUpErrorMessageClosed,
-} from '../../store/user/user.reducer';
+} from '../../features/user/user.slice';
 
 import { SignUpContainer } from './sign-up.styles';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';

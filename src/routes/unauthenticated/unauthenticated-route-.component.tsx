@@ -1,7 +1,7 @@
 import { cloneElement } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 import { Navigate } from 'react-router-dom';
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 
 const queryString = (name: string, url = window.location.href) => {
   const parsedName = name.replace(/[[]]/g, '\\$&');

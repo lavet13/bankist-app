@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { fetchLoansStart } from '../../store/loan/loan.action';
+import { fetchLoansStarted } from '../../features/loan/loan.slice';
 
 import moment from 'moment';
 
@@ -20,8 +20,8 @@ import {
   DenyButton,
 } from './loan-item.styles';
 
-import { updatePermissionCreditLoan } from '../../utils/firebase/firebase.utils';
-import { Loan } from '../../utils/firebase/firebase.types';
+import { updatePermissionCreditLoan } from '../../common/utils/firebase/firebase.utils';
+import { Loan } from '../../common/utils/firebase/firebase.types';
 
 const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
   const dispatch = useDispatch();
@@ -42,7 +42,7 @@ const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
   const allowCreditHandler = async () => {
     try {
       await updatePermissionCreditLoan(userAuth, loan, true);
-      dispatch(fetchLoansStart());
+      dispatch(fetchLoansStarted());
     } catch (error: any) {
       alert(error.code);
     }
@@ -51,7 +51,7 @@ const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
   const denyCreditHandler = async () => {
     try {
       await updatePermissionCreditLoan(userAuth, loan, false);
-      dispatch(fetchLoansStart());
+      dispatch(fetchLoansStarted());
     } catch (error: any) {
       alert(error.code);
     }

@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { selectCurrentUser } from '../../store/user/user.selector';
+import { selectCurrentUser } from '../../features/user/user.selector';
 
 import { LoanContainer, MuiFileInputStyled } from './loan.styles';
 
@@ -17,14 +17,14 @@ import {
   selectSnackbarIsOpen,
   selectUploadLoanError,
   selectUploadLoanIsLoading,
-} from '../../store/loan/loan.selector';
+} from '../../features/loan/loan.selector';
 import {
-  closeSnackbar,
-  closeUploadLoanErrorMessage,
-  uploadLoanStart,
-} from '../../store/loan/loan.action';
+  snackbarClosed,
+  uploadLoanErrorMessageClosed,
+  uploadingLoanStarted,
+} from '../../features/loan/loan.slice';
 import { Close, Send } from '@mui/icons-material';
-import { getErrorMessage } from '../../utils/error/error.utils';
+import { getErrorMessage } from '../../common/utils/error/error.utils';
 import { LoadingButton } from '@mui/lab';
 import TelephoneInput, {
   MAX_TEL_SIZE,
@@ -35,7 +35,7 @@ import CreditCardInput, {
 import NumberInput from '../number-input/number-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { SyntheticEvent } from 'react';
-import { useAppSelector } from '../../store/store';
+import { useAppSelector } from '../../app/store';
 
 export type FileFields = {
   passportPhoto?: File | null;
@@ -85,17 +85,17 @@ const LoanForm = () => {
       return;
     }
 
-    dispatch(closeSnackbar());
+    dispatch(snackbarClosed());
   };
 
-  const handleErrorMessage = () => dispatch(closeUploadLoanErrorMessage());
+  const handleErrorMessage = () => dispatch(uploadLoanErrorMessageClosed());
 
   const onSubmit: SubmitHandler<LoanDefaultValues> = data => {
     if (isLoading || !currentUser) return;
     const { fileFields, ...fields } = data;
 
     dispatch(
-      uploadLoanStart({
+      uploadingLoanStarted({
         currentUser,
         fields,
         fileFields,
