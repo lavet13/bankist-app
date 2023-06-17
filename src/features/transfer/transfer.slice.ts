@@ -2,8 +2,6 @@ import { AuthError } from 'firebase/auth';
 import { GenerateError } from '../../common/utils/error/error.utils';
 import { PayloadAction, createAction, createSlice } from '@reduxjs/toolkit';
 import { TransferStartPayload } from './transfer.types';
-import { withPayloadType } from '../../app/store';
-import { UserData } from '../../common/utils/firebase/firebase.types';
 
 type TransferState = {
   readonly transferIsLoading: boolean;
@@ -57,6 +55,5 @@ export const {
 } = transferSlice.actions;
 
 export const transferSucceeded = createAction(
-  `${transferSlice.name}/transferSucceeded`,
-  withPayloadType<UserData>()
+  `${transferSlice.name}/transferSucceeded`
 );

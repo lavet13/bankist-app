@@ -63,11 +63,11 @@ export const loanSlice = createSlice({
     uploadLoanErrorMessageClosed(state, _: PayloadAction<void>) {
       state.uploadLoanError = null;
     },
-    loanErrorsReset(state, action: PayloadAction<void>) {
+    loanErrorsReset(state, _: PayloadAction<void>) {
       state.uploadLoanError = null;
       state.error = null;
     },
-    loanLoadingReset(state, action: PayloadAction<void>) {
+    loanLoadingReset(state, _: PayloadAction<void>) {
       state.uploadLoanIsLoading = false;
       state.isLoading = false;
     },

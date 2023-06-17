@@ -1,11 +1,5 @@
 import { call, all, put, takeLatest } from 'typed-redux-saga/macro';
 
-import {
-  CloseAccountStartPayload,
-  EmailSignInStartPayload,
-  SignUpStartPayload,
-  SignUpSuccessPayload,
-} from './user.types';
 import { USER_ERROR_MESSAGES } from './user.error';
 import {
   deleteUserAccount,
@@ -73,9 +67,9 @@ export function* getSnapshotFromUserAuth(
       yield* put(
         signInSucceeded({
           ...userSnapshotData,
+          ...admin,
           createdAt: JSON.stringify(createdAt),
           id: userSnapshot.id,
-          ...admin,
         })
       );
     }
@@ -97,7 +91,7 @@ export function* isUserAuthenticated() {
 }
 
 export function* signInWithEmail(
-  action: { payload: EmailSignInStartPayload } & { type: string }
+  action: ReturnType<typeof emailSignInStarted>
 ) {
   try {
     const { email, password } = action.payload;
@@ -126,13 +120,7 @@ export function* signInWithGoogle() {
   }
 }
 
-export function* resetErrorsState() {
-  yield* put(userErrorsReset());
-}
-
-export function* signUpWithEmail(
-  action: { payload: SignUpStartPayload } & { type: string }
-) {
+export function* signUpWithEmail(action: ReturnType<typeof signUpStarted>) {
   try {
     const { email, password, confirmPassword, ...additionalDetails } =
       action.payload;
@@ -162,9 +150,7 @@ export function* signUpWithEmail(
   }
 }
 
-export function* signInAfterSignUp(
-  action: { payload: SignUpSuccessPayload } & { type: string }
-) {
+export function* signInAfterSignUp(action: ReturnType<typeof signUpSucceeded>) {
   const { user, ...additionalDetails } = action.payload;
   yield* call(getSnapshotFromUserAuth, user, additionalDetails);
 }
@@ -180,9 +166,7 @@ export function* signOut() {
 }
 
 export function* closeUserAccount(
-  action: {
-    payload: CloseAccountStartPayload;
-  } & { type: string }
+  action: ReturnType<typeof closeAccountStarted>
 ) {
   try {
     // @USER RE-AUTHENTICATED AND CREDENTIALS BEFORE DELETING
@@ -225,9 +209,11 @@ export function* closeUserAccount(
 export function* signOutAfterDeletedUser() {
   try {
     yield* call(onTimeoutInvoke, signOutUser, 2);
-    yield* call(resetErrorsState);
-
-    yield* put(signOutSucceeded());
+    yield* all([
+      put(userErrorsReset()),
+      put(userLoadingReset()),
+      put(signOutSucceeded()),
+    ]);
   } catch (error: any) {
     yield* put(signOutFailed(error));
   }
@@ -237,9 +223,16 @@ export function* resetLoadingState() {
   yield* put(userLoadingReset());
 }
 
+export function* resetErrorsAndLoadingState() {
+  yield* all([put(userErrorsReset()), put(userLoadingReset())]);
+}
+
 export function* clearUserLoans() {
-  yield* put(loanCleared());
-  yield* call(resetErrorsState);
+  yield* all([
+    put(loanCleared()),
+    put(userErrorsReset()),
+    put(userLoadingReset()),
+  ]);
 }
 
 export function* onCheckUserSession() {
@@ -287,15 +280,11 @@ export function* onCloseAccountFailed() {
 }
 
 export function* onSignInSuccess() {
-  yield* takeLatest(signInSucceeded.type, resetErrorsState);
+  yield* takeLatest(signInSucceeded.type, resetErrorsAndLoadingState);
 }
 
 export function* onSignInFailed() {
   yield* takeLatest(signInFailed.type, resetLoadingState);
-}
-
-export function* onResetErrors() {
-  yield* takeLatest(userErrorsReset.type, resetLoadingState);
 }
 
 export function* onSignUpFailed() {
@@ -318,6 +307,5 @@ export function* userSagas() {
     call(onCloseAccountStart),
     call(onCloseAccountSuccess),
     call(onCloseAccountFailed),
-    call(onResetErrors),
   ]);
 }

@@ -195,32 +195,23 @@ export const addMovementsToUser = async (
   console.log('done');
 };
 
-export const getMovements = async (userAuth: UserData) => {
-  const querySnapshot: QuerySnapshot<Movement> = await new Promise(
-    (resolve, reject) => {
-      const q = query(
-        collection(db, 'users', userAuth.id, 'movements'),
-        orderBy('date', 'desc')
-      );
-
-      const unsubscribe = onSnapshot(
-        q,
-        querySnapshot => {
-          unsubscribe();
-          resolve(querySnapshot as QuerySnapshot<Movement>);
-        },
-        reject
-      );
-    }
-  );
-
-  const movementItems = querySnapshot.docs.map(docSnapshot => {
+export const getMovementsItems = (querySnapshot: QuerySnapshot<Movement>) => {
+  const movementItems: Movement[] = querySnapshot.docs.map(docSnapshot => {
     const { date, ...docSnapshotData } = docSnapshot.data();
 
     return { date: JSON.stringify(date), ...docSnapshotData };
   });
 
   return movementItems;
+};
+
+export const getQueryMovements = (userAuth: UserData) => {
+  const q = query(
+    collection(db, 'users', userAuth.id, 'movements'),
+    orderBy('date', 'desc')
+  );
+
+  return q;
 };
 
 export const getUserCreditCard = async (creditCard: string) => {
