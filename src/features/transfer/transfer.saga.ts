@@ -3,7 +3,6 @@ import { all, call, put, takeLatest } from 'typed-redux-saga/macro';
 import {
   transferStarted,
   transferFailed,
-  transferSlice,
   snackbarShown,
   transferErrorsReset,
   transferLoadingReset,
@@ -14,17 +13,14 @@ import {
   getUserCreditCard,
   transferAmountToUser,
 } from '../../common/utils/firebase/firebase.utils';
-import { fetchMovementStarted } from '../movement/movement.slice';
 import { generateError } from '../../common/utils/error/error.utils';
 import {
   TRANSFER_ERROR_CODE_TYPES,
   TRANSFER_ERROR_MESSAGES,
 } from './transfer.error';
-import { TransferStartPayload } from './transfer.types';
-import { UserData } from '../../common/utils/firebase/firebase.types';
 
 export function* fetchTransferAsync(
-  action: { payload: TransferStartPayload } & { type: string }
+  action: ReturnType<typeof transferStarted>
 ) {
   try {
     const { currentUser, creditCard, amount, reset } = action.payload;
@@ -52,24 +48,18 @@ export function* fetchTransferAsync(
 
     yield* call(transferAmountToUser, currentUser, userToTransfer, amount);
     yield* call(reset, { creditCard: { value: '', formattedValue: '' } });
-    yield* put(transferSucceeded(currentUser));
+    yield* put(transferSucceeded());
   } catch (error: any) {
     yield* put(transferFailed(error));
   }
 }
 
-export function* updateMovementsAfterTransaction(
-  action: {
-    payload: UserData;
-  } & { type: string }
-) {
-  yield* put(snackbarShown());
-  yield* put(fetchMovementStarted(action.payload));
-  yield* call(resetErrorsState);
-}
-
-export function* resetErrorsState() {
-  yield* put(transferErrorsReset());
+export function* updateMovementsAfterTransaction() {
+  yield* all([
+    put(snackbarShown()),
+    put(transferErrorsReset()),
+    put(transferLoadingReset()),
+  ]);
 }
 
 export function* resetLoadingState() {
@@ -88,15 +78,10 @@ export function* onTransferFailed() {
   yield* takeLatest(transferFailed.type, resetLoadingState);
 }
 
-export function* onResetErrors() {
-  yield* takeLatest(transferErrorsReset.type, resetLoadingState);
-}
-
 export function* transferSagas() {
   yield* all([
     call(onTransferStart),
     call(onTransferSuccess),
     call(onTransferFailed),
-    call(onResetErrors),
   ]);
 }

@@ -21,15 +21,10 @@ import {
   uploadingLoanSucceeded,
 } from './loan.slice';
 import { FormFields } from '../../components/loan/loan-form.component';
-import { UserData } from '../../common/utils/firebase/firebase.types';
-import { UploadLoanStartPayload } from './loan.types';
 
 export function* fetchLoanAsync({
   payload: user,
-}: {
-  type: string;
-  payload: UserData;
-}) {
+}: ReturnType<typeof fetchLoanStarted>) {
   if (!user) return;
 
   try {
@@ -57,10 +52,7 @@ export type newFormFields = {
 
 export function* uploadLoan({
   payload: { currentUser, fields, fileFields, reset },
-}: {
-  type: string;
-  payload: UploadLoanStartPayload;
-}) {
+}: ReturnType<typeof uploadingLoanStarted>) {
   try {
     const {
       tel: { formattedValue: telFormat },
@@ -85,12 +77,15 @@ export function* uploadLoan({
 }
 
 export function* showSnackbarAfterUploadLoan() {
-  yield* put(snackbarShown());
-  yield* put(loanErrorsReset());
+  yield* all([
+    put(snackbarShown()),
+    put(loanErrorsReset()),
+    put(loanLoadingReset()),
+  ]);
 }
 
-export function* resetErrorsState() {
-  yield* put(loanErrorsReset());
+export function* resetErrorsAndLoadingState() {
+  yield* all([put(loanErrorsReset()), put(loanLoadingReset())]);
 }
 
 export function* resetLoadingState() {
@@ -102,7 +97,7 @@ export function* onFetchLoanStart() {
 }
 
 export function* onFetchLoanSuccess() {
-  yield* takeLatest(fetchLoanSucceeded.type, resetErrorsState);
+  yield* takeLatest(fetchLoanSucceeded.type, resetErrorsAndLoadingState);
 }
 
 export function* onFetchLoanFailed() {
@@ -114,7 +109,7 @@ export function* onFetchLoansStart() {
 }
 
 export function* onFetchLoansSuccess() {
-  yield* takeLatest(fetchLoansSucceeded.type, resetErrorsState);
+  yield* takeLatest(fetchLoansSucceeded.type, resetErrorsAndLoadingState);
 }
 
 export function* onFetchLoansFailed() {
@@ -133,10 +128,6 @@ export function* onUploadFailed() {
   yield* takeLatest(uploadingLoanFailed.type, resetLoadingState);
 }
 
-export function* onResetErrors() {
-  yield* takeLatest(loanErrorsReset.type, resetLoadingState);
-}
-
 export function* loanSagas() {
   yield* all([
     call(onFetchLoanStart),
@@ -148,6 +139,5 @@ export function* loanSagas() {
     call(onUploadStart),
     call(onUploadSuccess),
     call(onUploadFailed),
-    call(onResetErrors),
   ]);
 }

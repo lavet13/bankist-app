@@ -36,14 +36,15 @@ function createMovementsChannel(user: UserData) {
       }
     );
 
-    return unsubscribe;
+    return () => {
+      console.log('unsubscribe');
+      unsubscribe();
+    };
   });
 }
 
 export function* fetchMovementsAsync(
-  action: {
-    payload: UserData;
-  } & { type: string }
+  action: ReturnType<typeof fetchMovementStarted>
 ) {
   const movementsChannel = yield* call(createMovementsChannel, action.payload);
 

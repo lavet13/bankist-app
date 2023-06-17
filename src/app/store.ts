@@ -9,6 +9,7 @@ import { rootReducer } from './root-reducer';
 
 import createSagaMiddleware from 'redux-saga';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import { reduxBatch } from '@manaflair/redux-batch';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -28,6 +29,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+  enhancers: enhancers => [reduxBatch, ...enhancers, reduxBatch],
   middleware: getDefaultMiddleware => {
     const middleware = getDefaultMiddleware({
       thunk: false,
