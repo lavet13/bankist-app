@@ -30,11 +30,16 @@ export const movementSlice = createSlice({
       state.error = action.payload;
       state.isLoading = false;
     },
+    fetchMovementCancelled(state, _: PayloadAction<void>) {
+      state.isLoading = false;
+      state.error = null;
+    },
   },
 });
 
 export default movementSlice.reducer;
 export const {
+  fetchMovementCancelled,
   fetchMovementFailed,
   fetchMovementStarted,
   fetchMovementSucceeded,

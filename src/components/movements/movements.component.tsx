@@ -5,7 +5,10 @@ import {
   selectMovementsIsLoading,
   selectMovementsItems,
 } from '../../features/movement/movement.selector';
-import { fetchMovementStarted } from '../../features/movement/movement.slice';
+import {
+  fetchMovementCancelled,
+  fetchMovementStarted,
+} from '../../features/movement/movement.slice';
 
 import { MovementsContainer } from './movements.styles';
 import MovementItem from '../movement-item/movement-item.component';
@@ -24,6 +27,10 @@ const Movements = () => {
     if (currentUser) {
       dispatch(fetchMovementStarted(currentUser));
     }
+
+    return () => {
+      dispatch(fetchMovementCancelled());
+    };
   }, [currentUser]);
 
   return (

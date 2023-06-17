@@ -1,9 +1,10 @@
-import { eventChannel } from 'redux-saga';
-import { takeLatest, call, all, put, take } from 'typed-redux-saga/macro';
+import { EventChannel, eventChannel } from 'redux-saga';
+import { takeLatest, call, all, put, take, fork } from 'typed-redux-saga/macro';
 import {
   fetchMovementStarted,
   fetchMovementSucceeded,
   fetchMovementFailed,
+  fetchMovementCancelled,
 } from './movement.slice';
 import { Movement, UserData } from '../../common/utils/firebase/firebase.types';
 import {
@@ -43,10 +44,19 @@ function createMovementsChannel(user: UserData) {
   });
 }
 
+export function* cancelMovementsChannel(
+  movementsChannel: EventChannel<QuerySnapshot<Movement> | FirestoreError>
+) {
+  yield* take(fetchMovementCancelled);
+  movementsChannel.close();
+}
+
 export function* fetchMovementsAsync(
   action: ReturnType<typeof fetchMovementStarted>
 ) {
   const movementsChannel = yield* call(createMovementsChannel, action.payload);
+
+  yield* fork(cancelMovementsChannel, movementsChannel);
 
   while (true) {
     try {
