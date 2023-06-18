@@ -29,13 +29,15 @@ const LoansPreview = () => {
           {currentUser && !currentUser.admin
             ? (userLoans as LoanStore[]).map(loan => (
                 <Link key={loan.id} to={loan.id}>
-                  <p>{format(new Date(loan.timestamp), 'dd.MM.yyyy')}</p>
+                  <p>{format(new Date(loan.timestamp), 'dd.MM.yyyy, kk:mm')}</p>
                 </Link>
               ))
             : (userLoans as LoanStore[][]).flatMap(loanArray =>
                 loanArray.map(loan => (
                   <Link key={loan.id} to={loan.id}>
-                    <p>{format(new Date(loan.timestamp), 'dd.MM.yyyy')}</p>
+                    <p>
+                      {format(new Date(loan.timestamp), 'dd.MM.yyyy, kk:mm')}
+                    </p>
                   </Link>
                 ))
               )}

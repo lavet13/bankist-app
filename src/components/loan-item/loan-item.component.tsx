@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { FC, Fragment } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { fetchLoansStarted } from '../../features/loan/loan.slice';
@@ -22,7 +22,12 @@ import { updatePermissionCreditLoan } from '../../common/utils/firebase/firebase
 import { LoanStore } from '../../features/loan/loan.types';
 import { format } from 'date-fns';
 
-const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: LoanStore }) => {
+type LoanItemProps = {
+  isAdmin: boolean;
+  loan: LoanStore;
+};
+
+const LoanItem: FC<LoanItemProps> = ({ loan, isAdmin }) => {
   const dispatch = useDispatch();
 
   const {

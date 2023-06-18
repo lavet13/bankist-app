@@ -96,7 +96,7 @@ const LoanForm = () => {
 
     dispatch(
       uploadingLoanStarted({
-        currentUser,
+        userId: currentUser.id,
         fields,
         fileFields,
         reset,

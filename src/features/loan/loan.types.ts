@@ -4,7 +4,6 @@ import {
   FormFields,
   LoanDefaultValues,
 } from '../../components/loan/loan-form.component';
-import { UserStore } from '../user/user.types';
 
 export type LoanStore = {
   id: string;
@@ -20,7 +19,7 @@ export type LoanStore = {
 };
 
 export type UploadLoanStartPayload = {
-  currentUser: UserStore;
+  userId: string;
   fileFields: FileFields;
   fields: FormFields;
   reset: UseFormReset<LoanDefaultValues>;

@@ -51,10 +51,10 @@ export function* cancelMovementsChannel(
   movementsChannel.close();
 }
 
-export function* fetchMovementsAsync(
-  action: ReturnType<typeof fetchMovementStarted>
-) {
-  const movementsChannel = yield* call(createMovementsChannel, action.payload);
+export function* fetchMovementsAsync({
+  payload: userId,
+}: ReturnType<typeof fetchMovementStarted>) {
+  const movementsChannel = yield* call(createMovementsChannel, userId);
 
   yield* fork(cancelMovementsChannel, movementsChannel);
 

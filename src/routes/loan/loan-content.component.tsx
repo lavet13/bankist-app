@@ -10,7 +10,6 @@ import {
 import LoanItem from '../../components/loan-item/loan-item.component';
 import Spinner from '../../components/spinner/spinner.component';
 import { selectCurrentUser } from '../../features/user/user.selector';
-import { Loan } from '../../common/utils/firebase/firebase.types';
 import { LoanStore } from '../../features/loan/loan.types';
 
 type LoanContentRouteParams = {

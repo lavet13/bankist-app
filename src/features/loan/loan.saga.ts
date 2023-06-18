@@ -49,7 +49,7 @@ export type newFormFields = {
 };
 
 export function* uploadLoan({
-  payload: { currentUser, fields, fileFields, reset },
+  payload: { userId, fields, fileFields, reset },
 }: ReturnType<typeof uploadingLoanStarted>) {
   try {
     const {
@@ -63,7 +63,7 @@ export function* uploadLoan({
       creditCard: creditCardFormat,
     };
 
-    yield* call(uploadInfoForLoan, currentUser.id, fileFields, newFormFields);
+    yield* call(uploadInfoForLoan, userId, fileFields, newFormFields);
     yield* call(reset, {
       tel: { value: '', formattedValue: '' },
       creditCard: { value: '', formattedValue: '' },
