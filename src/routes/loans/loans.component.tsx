@@ -19,7 +19,7 @@ const Loans = () => {
 
   useEffect(() => {
     if (currentUser && !currentUser.admin)
-      dispatch(fetchLoanStarted(currentUser));
+      dispatch(fetchLoanStarted(currentUser.id));
     else if (currentUser && currentUser.admin) dispatch(fetchLoansStarted());
   }, [currentUser]);
 

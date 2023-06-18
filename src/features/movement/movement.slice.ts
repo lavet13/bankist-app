@@ -1,10 +1,11 @@
-import { Movement, UserData } from '../../common/utils/firebase/firebase.types';
+import { Movement } from '../../common/utils/firebase/firebase.types';
 import { AuthError } from 'firebase/auth';
 import { GenerateError } from '../../common/utils/error/error.utils';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { MovementItemType } from './movement.types';
 
 export type MovementState = {
-  readonly movementsItems: Movement[];
+  readonly movementsItems: MovementItemType[];
   readonly isLoading: boolean;
   readonly error: GenerateError | AuthError | null;
 };
@@ -19,12 +20,22 @@ export const movementSlice = createSlice({
   name: 'movement',
   initialState,
   reducers: {
-    fetchMovementStarted(state, _: PayloadAction<UserData>) {
+    fetchMovementStarted(state, _: PayloadAction<string>) {
       state.isLoading = true;
     },
-    fetchMovementSucceeded(state, action: PayloadAction<Movement[]>) {
-      state.movementsItems = action.payload;
-      state.isLoading = false;
+    fetchMovementSucceeded: {
+      reducer(state, action: PayloadAction<MovementItemType[]>) {
+        state.movementsItems = action.payload;
+        state.isLoading = false;
+      },
+      prepare(movementItems: Movement[]) {
+        return {
+          payload: movementItems.map(({ date, ...movementProps }) => ({
+            date: date.toDate().toISOString(),
+            ...movementProps,
+          })),
+        };
+      },
     },
     fetchMovementFailed(state, action: PayloadAction<Error>) {
       state.error = action.payload;

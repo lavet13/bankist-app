@@ -1,11 +1,11 @@
-import { Loan, UserData } from '../../common/utils/firebase/firebase.types';
+import { Loan } from '../../common/utils/firebase/firebase.types';
 import { GenerateError } from '../../common/utils/error/error.utils';
 import { AuthError } from 'firebase/auth';
 import { PayloadAction, createAction, createSlice } from '@reduxjs/toolkit';
-import { UploadLoanStartPayload } from './loan.types';
+import { LoanStore, UploadLoanStartPayload } from './loan.types';
 
 export type LoanState = {
-  readonly loanItems: Loan[] | Loan[][];
+  readonly loanItems: LoanStore[] | LoanStore[][];
   readonly isLoading: boolean;
   readonly error: Error | null;
   readonly uploadLoanError: GenerateError | AuthError | null;
@@ -32,17 +32,39 @@ export const loanSlice = createSlice({
     snackbarClosed(state, _: PayloadAction<void>) {
       state.snackbarIsOpen = false;
     },
-    fetchLoanStarted(state, _: PayloadAction<UserData>) {
+    fetchLoanStarted(state, _: PayloadAction<string>) {
       state.isLoading = true;
     },
     fetchLoansStarted(state, _: PayloadAction<void>) {
       state.isLoading = true;
     },
-    fetchLoanSucceeded(state, action: PayloadAction<Loan[]>) {
-      state.loanItems = action.payload;
+    fetchLoanSucceeded: {
+      reducer(state, action: PayloadAction<LoanStore[]>) {
+        state.loanItems = action.payload;
+      },
+      prepare(loan: Loan[]) {
+        return {
+          payload: loan.map(loanItem => ({
+            ...loanItem,
+            timestamp: loanItem.timestamp.toDate().toISOString(),
+          })),
+        };
+      },
     },
-    fetchLoansSucceeded(state, action: PayloadAction<Loan[][]>) {
-      state.loanItems = action.payload;
+    fetchLoansSucceeded: {
+      reducer(state, action: PayloadAction<LoanStore[][]>) {
+        state.loanItems = action.payload;
+      },
+      prepare(loans: Loan[][]) {
+        return {
+          payload: loans.map(loanArray =>
+            loanArray.map(loanItem => ({
+              ...loanItem,
+              timestamp: loanItem.timestamp.toDate().toISOString(),
+            }))
+          ),
+        };
+      },
     },
     loanCleared(state, _: PayloadAction<void>) {
       state.loanItems = [];

@@ -25,7 +25,7 @@ const Movements = () => {
 
   useEffect(() => {
     if (currentUser) {
-      dispatch(fetchMovementStarted(currentUser));
+      dispatch(fetchMovementStarted(currentUser.id));
     }
 
     return () => {

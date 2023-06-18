@@ -1,5 +1,5 @@
-import moment from 'moment';
-import ruLocale from 'moment/locale/ru';
+import { formatDistanceToNow } from 'date-fns';
+import ruLocale from 'date-fns/locale/ru';
 
 import MovementType, {
   MOVEMENT_TYPES,
@@ -10,8 +10,8 @@ import {
   MovementItemContainer,
   MovementValue,
 } from './movement-item.styles';
-import { Movement } from '../../common/utils/firebase/firebase.types';
 import { FC } from 'react';
+import { MovementItemType } from '../../features/movement/movement.types';
 
 const translateToRussian = {
   withdrawal: 'Расход',
@@ -19,19 +19,13 @@ const translateToRussian = {
 };
 
 type MovementItemProps = {
-  movement: Movement;
+  movement: MovementItemType;
 };
 
 const MovementItem: FC<MovementItemProps> = ({ movement }) => {
   const { date, value } = movement;
+
   const type = value < 0 ? 'withdrawal' : 'deposit';
-  moment.updateLocale('ru', [ruLocale]);
-
-  const dateValue = typeof date === 'string' ? JSON.parse(date) : date;
-
-  const serializedDate = new Date(
-    dateValue.seconds * 1000 + dateValue.nanoseconds / 1000000
-  );
 
   return (
     <MovementItemContainer>
@@ -39,9 +33,11 @@ const MovementItem: FC<MovementItemProps> = ({ movement }) => {
         {translateToRussian[type]}
       </MovementType>
       <MovementDate>
-        {moment(typeof date === 'string' ? serializedDate : dateValue.toDate())
-          .startOf('minute')
-          .fromNow()}
+        {formatDistanceToNow(new Date(date), {
+          includeSeconds: true,
+          locale: ruLocale,
+          addSuffix: true,
+        })}
       </MovementDate>
       <MovementValue>
         {Intl.NumberFormat('ru-RU', {

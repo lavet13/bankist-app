@@ -7,11 +7,12 @@ import {
   EmailSignInStartPayload,
   SignUpStartPayload,
   SignUpSuccessPayload,
+  UserStore,
 } from './user.types';
 import { withPayloadType } from '../../app/store';
 
 export type UserState = {
-  readonly currentUser: UserData | null;
+  readonly currentUser: UserStore | null;
   readonly isLoading: boolean;
   readonly emailSignInIsLoading: boolean;
   readonly googleSignInIsLoading: boolean;
@@ -64,8 +65,20 @@ export const userSlice = createSlice({
       state.isLoading = true;
     },
 
-    signInSucceeded(state, action: PayloadAction<UserData | null>) {
-      state.currentUser = action.payload;
+    signInSucceeded: {
+      reducer(state, action: PayloadAction<UserStore | null>) {
+        state.currentUser = action.payload;
+      },
+      prepare(user: UserData | null) {
+        if (!user) return { payload: null };
+
+        return {
+          payload: {
+            ...user,
+            createdAt: user.createdAt.toDate().toISOString(),
+          },
+        };
+      },
     },
 
     signOutSucceeded(state, _: PayloadAction<void>) {

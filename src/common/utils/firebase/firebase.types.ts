@@ -8,7 +8,7 @@ export type UserData = {
   id: string;
   admin: boolean;
   email: string;
-  createdAt: Date | Timestamp | string;
+  createdAt: Timestamp;
   creditCard: number | null;
 } & AdditionalInformation;
 
@@ -20,7 +20,7 @@ export type ProvidersInfo = {
 export type ProvidersInfoPassword = ProvidersInfo & { password: string };
 
 export type Movement = {
-  date: Timestamp | string;
+  date: Timestamp;
   value: number;
 };
 
@@ -34,7 +34,7 @@ export type Loan = {
   isAllowed: boolean;
   tel: string;
   timestamp: Timestamp;
-  userAuth: UserData;
+  userId: string;
 };
 
 export type ObjectToAdd = {

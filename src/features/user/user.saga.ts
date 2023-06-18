@@ -62,13 +62,11 @@ export function* getSnapshotFromUserAuth(
 
     const admin = yield* call(isAdmin, user);
 
-    if (userSnapshot && userSnapshot.exists()) {
-      const { createdAt, ...userSnapshotData } = userSnapshot.data();
+    if (userSnapshot?.exists()) {
       yield* put(
         signInSucceeded({
-          ...userSnapshotData,
+          ...userSnapshot.data(),
           ...admin,
-          createdAt: JSON.stringify(createdAt),
           id: userSnapshot.id,
         })
       );

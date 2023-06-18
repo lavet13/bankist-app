@@ -62,6 +62,8 @@ import {
 } from './firebase.types';
 import { FileFields } from '../../../components/loan/loan-form.component';
 import { newFormFields } from '../../../features/loan/loan.saga';
+import { UserStore } from '../../../features/user/user.types';
+import { LoanStore } from '../../../features/loan/loan.types';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDjVb89yW2JjQPvMjxSb3PiPRc73ttErGY',
@@ -100,11 +102,10 @@ type UploadInfoResult = {
 };
 
 export const uploadInfoForLoan = async (
-  userAuth: UserData,
+  userId: string,
   formFileFields: FileFields,
   formFields: newFormFields
 ) => {
-  if (!userAuth) return;
   const regExp = /(?:\.([^.]+))?$/;
   const names = Object.keys(formFileFields);
   const fileNames = Object.values(formFileFields).map((file, idx) => {
@@ -121,7 +122,7 @@ export const uploadInfoForLoan = async (
     Boolean(file)
   );
 
-  const userRef = ref(storage, `users/${userAuth.id}`);
+  const userRef = ref(storage, `users/${userId}`);
 
   const folderName = uuidv4();
 
@@ -151,18 +152,16 @@ export const uploadInfoForLoan = async (
     ...formFields,
   };
 
-  return await createUserLoanDocument(userAuth, result);
+  return await createUserLoanDocument(userId, result);
 };
 
 export const createUserLoanDocument = async (
-  userAuth: UserData,
+  userId: string,
   data: UploadInfoResult
 ) => {
-  if (!userAuth) return;
-
   const { folderName, images, timestamp, ...formFields } = data;
 
-  const folderDocRef = doc(db, 'users', userAuth.id, 'loans', folderName);
+  const folderDocRef = doc(db, 'users', userId, 'loans', folderName);
   const folderSnapshot = await getDoc(folderDocRef);
 
   if (!folderSnapshot.exists()) {
@@ -196,18 +195,16 @@ export const addMovementsToUser = async (
 };
 
 export const getMovementsItems = (querySnapshot: QuerySnapshot<Movement>) => {
-  const movementItems: Movement[] = querySnapshot.docs.map(docSnapshot => {
-    const { date, ...docSnapshotData } = docSnapshot.data();
-
-    return { date: JSON.stringify(date), ...docSnapshotData };
-  });
+  const movementItems: Movement[] = querySnapshot.docs.map(docSnapshot =>
+    docSnapshot.data()
+  );
 
   return movementItems;
 };
 
-export const getQueryMovements = (userAuth: UserData) => {
+export const getQueryMovements = (userId: string) => {
   const q = query(
-    collection(db, 'users', userAuth.id, 'movements'),
+    collection(db, 'users', userId, 'movements'),
     orderBy('date', 'desc')
   );
 
@@ -226,14 +223,14 @@ export const getUserCreditCard = async (creditCard: string) => {
 };
 
 export const transferAmountToUser = async (
-  userAuth: UserData,
+  userId: string,
   userToTransfer: QueryDocumentSnapshot<UserData>,
   amount: string
 ) => {
   const collectionUsersRef = collection(db, 'users');
 
   const userTransferToDocRef = doc(collectionUsersRef, userToTransfer.id);
-  const currentUserDocRef = doc(collectionUsersRef, userAuth.id);
+  const currentUserDocRef = doc(collectionUsersRef, userId);
 
   const movementDepositRef = doc(userTransferToDocRef, 'movements', uuidv4());
   const movementWithdrawalRef = doc(currentUserDocRef, 'movements', uuidv4());
@@ -257,19 +254,15 @@ export const getAllUserLoans = async () => {
   const q = query(collection(db, 'users'));
   const querySnapshot = await getDocs(q);
 
-  const users = querySnapshot.docs.map(
-    doc => ({ id: doc.id, ...doc.data() } as UserData)
-  );
-  const loanSnapshots = users.map(
-    async (user: UserData) => await getUserLoans(user)
-  );
+  const userIds = querySnapshot.docs.map(doc => doc.id);
+  const loanSnapshots = userIds.map(async userId => await getUserLoans(userId));
   const result = await Promise.all(loanSnapshots);
 
   return result.filter(loans => loans.length !== 0);
 };
 
-export const getUserLoans = async (userAuth: UserData): Promise<Loan[]> => {
-  const userDocRef = doc(db, 'users', userAuth.id);
+export const getUserLoans = async (userId: string): Promise<Loan[]> => {
+  const userDocRef = doc(db, 'users', userId);
   const q = query(
     collection(userDocRef, 'loans'),
     orderBy('timestamp', 'desc')
@@ -279,7 +272,7 @@ export const getUserLoans = async (userAuth: UserData): Promise<Loan[]> => {
   return loanSnapshot.docs.map(loanDoc => ({
     ...loanDoc.data(),
     id: loanDoc.id,
-    userAuth,
+    userId,
   }));
 };
 
@@ -360,13 +353,14 @@ export const isAdmin = async (userAuth: User) => {
 };
 
 export const updatePermissionCreditLoan = async (
-  userAuth: UserData,
-  loan: Loan,
+  userId: string,
+  loanId: string,
+  loanAmount: number,
   flag: boolean
 ) => {
-  const userDocRef = doc(db, 'users', userAuth.id);
+  const userDocRef = doc(db, 'users', userId);
   const movementDocRef = doc(userDocRef, 'movements', uuidv4());
-  const loanDocRef = doc(userDocRef, 'loans', loan.id);
+  const loanDocRef = doc(userDocRef, 'loans', loanId);
 
   const loanSnapshot = (await getDoc(loanDocRef)) as DocumentSnapshot<Loan>;
 
@@ -389,7 +383,7 @@ export const updatePermissionCreditLoan = async (
   if (flag) {
     await setDoc(movementDocRef, {
       date: serverTimestamp(),
-      value: Math.abs(loan.amount),
+      value: Math.abs(loanAmount),
     });
   }
 };

@@ -23,12 +23,10 @@ import {
 import { FormFields } from '../../components/loan/loan-form.component';
 
 export function* fetchLoanAsync({
-  payload: user,
+  payload: userId,
 }: ReturnType<typeof fetchLoanStarted>) {
-  if (!user) return;
-
   try {
-    const userLoans = yield* call(getUserLoans, user);
+    const userLoans = yield* call(getUserLoans, userId);
     yield* put(fetchLoanSucceeded(userLoans));
   } catch (error: any) {
     yield* put(fetchLoanFailed(error));
@@ -65,7 +63,7 @@ export function* uploadLoan({
       creditCard: creditCardFormat,
     };
 
-    yield* call(uploadInfoForLoan, currentUser, fileFields, newFormFields);
+    yield* call(uploadInfoForLoan, currentUser.id, fileFields, newFormFields);
     yield* call(reset, {
       tel: { value: '', formattedValue: '' },
       creditCard: { value: '', formattedValue: '' },

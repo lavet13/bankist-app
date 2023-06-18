@@ -6,7 +6,7 @@ import {
   fetchMovementFailed,
   fetchMovementCancelled,
 } from './movement.slice';
-import { Movement, UserData } from '../../common/utils/firebase/firebase.types';
+import { Movement } from '../../common/utils/firebase/firebase.types';
 import {
   DocumentData,
   FirestoreError,
@@ -23,9 +23,9 @@ const isValidQuerySnapshot = (
 ): querySnapshot is QuerySnapshot<Movement> =>
   !(querySnapshot as FirestoreError).code;
 
-function createMovementsChannel(user: UserData) {
+function createMovementsChannel(userId: string) {
   return eventChannel<QuerySnapshot<Movement> | FirestoreError>(emitter => {
-    const q = getQueryMovements(user);
+    const q = getQueryMovements(userId);
 
     const unsubscribe = onSnapshot(
       q,

@@ -3,8 +3,6 @@ import { useDispatch } from 'react-redux';
 
 import { fetchLoansStarted } from '../../features/loan/loan.slice';
 
-import moment from 'moment';
-
 import { BUTTON_TYPE_CLASSES } from '../button/button.component';
 
 import {
@@ -21,27 +19,28 @@ import {
 } from './loan-item.styles';
 
 import { updatePermissionCreditLoan } from '../../common/utils/firebase/firebase.utils';
-import { Loan } from '../../common/utils/firebase/firebase.types';
+import { LoanStore } from '../../features/loan/loan.types';
+import { format } from 'date-fns';
 
-const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
+const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: LoanStore }) => {
   const dispatch = useDispatch();
 
   const {
-    id,
+    id: loanId,
     creditCard,
     displayName,
     email,
     images,
     isAllowed,
-    amount,
+    amount: loanAmount,
     tel,
     timestamp,
-    userAuth,
+    userId,
   } = loan;
 
   const allowCreditHandler = async () => {
     try {
-      await updatePermissionCreditLoan(userAuth, loan, true);
+      await updatePermissionCreditLoan(userId, loanId, loanAmount, true);
       dispatch(fetchLoansStarted());
     } catch (error: any) {
       alert(error.code);
@@ -50,7 +49,7 @@ const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
 
   const denyCreditHandler = async () => {
     try {
-      await updatePermissionCreditLoan(userAuth, loan, false);
+      await updatePermissionCreditLoan(userId, loanId, loanAmount, false);
       dispatch(fetchLoansStarted());
     } catch (error: any) {
       alert(error.code);
@@ -61,13 +60,13 @@ const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
     <LoanItemContainer>
       <p style={{ marginBottom: '20px' }}>
         <b>Дата оформления кредита </b>
-        {moment(timestamp.toDate()).calendar().toLowerCase()}
+        {format(new Date(timestamp), 'dd.MM.yyyy')}
       </p>
       <p>
-        <b>Идентификатор пользователя:</b> {userAuth.id}
+        <b>Идентификатор пользователя:</b> {userId}
       </p>
       <p>
-        <b>Идентификатор кредита:</b> {id}
+        <b>Идентификатор кредита:</b> {loanId}
       </p>
       <p>
         <b>Имя кредитора:</b> {displayName}
@@ -76,7 +75,7 @@ const LoanItem = ({ loan, isAdmin }: { isAdmin: boolean; loan: Loan }) => {
         <b>Кредитная карта:</b> {creditCard}
       </p>
       <p>
-        <b>Запрашиваемая сумма: </b> {amount}
+        <b>Запрашиваемая сумма: </b> {loanAmount}
       </p>
       <p>
         <b>E-mail:</b> {email}

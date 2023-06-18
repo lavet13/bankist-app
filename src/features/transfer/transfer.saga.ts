@@ -46,7 +46,7 @@ export function* fetchTransferAsync(
         TRANSFER_ERROR_MESSAGES[CANNOT_TRANSFER_YOURSELF]
       );
 
-    yield* call(transferAmountToUser, currentUser, userToTransfer, amount);
+    yield* call(transferAmountToUser, currentUser.id, userToTransfer, amount);
     yield* call(reset, { creditCard: { value: '', formattedValue: '' } });
     yield* put(transferSucceeded());
   } catch (error: any) {

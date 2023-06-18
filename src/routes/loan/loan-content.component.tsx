@@ -11,10 +11,17 @@ import LoanItem from '../../components/loan-item/loan-item.component';
 import Spinner from '../../components/spinner/spinner.component';
 import { selectCurrentUser } from '../../features/user/user.selector';
 import { Loan } from '../../common/utils/firebase/firebase.types';
+import { LoanStore } from '../../features/loan/loan.types';
+
+type LoanContentRouteParams = {
+  id: string;
+};
 
 const LoanContent = () => {
-  const { id } = useParams();
-  const [loan, setLoan] = useState<Loan | null | undefined>(null);
+  const { id } = useParams<
+    keyof LoanContentRouteParams
+  >() as LoanContentRouteParams;
+  const [loan, setLoan] = useState<LoanStore | undefined>(undefined);
   const loanArray = useAppSelector(selectLoanArray);
   const loanArrayIsLoading = useAppSelector(selectLoanArrayIsLoading);
   const currentUser = useAppSelector(selectCurrentUser);
@@ -22,8 +29,8 @@ const LoanContent = () => {
   useEffect(() => {
     if (!loanArrayIsLoading && currentUser) {
       const loan = !currentUser.admin
-        ? (loanArray as Loan[]).find(loan => loan.id === id)
-        : (loanArray as Loan[][])
+        ? (loanArray as LoanStore[]).find(loan => loan.id === id)
+        : (loanArray as LoanStore[][])
             .find(loanArray => loanArray.find(loan => loan.id === id))
             ?.find(loan => loan.id === id);
 

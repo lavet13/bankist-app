@@ -12,8 +12,8 @@ import { Link } from 'react-router-dom';
 import Spinner from '../../components/spinner/spinner.component';
 
 import './loans-preview.styles';
-import moment from 'moment';
-import { Loan } from '../../common/utils/firebase/firebase.types';
+import { format } from 'date-fns';
+import { LoanStore } from '../../features/loan/loan.types';
 
 const LoansPreview = () => {
   const userLoans = useAppSelector(selectLoanArray);
@@ -27,15 +27,15 @@ const LoansPreview = () => {
       ) : (
         <Fragment>
           {currentUser && !currentUser.admin
-            ? (userLoans as Loan[]).map(loan => (
+            ? (userLoans as LoanStore[]).map(loan => (
                 <Link key={loan.id} to={loan.id}>
-                  <p>{moment(loan.timestamp.toDate()).calendar()}</p>
+                  <p>{format(new Date(loan.timestamp), 'dd.MM.yyyy')}</p>
                 </Link>
               ))
-            : (userLoans as Loan[][]).flatMap(loanArray =>
+            : (userLoans as LoanStore[][]).flatMap(loanArray =>
                 loanArray.map(loan => (
                   <Link key={loan.id} to={loan.id}>
-                    <p>{moment(loan.timestamp.toDate()).calendar()}</p>
+                    <p>{format(new Date(loan.timestamp), 'dd.MM.yyyy')}</p>
                   </Link>
                 ))
               )}
