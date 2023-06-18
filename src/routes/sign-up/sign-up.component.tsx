@@ -1,6 +1,5 @@
 import { Fragment, useState } from 'react';
-import { useAppSelector } from '../../app/store';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../app/store';
 
 import Spinner from '../../components/spinner/spinner.component';
 
@@ -57,7 +56,7 @@ const SignUp = () => {
   const { control, handleSubmit } = useForm<SignUpDefaultValues>({
     defaultValues,
   });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
   const emailSignUpIsLoading = useAppSelector(selectEmailSignUpIsLoading);
   const signUpError = useAppSelector(selectSignUpError);

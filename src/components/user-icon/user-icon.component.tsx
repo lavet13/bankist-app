@@ -1,13 +1,12 @@
-import { useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../app/store';
 
 import { userProfileToggled } from '../../features/user-profile/user-profile.slice';
 import { selectUserDropdownIsOpen } from '../../features/user-profile/user-profile.selector';
 
 import { UserProfileIcon, UserIconContainer } from './user-icon.styles';
-import { useAppSelector } from '../../app/store';
 
 const UserIcon = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const isUserDropdownOpen = useAppSelector(selectUserDropdownIsOpen);
 
   const toggleUserDropdownHandler = () =>

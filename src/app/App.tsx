@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from './store';
 import { Routes, Route } from 'react-router-dom';
 
 import Home from '../routes/home/home.component';
@@ -15,7 +15,7 @@ import Loans from '../routes/loans/loans.component';
 import { userSessionChecked } from '../features/user/user.slice';
 
 const App = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(userSessionChecked());

@@ -10,7 +10,7 @@ export type MovementState = {
   readonly error: GenerateError | AuthError | null;
 };
 
-export const initialState: MovementState = {
+const initialState: MovementState = {
   movementsItems: [],
   isLoading: true,
   error: null,

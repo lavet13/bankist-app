@@ -8,7 +8,7 @@ import { rootSaga } from './root-saga';
 import { rootReducer } from './root-reducer';
 
 import createSagaMiddleware from 'redux-saga';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { reduxBatch } from '@manaflair/redux-batch';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -51,6 +51,8 @@ sagaMiddleware.run(rootSaga);
 
 export const persistor = persistStore(store);
 
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export function withPayloadType<T>() {

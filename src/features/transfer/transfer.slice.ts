@@ -3,7 +3,7 @@ import { GenerateError } from '../../common/utils/error/error.utils';
 import { PayloadAction, createAction, createSlice } from '@reduxjs/toolkit';
 import { TransferStartPayload } from './transfer.types';
 
-type TransferState = {
+export type TransferState = {
   readonly transferIsLoading: boolean;
   readonly transferError: GenerateError | AuthError | null;
   readonly snackbarIsOpen: boolean;

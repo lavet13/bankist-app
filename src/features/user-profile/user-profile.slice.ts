@@ -4,7 +4,7 @@ export type UserProfileState = {
   readonly isUserDropdownOpen: boolean;
 };
 
-export const initialState: UserProfileState = {
+const initialState: UserProfileState = {
   isUserDropdownOpen: false,
 };
 

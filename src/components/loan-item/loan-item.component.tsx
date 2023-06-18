@@ -1,5 +1,5 @@
+import { useAppDispatch } from '../../app/store';
 import { FC, Fragment } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { fetchLoansStarted } from '../../features/loan/loan.slice';
 
@@ -28,7 +28,7 @@ type LoanItemProps = {
 };
 
 const LoanItem: FC<LoanItemProps> = ({ loan, isAdmin }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const {
     id: loanId,

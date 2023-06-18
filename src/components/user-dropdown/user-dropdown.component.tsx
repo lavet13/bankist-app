@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../../app/store';
 
 import { signOutStarted } from '../../features/user/user.slice';
 
@@ -10,7 +10,7 @@ import {
 
 const UserDropdown = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const navigateToSettings = () => navigate('settings');
   const navigateToWork = () => navigate('work');

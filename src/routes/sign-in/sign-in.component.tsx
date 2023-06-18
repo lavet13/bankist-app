@@ -1,6 +1,5 @@
 import { useState, Fragment } from 'react';
-import { useAppSelector } from '../../app/store';
-import { useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../../app/store';
 
 import {
   googleSignInStarted,
@@ -53,7 +52,7 @@ const SignIn = () => {
   const { control, handleSubmit } = useForm<SignInDefaultValues>({
     defaultValues,
   });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentUserIsLoading = useAppSelector(selectCurrentUserIsLoading);
   const emailSignInIsLoading = useAppSelector(selectEmailSignInIsLoading);
   const googleSignInIsLoading = useAppSelector(selectGoogleSignInIsLoading);

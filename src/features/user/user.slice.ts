@@ -24,7 +24,7 @@ export type UserState = {
   readonly closeAccountError: GenerateError | AuthError | null;
 };
 
-export const initialState: UserState = {
+const initialState: UserState = {
   currentUser: null,
   isLoading: true,
   emailSignInIsLoading: false,

@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../../app/store';
 
 import { selectBalance } from '../../features/movement/movement.selector';
 import { selectCurrentUser } from '../../features/user/user.selector';
@@ -38,7 +38,6 @@ import {
   getTransferCreditCardError,
 } from '../../features/transfer/transfer.error';
 import { SyntheticEvent } from 'react';
-import { useAppSelector } from '../../app/store';
 
 export type TransferDefaultValues = {
   creditCard: { value: string; formattedValue: string };
@@ -54,7 +53,7 @@ const Transfer = () => {
   const { control, handleSubmit, reset } = useForm({
     defaultValues,
   });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const balance = useAppSelector(selectBalance);
   const currentUser = useAppSelector(selectCurrentUser);
   const isLoading = useAppSelector(selectTransferIsLoading);

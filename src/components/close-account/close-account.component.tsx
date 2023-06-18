@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAppSelector, useAppDispatch } from '../../app/store';
 
 import {
   auth,
@@ -9,7 +10,6 @@ import {
 import { CloseAccountContainer } from './close-account.styles';
 
 import { Title, Form } from '../transfer/transfer.styles';
-import { useDispatch } from 'react-redux';
 import {
   closeAccountStarted,
   closeAccountErrorMessageClosed,
@@ -29,7 +29,6 @@ import {
 import { getErrorMessage } from '../../common/utils/error/error.utils';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { ProvidersInfo } from '../../common/utils/firebase/firebase.types';
-import { useAppSelector } from '../../app/store';
 
 export type CloseAccountDefaultValues = {
   password: string;
@@ -41,7 +40,7 @@ const defaultValues: CloseAccountDefaultValues = {
 
 const CloseAccount = () => {
   const { control, handleSubmit, reset } = useForm({ defaultValues });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
   const closeAccountIsLoading = useAppSelector(selectCloseAccountIsLoading);
   const closeAccountError = useAppSelector(selectCloseAccountError);

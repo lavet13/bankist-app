@@ -1,4 +1,4 @@
-import { useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../../app/store';
 import { selectCurrentUser } from '../../features/user/user.selector';
 
 import { LoanContainer, MuiFileInputStyled } from './loan.styles';
@@ -35,7 +35,6 @@ import CreditCardInput, {
 import NumberInput from '../number-input/number-input.component';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { SyntheticEvent } from 'react';
-import { useAppSelector } from '../../app/store';
 
 export type FileFields = {
   passportPhoto?: File | null;
@@ -73,7 +72,7 @@ const LoanForm = () => {
   const { control, handleSubmit, reset } = useForm<LoanDefaultValues>({
     defaultValues,
   });
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentUser = useAppSelector(selectCurrentUser);
 
   const isLoading = useAppSelector(selectUploadLoanIsLoading);

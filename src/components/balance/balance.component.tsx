@@ -1,3 +1,4 @@
+import { useAppSelector } from '../../app/store';
 import { Fragment } from 'react';
 
 import { selectBalance } from '../../features/movement/movement.selector';
@@ -10,7 +11,6 @@ import {
   BalanceLabel,
   BalanceValue,
 } from './balance.styles';
-import { useAppSelector } from '../../app/store';
 
 const Balance = () => {
   const balance = useAppSelector(selectBalance);
